@@ -649,15 +649,18 @@ export const Satranc: React.FC<SatrancProps> = ({
         </div>
 
         {/* SIDEBAR: ACADEMY LESSONS LIST OR MOVE HISTORY */}
-        <div className="w-full md:w-64 lg:w-72 border border-[var(--border-color)] rounded-2xl p-2.5 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col shadow-xs max-h-[380px] overflow-hidden">
+        <div
+          className="w-full md:w-64 lg:w-72 border rounded-2xl p-2.5 flex flex-col shadow-xs max-h-[380px] overflow-hidden"
+          style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+        >
           {mode === 'academy' ? (
             <>
               <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[var(--border-color)]">
-                <h4 className="font-bold text-xs tracking-wider uppercase text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
+                <h4 className="font-bold text-xs tracking-wider uppercase flex items-center gap-1.5" style={{ color: 'var(--accent-color)' }}>
                   <Award size={13} className="text-amber-500" />
                   <span>{isEn ? 'CURRICULUM' : 'DERS LİSTESİ'}</span>
                 </h4>
-                <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400">
+                <span className="text-[10px] font-extrabold" style={{ color: 'var(--accent-color)' }}>
                   {completedLessonIds.length}/{CHESS_LESSONS.length} {isEn ? 'Done' : 'Bitti'}
                 </span>
               </div>
@@ -697,7 +700,7 @@ export const Satranc: React.FC<SatrancProps> = ({
             </>
           ) : (
             <>
-              <h4 className="font-bold text-xs mb-2 border-b border-[var(--border-color)] pb-1.5 flex items-center justify-between">
+              <h4 className="font-bold text-xs mb-2 border-b border-[var(--border-color)] pb-1.5 flex items-center justify-between" style={{ color: 'var(--accent-color)' }}>
                 <span>{isEn ? 'MOVE HISTORY' : 'HAMLE GEÇMİŞİ'}</span>
                 {isOnline && <span className="text-[10px] text-emerald-500 font-mono">{isEn ? 'P2P Live' : 'P2P Canlı'}</span>}
               </h4>

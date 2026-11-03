@@ -444,21 +444,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Brand Header */}
       <div className="px-3.5 py-2.5 border-b flex items-center justify-between shrink-0" style={{ borderColor: 'var(--border-color)' }}>
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-lg flex items-center justify-center text-xs shadow-xs">
+          <div
+            className="w-8 h-8 font-bold rounded-lg flex items-center justify-center text-xs shadow-xs"
+            style={{ backgroundColor: 'var(--accent-color)', color: 'var(--accent-contrast)' }}
+          >
             BK
           </div>
           <div>
-            <h1 className="font-bold text-xs text-gray-900 dark:text-gray-100">
+            <h1 className="font-bold text-xs" style={{ color: 'var(--text-primary)' }}>
               {language === 'tr' ? 'Bulmaca Kulübü' : 'Puzzle Club'}
             </h1>
-            <p className="text-[10px] text-gray-500 dark:text-gray-400">
+            <p className="text-[10px]" style={{ color: 'var(--accent-color)' }}>
               {language === 'tr' ? '14 oyun · sınırsız mod' : '14 games · infinite mode'}
             </p>
           </div>
         </div>
         <button
           onClick={onToggleLanguage}
-          className="px-2 py-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-[10px] font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition shadow-2xs"
+          className="px-2 py-1 rounded-lg text-[10px] font-bold border transition shadow-2xs cursor-pointer"
+          style={{
+            backgroundColor: 'var(--bg-card)',
+            borderColor: 'var(--border-color)',
+            color: 'var(--text-primary)',
+          }}
           title="Dili Değiştir / Change Language"
         >
           {language.toUpperCase()}
@@ -470,7 +478,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         onScroll={() => setHoveredGame(null)}
         className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 relative scrollbar-none"
       >
-        <div className="px-2.5 py-0.5 text-[9px] font-bold text-gray-400 tracking-wider">
+        <div className="px-2.5 py-0.5 text-[9px] font-bold tracking-wider" style={{ color: 'var(--accent-color)' }}>
           {language === 'tr' ? 'OYUNLAR' : 'GAMES'}
         </div>
         {gameItems.map((item) => {
@@ -495,15 +503,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   onSelectGame(item.id);
                   setHoveredGame(null);
                 }}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer ${
                   isActive
-                    ? 'bg-gray-200/90 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold shadow-2xs'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200'
+                    ? 'font-bold shadow-2xs'
+                    : 'hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] font-medium'
                 }`}
+                style={
+                  isActive
+                    ? {
+                        backgroundColor: 'var(--accent-color)',
+                        color: 'var(--accent-contrast)',
+                      }
+                    : {
+                        color: 'var(--text-primary)',
+                        opacity: 0.85,
+                      }
+                }
               >
                 <div className="flex items-center gap-2.5 truncate">
-                  <Icon size={15} className={isActive ? 'text-gray-900 dark:text-white' : 'text-gray-500'} />
-                  <span className="truncate text-xs font-semibold">{item.label}</span>
+                  <Icon
+                    size={15}
+                    style={{ color: isActive ? 'var(--accent-contrast)' : 'var(--accent-color)' }}
+                  />
+                  <span className="truncate text-xs">{item.label}</span>
                 </div>
               </button>
             </div>

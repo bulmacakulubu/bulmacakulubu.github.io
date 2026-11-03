@@ -161,195 +161,237 @@
   /* 6. OBSİDİYEN & ALTIN (Obsidian & Gold) */
   :root[data-palette="obsidian"],
   body.theme-obsidian {
-    --bg-main: #121212;
-    --panel-bg: #1e1e1e;
-    --text-color: #f5f5f5;
+    --bg-main: #0a0a0c;
+    --panel-bg: #141418;
+    --text-color: #fbf8ee;
     --accent-gold: #d4af37;
-    --board-dark: #222222;
-    --board-light: #444444;
-    --border-color: #333333;
+    --board-dark: #1b1b20;
+    --board-light: #d4af37;
+    --border-color: #2d2716;
 
-    /* App Standard Variables */
-    --bg-primary: #121212;
-    --bg-secondary: #181818;
-    --bg-card: #1e1e1e;
-    --text-primary: #f5f5f5;
+    /* App Standard Variables (2-Color Monolith) */
+    --bg-primary: #0a0a0c;
+    --bg-secondary: #0a0a0c;
+    --bg-card: #141418;
+    --text-primary: #fbf8ee;
     --accent-color: #d4af37;
-    --accent-contrast: #121212;
-    --accent-light: #2a2618;
-    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.65);
+    --accent-contrast: #0a0a0c;
+    --accent-light: #231f13;
+    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.85);
   }
 
   /* 7. ZÜMRÜT & TİTAN (Emerald & Titanium) */
   :root[data-palette="emerald"],
   body.theme-emerald {
-    --bg-main: #0b1f15;
-    --panel-bg: #122e20;
-    --text-color: #e8f5e9;
+    --bg-main: #081a12;
+    --panel-bg: #0f291e;
+    --text-color: #e8f5ec;
     --accent-gold: #c5a059;
-    --board-dark: #1b4d3e;
-    --board-light: #c8d6e5;
-    --border-color: #224d36;
+    --board-dark: #143527;
+    --board-light: #c5a059;
+    --border-color: #1c4230;
 
-    /* App Standard Variables */
-    --bg-primary: #0b1f15;
-    --bg-secondary: #0f261b;
-    --bg-card: #122e20;
-    --text-primary: #e8f5e9;
+    /* App Standard Variables (2-Color Monolith) */
+    --bg-primary: #081a12;
+    --bg-secondary: #081a12;
+    --bg-card: #0f291e;
+    --text-primary: #e8f5ec;
     --accent-color: #c5a059;
-    --accent-contrast: #0b1f15;
-    --accent-light: #252e1f;
-    --card-shadow: 0 6px 24px -2px rgba(5, 20, 12, 0.6);
+    --accent-contrast: #081a12;
+    --accent-light: #1f3020;
+    --card-shadow: 0 6px 24px -2px rgba(4, 15, 10, 0.7);
   }
 
   /* 8. GRAFİT & GÜL ALTIN (Slate & Rose Gold) */
   :root[data-palette="slate-rose"],
   body.theme-slate-rose {
-    --bg-main: #1a1d21;
-    --panel-bg: #2c3035;
-    --text-color: #f0f0f0;
+    --bg-main: #181b1f;
+    --panel-bg: #21252b;
+    --text-color: #f2f2f2;
     --accent-gold: #e0a96d;
-    --board-dark: #2c3035;
+    --board-dark: #282c35;
     --board-light: #b58863;
-    --border-color: #383e46;
+    --border-color: #333842;
 
-    /* App Standard Variables */
-    --bg-primary: #1a1d21;
-    --bg-secondary: #22262b;
-    --bg-card: #2c3035;
-    --text-primary: #f0f0f0;
+    /* App Standard Variables (2-Color Monolith) */
+    --bg-primary: #181b1f;
+    --bg-secondary: #181b1f;
+    --bg-card: #21252b;
+    --text-primary: #f2f2f2;
     --accent-color: #e0a96d;
-    --accent-contrast: #1a1d21;
-    --accent-light: #3a2e22;
-    --card-shadow: 0 6px 24px -2px rgba(10, 12, 14, 0.65);
+    --accent-contrast: #15171a;
+    --accent-light: #36291e;
+    --card-shadow: 0 6px 24px -2px rgba(10, 12, 14, 0.7);
   }
 
   /* 9. ŞAMPANYA & KARBON (Champagne & Carbon - Resim 1) */
   :root[data-palette="champagne-carbon"],
   body.theme-champagne-carbon {
-    --bg-main: #141518;
-    --panel-bg: #1c1e24;
-    --text-color: #f3f4f6;
-    --accent-gold: #d6b68a;
-    --board-dark: #2d313a;
-    --board-light: #d5c7b3;
-    --border-color: #363942;
+    --bg-main: #23262d;
+    --panel-bg: #2a2d36;
+    --text-color: #f0ede8;
+    --accent-gold: #c9bbae;
+    --board-dark: #363a44;
+    --board-light: #c9bbae;
+    --border-color: #3a3e4a;
 
-    /* App Standard Variables */
-    --bg-primary: #141518;
-    --bg-secondary: #191b20;
-    --bg-card: #1c1e24;
-    --text-primary: #f3f4f6;
-    --accent-color: #d6b68a;
-    --accent-contrast: #141518;
-    --accent-light: #2d281f;
-    --card-shadow: 0 6px 24px -2px rgba(8, 9, 12, 0.65);
+    /* App Standard Variables (2-Color Monolith) */
+    --bg-primary: #23262d;
+    --bg-secondary: #23262d;
+    --bg-card: #2a2d36;
+    --text-primary: #f0ede8;
+    --accent-color: #c9bbae;
+    --accent-contrast: #1a1c22;
+    --accent-light: #333130;
+    --card-shadow: 0 6px 24px -2px rgba(12, 14, 18, 0.65);
   }
 
   /* 10. KRALİYET KEHRİBARI (Royal Amber & Night - Resim 2) */
   :root[data-palette="royal-amber"],
   body.theme-royal-amber {
-    --bg-main: #101216;
-    --panel-bg: #171a22;
-    --text-color: #f0f2f5;
+    --bg-main: #121620;
+    --panel-bg: #181d2a;
+    --text-color: #f8f2eb;
     --accent-gold: #df9858;
-    --board-dark: #232730;
-    --board-light: #bc875b;
-    --border-color: #333742;
+    --board-dark: #202636;
+    --board-light: #df9858;
+    --border-color: #2b3447;
 
-    /* App Standard Variables */
-    --bg-primary: #101216;
-    --bg-secondary: #14161d;
-    --bg-card: #171a22;
-    --text-primary: #f0f2f5;
+    /* App Standard Variables (2-Color Monolith) */
+    --bg-primary: #121620;
+    --bg-secondary: #121620;
+    --bg-card: #181d2a;
+    --text-primary: #f8f2eb;
     --accent-color: #df9858;
-    --accent-contrast: #101216;
-    --accent-light: #2e2217;
-    --card-shadow: 0 6px 24px -2px rgba(6, 7, 10, 0.65);
+    --accent-contrast: #0e121a;
+    --accent-light: #2f2216;
+    --card-shadow: 0 6px 24px -2px rgba(6, 8, 14, 0.7);
   }
 
   /* 11. GÜL BRONZU & BAKIR (Rose Bronze & Copper - Resim 3) */
   :root[data-palette="rose-bronze"],
   body.theme-rose-bronze {
-    --bg-main: #17181c;
-    --panel-bg: #202126;
-    --text-color: #f5f4f2;
-    --accent-gold: #b87d65;
-    --board-dark: #25262c;
-    --board-light: #ba816a;
-    --border-color: #3e3430;
+    --bg-main: #1e1e26;
+    --panel-bg: #252530;
+    --text-color: #f5eee8;
+    --accent-gold: #c28e6c;
+    --board-dark: #33323c;
+    --board-light: #c28e6c;
+    --border-color: #3d3947;
 
-    /* App Standard Variables */
-    --bg-primary: #17181c;
-    --bg-secondary: #1b1c21;
-    --bg-card: #202126;
-    --text-primary: #f5f4f2;
-    --accent-color: #b87d65;
-    --accent-contrast: #ffffff;
-    --accent-light: #33231d;
-    --card-shadow: 0 6px 24px -2px rgba(10, 10, 12, 0.65);
+    /* App Standard Variables (2-Color Monolith) */
+    --bg-primary: #1e1e26;
+    --bg-secondary: #1e1e26;
+    --bg-card: #252530;
+    --text-primary: #f5eee8;
+    --accent-color: #c28e6c;
+    --accent-contrast: #181820;
+    --accent-light: #352822;
+    --card-shadow: 0 6px 24px -2px rgba(12, 12, 16, 0.7);
   }
 }
 
 /* Explicit class definitions for body.theme-* */
 body.theme-obsidian {
-  --bg-main: #121212;
-  --panel-bg: #1e1e1e;
-  --text-color: #f5f5f5;
+  --bg-main: #0a0a0c;
+  --panel-bg: #141418;
+  --text-color: #fbf8ee;
   --accent-gold: #d4af37;
-  --board-dark: #222222;
-  --board-light: #444444;
-  --border-color: #333333;
+  --board-dark: #1b1b20;
+  --board-light: #d4af37;
+  --border-color: #2d2716;
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #0a0a0c;
+  --bg-card: #141418;
+  --text-primary: #fbf8ee;
+  --accent-color: #d4af37;
+  --accent-contrast: #0a0a0c;
+  --accent-light: #231f13;
 }
 
 body.theme-emerald {
-  --bg-main: #0b1f15;
-  --panel-bg: #122e20;
-  --text-color: #e8f5e9;
+  --bg-main: #081a12;
+  --panel-bg: #0f291e;
+  --text-color: #e8f5ec;
   --accent-gold: #c5a059;
-  --board-dark: #1b4d3e;
-  --board-light: #c8d6e5;
-  --border-color: #224d36;
+  --board-dark: #143527;
+  --board-light: #c5a059;
+  --border-color: #1c4230;
+  --bg-primary: #081a12;
+  --bg-secondary: #081a12;
+  --bg-card: #0f291e;
+  --text-primary: #e8f5ec;
+  --accent-color: #c5a059;
+  --accent-contrast: #081a12;
+  --accent-light: #1f3020;
 }
 
 body.theme-slate-rose {
-  --bg-main: #1a1d21;
-  --panel-bg: #2c3035;
-  --text-color: #f0f0f0;
+  --bg-main: #181b1f;
+  --panel-bg: #21252b;
+  --text-color: #f2f2f2;
   --accent-gold: #e0a96d;
-  --board-dark: #2c3035;
+  --board-dark: #282c35;
   --board-light: #b58863;
-  --border-color: #383e46;
+  --border-color: #333842;
+  --bg-primary: #181b1f;
+  --bg-secondary: #181b1f;
+  --bg-card: #21252b;
+  --text-primary: #f2f2f2;
+  --accent-color: #e0a96d;
+  --accent-contrast: #15171a;
+  --accent-light: #36291e;
 }
 
 body.theme-champagne-carbon {
-  --bg-main: #141518;
-  --panel-bg: #1c1e24;
-  --text-color: #f3f4f6;
-  --accent-gold: #d6b68a;
-  --board-dark: #2d313a;
-  --board-light: #d5c7b3;
-  --border-color: #363942;
+  --bg-main: #23262d;
+  --panel-bg: #2a2d36;
+  --text-color: #f0ede8;
+  --accent-gold: #c9bbae;
+  --board-dark: #363a44;
+  --board-light: #c9bbae;
+  --border-color: #3a3e4a;
+  --bg-primary: #23262d;
+  --bg-secondary: #23262d;
+  --bg-card: #2a2d36;
+  --text-primary: #f0ede8;
+  --accent-color: #c9bbae;
+  --accent-contrast: #1a1c22;
+  --accent-light: #333130;
 }
 
 body.theme-royal-amber {
-  --bg-main: #101216;
-  --panel-bg: #171a22;
-  --text-color: #f0f2f5;
+  --bg-main: #121620;
+  --panel-bg: #181d2a;
+  --text-color: #f8f2eb;
   --accent-gold: #df9858;
-  --board-dark: #232730;
-  --board-light: #bc875b;
-  --border-color: #333742;
+  --board-dark: #202636;
+  --board-light: #df9858;
+  --border-color: #2b3447;
+  --bg-primary: #121620;
+  --bg-secondary: #121620;
+  --bg-card: #181d2a;
+  --text-primary: #f8f2eb;
+  --accent-color: #df9858;
+  --accent-contrast: #0e121a;
+  --accent-light: #2f2216;
 }
 
 body.theme-rose-bronze {
-  --bg-main: #17181c;
-  --panel-bg: #202126;
-  --text-color: #f5f4f2;
-  --accent-gold: #b87d65;
-  --board-dark: #25262c;
-  --board-light: #ba816a;
-  --border-color: #3e3430;
+  --bg-main: #1e1e26;
+  --panel-bg: #252530;
+  --text-color: #f5eee8;
+  --accent-gold: #c28e6c;
+  --board-dark: #33323c;
+  --board-light: #c28e6c;
+  --border-color: #3d3947;
+  --bg-primary: #1e1e26;
+  --bg-secondary: #1e1e26;
+  --bg-card: #252530;
+  --text-primary: #f5eee8;
+  --accent-color: #c28e6c;
+  --accent-contrast: #181820;
+  --accent-light: #352822;
 }
 
 body {

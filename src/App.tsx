@@ -311,7 +311,10 @@ export default function App() {
         {/* Top Ticker Stats Bar */}
         <header className="px-6 py-3 border-b flex items-center justify-between shrink-0" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <div className="flex items-center gap-3 truncate">
-            <div className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 flex items-center justify-center font-bold text-xs shrink-0">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs"
+              style={{ backgroundColor: 'var(--accent-color)', color: 'var(--accent-contrast)' }}
+            >
               ⚡
             </div>
             <div className="truncate">
@@ -439,23 +442,23 @@ export default function App() {
             <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
 
             <div className="text-center">
-              <div className="text-[9px] text-gray-400 uppercase tracking-wider">{settings.language === 'tr' ? 'OYNANAN' : 'PLAYED'}</div>
+              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'OYNANAN' : 'PLAYED'}</div>
               <div className="font-bold text-xs">{currentStats.played}</div>
             </div>
             <div className="text-center">
-              <div className="text-[9px] text-gray-400 uppercase tracking-wider">{settings.language === 'tr' ? 'BAŞARI' : 'WIN %'}</div>
+              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'BAŞARI' : 'WIN %'}</div>
               <div className="font-bold text-xs">{winRate}%</div>
             </div>
             <div className="text-center">
-              <div className="text-[9px] text-gray-400 uppercase tracking-wider">{settings.language === 'tr' ? 'SERİ' : 'STREAK'}</div>
+              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'SERİ' : 'STREAK'}</div>
               <div className="font-bold text-xs">{currentStats.streak}</div>
             </div>
             <div className="text-center">
-              <div className="text-[9px] text-gray-400 uppercase tracking-wider">{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
+              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
               <div className="font-bold text-xs">{bestRecord}</div>
             </div>
 
-            <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+            <div className="h-6 w-px border-r hidden sm:block" style={{ borderColor: 'var(--border-color)' }}></div>
 
             {/* Google Account Profile Button - En Sağda */}
             <button
