@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Sparkles, Crown, X } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Sparkles, Crown } from 'lucide-react';
 import { ADSENSE_CONFIG, pushAdSense } from '../utils/adSenseService';
 
 interface AdSenseBannerProps {
@@ -13,17 +13,16 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
   onOpenRemoveAds,
   language = 'tr',
 }) => {
-  const [isDismissedTemporarily, setIsDismissedTemporarily] = useState(false);
   const isTr = language === 'tr';
 
   useEffect(() => {
-    if (!isPremium && !isDismissedTemporarily) {
+    if (!isPremium) {
       pushAdSense();
     }
-  }, [isPremium, isDismissedTemporarily]);
+  }, [isPremium]);
 
   // If user is VIP / Paid to remove ads, never render the banner
-  if (isPremium || isDismissedTemporarily) {
+  if (isPremium) {
     return null;
   }
 
@@ -75,17 +74,6 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
               </span>
             </div>
           )}
-        </div>
-
-        {/* Right: Dismiss this session */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsDismissedTemporarily(true)}
-            className="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition"
-            title={isTr ? 'Kapat' : 'Close'}
-          >
-            <X size={14} />
-          </button>
         </div>
       </div>
     </aside>
