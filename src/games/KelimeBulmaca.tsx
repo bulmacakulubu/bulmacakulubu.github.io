@@ -395,7 +395,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       )}
 
       {/* UNIFORM CONTROL BAR */}
-      <div className="w-full max-w-xl flex items-center justify-between pb-1 border-b border-[var(--border-color)] shrink-0">
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl flex items-center justify-between pb-1 border-b border-[var(--border-color)] shrink-0">
         {/* Length selector */}
         <div className="flex bg-gray-100 dark:bg-gray-800/80 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {[5, 7, 9].map((len) => (
@@ -449,9 +449,9 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         </div>
       </div>
 
-      {/* LÜKS ALTIN ÇERÇEVELİ OYUN ALANI (Option 1 Game Bezel Box - Zero Scroll Sizing) */}
-      <div className="p-1.5 sm:p-2.5 rounded-2xl border border-amber-500/40 bg-zinc-950/80 shadow-xl backdrop-blur-md ring-1 ring-amber-400/20 flex flex-col items-center justify-center shrink-0">
-        <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5">
+      {/* LÜKS ALTIN ÇERÇEVELİ OYUN ALANI (Option 1 Game Bezel Box - Widen Sideways by +50%) */}
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-2xl border border-amber-500/40 bg-zinc-950/80 shadow-xl backdrop-blur-md ring-1 ring-amber-400/20 flex flex-col items-center justify-center shrink-0">
+        <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5 w-full">
           {Array.from({ length: 6 }).map((_, rowIndex) => {
             const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');
             const isCompleted = rowIndex < guesses.length;
@@ -459,15 +459,15 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
             const cellSize =
               wordLength === 9
-                ? 'w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 max-h-[calc((100vh-280px)/6)] max-w-[calc((100vh-280px)/6)] aspect-square text-xs sm:text-sm font-black'
+                ? 'w-9 sm:w-11 md:w-12 h-7 sm:h-8 md:h-8.5 max-h-[calc((100vh-270px)/6)] text-xs sm:text-sm font-black'
                 : wordLength === 7
-                ? 'w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 max-h-[calc((100vh-270px)/6)] max-w-[calc((100vh-270px)/6)] aspect-square text-sm sm:text-base font-black'
-                : 'w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11 max-h-[calc((100vh-250px)/6)] max-w-[calc((100vh-250px)/6)] aspect-square text-base sm:text-lg font-black';
+                ? 'w-11 sm:w-13 md:w-15 h-7.5 sm:h-8.5 md:h-9 max-h-[calc((100vh-260px)/6)] text-sm sm:text-base font-black'
+                : 'w-13 sm:w-16 md:w-18 h-8 sm:h-9 md:h-9.5 max-h-[calc((100vh-250px)/6)] text-base sm:text-xl font-black';
 
             return (
               <div
                 key={rowIndex}
-                className={`grid gap-1 sm:gap-1.5 transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
+                className={`grid gap-1 sm:gap-2 justify-center transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
                 style={{ gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))` }}
               >
                 {Array.from({ length: wordLength }).map((_, colIndex) => {
