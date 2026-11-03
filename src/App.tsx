@@ -462,7 +462,7 @@ export default function App() {
         </header>
 
         {/* Game Container (Responsive, Uniform, Clean Scroll) */}
-        <div className={`flex-1 overflow-y-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col items-center justify-start w-full ${currentUser.isPremium ? 'pb-6' : 'pb-32 sm:pb-36'}`}>
+        <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col items-center justify-start w-full pb-3 sm:pb-4">
           <div className="w-full max-w-5xl xl:max-w-6xl flex flex-col items-center py-0.5">
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
@@ -554,6 +554,13 @@ export default function App() {
             )}
           </div>
         </div>
+
+        {/* Bottom AdSense Banner (Docked at the bottom of the main content column) */}
+        <AdSenseBanner
+          isPremium={currentUser.isPremium}
+          onOpenRemoveAds={() => setIsRemoveAdsOpen(true)}
+          language={settings.language}
+        />
       </main>
 
       {/* Settings Modal */}
@@ -609,13 +616,6 @@ export default function App() {
         onVolumeChange={(v) => setSettings({ ...settings, volume: v })}
         soundEnabled={settings.soundEnabled}
         onToggleSound={handleToggleSound}
-        language={settings.language}
-      />
-
-      {/* Sticky Bottom Google AdSense Banner (Auto-hidden for VIPs) */}
-      <AdSenseBanner
-        isPremium={currentUser.isPremium}
-        onOpenRemoveAds={() => setIsRemoveAdsOpen(true)}
         language={settings.language}
       />
 
