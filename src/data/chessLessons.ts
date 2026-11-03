@@ -410,3 +410,4 @@ export const CHESS_LESSONS: ChessLesson[] = [
     ],
   },
 ];
+

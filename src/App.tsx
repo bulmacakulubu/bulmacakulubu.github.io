@@ -473,12 +473,14 @@ export default function App() {
 
         {/* Game Container (Responsive, Uniform, Clean Scroll) */}
         <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col items-center justify-start w-full pb-3 sm:pb-4">
-          <div className="w-full max-w-5xl xl:max-w-6xl flex flex-col items-center py-0.5">
+          <div className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px] flex flex-col items-center py-0.5">
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
                 isPremium={currentUser.isPremium}
+                stats={stats['kelime-bulmaca']}
+                onOpenMultiplayer={() => setIsMultiplayerOpen(true)}
                 multiplayerSession={multiplayerSession}
                 onSendMultiplayerAction={(msg) => multiplayerService.sendMessage(msg)}
                 incomingMultiplayerMessage={incomingMultiplayerMessage}
