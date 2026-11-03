@@ -262,6 +262,7 @@ export default function App() {
         onNextTrack={handleNextTrack}
         onPrevTrack={handlePrevTrack}
         onOpenFloatingMusic={() => setIsFloatingMusicOpen((prev) => !prev)}
+        isPremium={currentUser.isPremium}
       />
 
       {/* Main Content Area */}
@@ -431,27 +432,6 @@ export default function App() {
               <div className="text-[9px] text-gray-400 uppercase tracking-wider">{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
               <div className="font-bold text-xs">{bestRecord}</div>
             </div>
-
-            <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
-
-            {/* Direct Settings Button */}
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] text-gray-600 dark:text-gray-300 transition text-xs shadow-2xs cursor-pointer flex items-center justify-center shrink-0"
-              title={settings.language === 'tr' ? 'Oyun Ayarları' : 'Settings'}
-            >
-              <SettingsIcon size={15} />
-            </button>
-
-            {/* Legal / KVKK Policy Button */}
-            <button
-              onClick={() => setIsLegalModalOpen(true)}
-              className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] text-gray-500 dark:text-gray-400 transition text-[11px] font-medium shadow-2xs cursor-pointer shrink-0"
-              title={settings.language === 'tr' ? 'Gizlilik & KVKK Politikası' : 'Privacy & Terms'}
-            >
-              <FileText size={13} />
-              <span className="hidden xl:inline">{settings.language === 'tr' ? 'KVKK / Gizlilik' : 'Legal'}</span>
-            </button>
           </div>
         </header>
 

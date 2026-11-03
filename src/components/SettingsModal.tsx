@@ -328,16 +328,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Yasal Bilgilendirme ve KVKK */}
           {onOpenLegal && (
-            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+            <div className="pt-3 border-t border-[var(--border-color)]">
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+                Yasal Uyum ve Şeffaflık
+              </div>
               <button
                 onClick={() => {
                   onClose();
                   onOpenLegal();
                 }}
-                className="w-full py-2.5 rounded-xl border border-[var(--border-color)] hover:bg-gray-50 dark:hover:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+                className="w-full py-2.5 px-3 rounded-xl border border-[var(--border-color)] bg-gray-50/60 dark:bg-gray-800/40 hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] text-xs font-bold text-gray-700 dark:text-gray-300 transition flex items-center justify-between cursor-pointer shadow-2xs group"
               >
-                <FileText size={14} className="text-blue-500" />
-                <span>Kullanıcı Sözleşmesi, KVKK ve Gizlilik Politikası</span>
+                <div className="flex items-center gap-2">
+                  <FileText size={15} className="text-blue-500 group-hover:text-[var(--accent-color)]" />
+                  <span>Kullanıcı Sözleşmesi, KVKK & Gizlilik Politikası</span>
+                </div>
+                <span className="text-[10px] text-gray-400 group-hover:text-[var(--accent-color)] font-medium">Oku ➔</span>
               </button>
             </div>
           )}

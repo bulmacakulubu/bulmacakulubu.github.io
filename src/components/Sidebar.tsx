@@ -33,6 +33,7 @@ interface SidebarProps {
   onNextTrack: () => void;
   onPrevTrack: () => void;
   onOpenFloatingMusic?: () => void;
+  isPremium?: boolean;
 }
 
 interface GameGuide {
@@ -356,6 +357,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNextTrack,
   onPrevTrack,
   onOpenFloatingMusic,
+  isPremium,
 }) => {
   const [hoveredGame, setHoveredGame] = useState<{ id: GameId; top: number } | null>(null);
   const gameItems = language === 'tr' ? GAME_ITEMS_TR : GAME_ITEMS_EN;
@@ -430,6 +432,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           );
         })}
+
+        {/* Settings button placed directly below Nokta Avı and above the ad banner */}
+        <div className={`pt-2.5 pb-2 px-1 ${!isPremium ? 'mb-20' : 'mb-4'}`}>
+          <div className="border-t border-[var(--border-color)] mb-2.5 opacity-60"></div>
+          <button
+            onClick={onOpenSettings}
+            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] text-xs font-bold transition shadow-2xs group cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-800 group-hover:bg-[var(--accent-color)] group-hover:text-white flex items-center justify-center transition">
+                <Settings size={14} />
+              </div>
+              <span className="font-bold text-gray-800 dark:text-gray-100 group-hover:text-[var(--accent-color)]">
+                {language === 'tr' ? 'Ayarlar' : 'Settings'}
+              </span>
+            </div>
+            <span className="text-[10px] text-gray-400 group-hover:text-[var(--accent-color)] font-medium">
+              {language === 'tr' ? 'Tema · Ses · KVKK' : 'Theme · Sound · Terms'} ➔
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Floating Hover Game Guide Card */}
@@ -493,22 +516,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         );
       })()}
-
-      {/* Settings Footer */}
-      <div className="px-2.5 py-1.5 border-t border-gray-200 dark:border-gray-800 shrink-0">
-        <button
-          onClick={onOpenSettings}
-          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-        >
-          <div className="flex items-center gap-2">
-            <Settings size={15} className="text-gray-500" />
-            <span className="font-semibold">{language === 'tr' ? 'Ayarlar' : 'Settings'}</span>
-          </div>
-          <div className="text-[10px] text-gray-400">
-            {language === 'tr' ? 'tema · dil · ses' : 'theme · lang · sound'}
-          </div>
-        </button>
-      </div>
     </aside>
   );
 };
