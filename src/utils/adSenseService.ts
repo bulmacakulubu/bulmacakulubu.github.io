@@ -3,8 +3,7 @@
  */
 
 export const ADSENSE_CONFIG = {
-  // Replace with your Google AdSense Publisher Client ID (e.g. 'ca-pub-1234567890123456')
-  client: import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-XXXXXXXXXXXXXXXX',
+  client: import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-1086062430851863',
   bottomBannerSlot: import.meta.env.VITE_ADSENSE_BANNER_SLOT || '1234567890',
   testMode: import.meta.env.DEV,
 };
