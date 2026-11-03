@@ -25,7 +25,18 @@ export interface GameStats {
 
 export type AllStats = Record<GameId, GameStats>;
 
-export type PaletteId = 'nordic' | 'kyoto' | 'cyber' | 'aurora' | 'monochrome' | 'sage' | 'classic' | 'pastel' | 'oled';
+export type PaletteId =
+  | 'emerald'
+  | 'obsidian'
+  | 'nordic'
+  | 'kyoto'
+  | 'cyber'
+  | 'aurora'
+  | 'monochrome'
+  | 'sage'
+  | 'classic'
+  | 'pastel'
+  | 'oled';
 
 export interface Settings {
   theme: 'light' | 'dark';

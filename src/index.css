@@ -157,6 +157,71 @@
     --accent-light: #222226;
     --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.7);
   }
+
+  /* 6. OBSİDİYEN & ALTIN (Obsidian & Gold) */
+  :root[data-palette="obsidian"],
+  body.theme-obsidian {
+    --bg-main: #121212;
+    --panel-bg: #1e1e1e;
+    --text-color: #f5f5f5;
+    --accent-gold: #d4af37;
+    --board-dark: #222222;
+    --board-light: #444444;
+    --border-color: #333333;
+
+    /* App Standard Variables */
+    --bg-primary: #121212;
+    --bg-secondary: #181818;
+    --bg-card: #1e1e1e;
+    --text-primary: #f5f5f5;
+    --accent-color: #d4af37;
+    --accent-contrast: #121212;
+    --accent-light: #2a2618;
+    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.65);
+  }
+
+  /* 7. ZÜMRÜT & TİTAN (Emerald & Titanium) */
+  :root[data-palette="emerald"],
+  body.theme-emerald {
+    --bg-main: #0b1f15;
+    --panel-bg: #122e20;
+    --text-color: #e8f5e9;
+    --accent-gold: #c5a059;
+    --board-dark: #1b4d3e;
+    --board-light: #c8d6e5;
+    --border-color: #224d36;
+
+    /* App Standard Variables */
+    --bg-primary: #0b1f15;
+    --bg-secondary: #0f261b;
+    --bg-card: #122e20;
+    --text-primary: #e8f5e9;
+    --accent-color: #c5a059;
+    --accent-contrast: #0b1f15;
+    --accent-light: #252e1f;
+    --card-shadow: 0 6px 24px -2px rgba(5, 20, 12, 0.6);
+  }
+}
+
+/* Explicit class definitions for body.theme-obsidian and body.theme-emerald */
+body.theme-obsidian {
+  --bg-main: #121212;
+  --panel-bg: #1e1e1e;
+  --text-color: #f5f5f5;
+  --accent-gold: #d4af37;
+  --board-dark: #222222;
+  --board-light: #444444;
+  --border-color: #333333;
+}
+
+body.theme-emerald {
+  --bg-main: #0b1f15;
+  --panel-bg: #122e20;
+  --text-color: #e8f5e9;
+  --accent-gold: #c5a059;
+  --board-dark: #1b4d3e;
+  --board-light: #c8d6e5;
+  --border-color: #224d36;
 }
 
 body {

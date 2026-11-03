@@ -139,7 +139,14 @@ export default function App() {
   useEffect(() => {
     saveSettings(settings);
     document.documentElement.setAttribute('data-theme', settings.theme);
-    document.documentElement.setAttribute('data-palette', settings.palette || 'nordic');
+    document.documentElement.setAttribute('data-palette', settings.palette || 'emerald');
+
+    // Remove old theme-* classes from body and add active theme
+    document.body.className = document.body.className
+      .replace(/theme-\w+/g, '')
+      .trim();
+    document.body.classList.add(`theme-${settings.palette || 'emerald'}`);
+
     if (settings.theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {

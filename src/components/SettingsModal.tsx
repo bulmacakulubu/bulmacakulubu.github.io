@@ -71,7 +71,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="text-xs text-gray-500">Awwwards & FWA ödüllü 5 çağdaş renk armonisi</div>
               </div>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 pt-1">
+              <button
+                onClick={() => onUpdateSettings({ ...settings, palette: 'emerald', theme: 'dark' })}
+                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
+                  settings.palette === 'emerald'
+                    ? 'border-emerald-500 bg-emerald-950/40 ring-2 ring-emerald-500/30'
+                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 rounded-full bg-[#1b4d3e] border border-emerald-400 shadow-xs"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#c5a059]"></span>
+                </div>
+                <div className="text-xs font-bold leading-tight">Zümrüt & Titan</div>
+                <div className="text-[10px] text-emerald-400 font-semibold">Yeşil & Altın</div>
+              </button>
+
+              <button
+                onClick={() => onUpdateSettings({ ...settings, palette: 'obsidian', theme: 'dark' })}
+                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
+                  settings.palette === 'obsidian'
+                    ? 'border-amber-500 bg-amber-950/40 ring-2 ring-amber-500/30'
+                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3.5 h-3.5 rounded-full bg-[#121212] border border-amber-400 shadow-xs"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#d4af37]"></span>
+                </div>
+                <div className="text-xs font-bold leading-tight">Obsidiyen & Altın</div>
+                <div className="text-[10px] text-amber-400 font-semibold">Siyah & Altın</div>
+              </button>
+
               <button
                 onClick={() => onUpdateSettings({ ...settings, palette: 'nordic' })}
                 className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${

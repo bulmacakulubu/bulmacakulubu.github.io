@@ -610,8 +610,13 @@ export const Satranc: React.FC<SatrancProps> = ({
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
                       className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-13.5 lg:h-13.5 flex items-center justify-center cursor-pointer transition relative select-none ${
-                        isDark ? 'bg-[#b58863] text-white' : 'bg-[#f0d9b5] text-gray-900'
+                        isDark ? 'text-white' : 'text-gray-900'
                       } ${isSelected ? 'ring-3 ring-amber-500 z-10 scale-102 shadow-md' : 'hover:opacity-90'}`}
+                      style={{
+                        backgroundColor: isDark
+                          ? 'var(--board-dark, #b58863)'
+                          : 'var(--board-light, #f0d9b5)',
+                      }}
                     >
                       {/* Legal Move Glow Dot */}
                       {isValidTarget && (

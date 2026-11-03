@@ -53,8 +53,8 @@ export function getDailyPuzzleInfo(): { gameId: GameId; dateKey: string; nextRes
 }
 
 export const defaultSettings: Settings = {
-  theme: 'light',
-  palette: 'nordic',
+  theme: 'dark',
+  palette: 'emerald',
   language: 'tr',
   soundEnabled: true,
   volume: 30,
@@ -116,12 +116,27 @@ export function loadSettings(): Settings {
     const data = localStorage.getItem(SETTINGS_KEY);
     if (!data) return defaultSettings;
     const parsed = JSON.parse(data);
-    let palette = parsed.palette || 'nordic';
+
+    // Apply the requested Emerald & Titanium theme as active
+    const themeAppliedKey = 'bk_theme_applied_emerald_v1';
+    const hasAppliedEmerald = localStorage.getItem(themeAppliedKey);
+
+    let palette = parsed.palette;
+    let theme = parsed.theme || 'dark';
+
+    if (!hasAppliedEmerald) {
+      palette = 'emerald';
+      theme = 'dark';
+      localStorage.setItem(themeAppliedKey, 'true');
+    }
+
     if (palette === 'sage') palette = 'nordic';
     if (palette === 'classic') palette = 'kyoto';
     if (palette === 'pastel') palette = 'aurora';
     if (palette === 'oled') palette = 'monochrome';
-    return { ...defaultSettings, ...parsed, palette };
+    const merged = { ...defaultSettings, ...parsed, palette, theme };
+    saveSettings(merged);
+    return merged;
   } catch (e) {
     return defaultSettings;
   }
