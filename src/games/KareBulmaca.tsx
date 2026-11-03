@@ -644,9 +644,9 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
           </div>
 
           {/* Integrated On-Screen Keyboard (Wordle Style) */}
-          <div className="w-full max-w-md space-y-1 pt-2">
+          <div className="w-full max-w-md space-y-1 pt-1.5 shrink-0">
             {KEYBOARD_ROWS.map((row, rIdx) => (
-              <div key={rIdx} className="flex justify-center gap-1">
+              <div key={rIdx} className="flex justify-center gap-0.5 sm:gap-1 w-full">
                 {row.map((key) => {
                   const isSpecial = key === '⇄ YÖN' || key === '⌫';
                   return (
@@ -657,12 +657,12 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
                         else if (key === '⌫') handleBackspace();
                         else handleInputChar(key);
                       }}
-                      className={`h-8 sm:h-9 rounded-lg font-bold text-xs border transition active:scale-95 shadow-2xs cursor-pointer ${
+                      className={`h-7 sm:h-8 rounded-lg font-bold text-xs border transition active:scale-95 shadow-2xs cursor-pointer flex items-center justify-center ${
                         key === '⇄ YÖN'
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500 px-2 font-extrabold'
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500 px-1.5 font-extrabold flex-[1.4] max-w-[56px]'
                           : key === '⌫'
-                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 px-3'
-                          : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800 min-w-[24px] sm:min-w-[30px] px-1'
+                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 px-2 flex-[1.2] max-w-[48px]'
+                          : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800 flex-1 max-w-[36px]'
                       }`}
                     >
                       {key}

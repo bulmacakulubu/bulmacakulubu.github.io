@@ -424,10 +424,10 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Ticker Stats Bar */}
-        <header className={`${isZenMode ? 'hidden' : 'px-6 py-3 border-b flex items-center justify-between shrink-0'} transition-all`} style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-          <div className="flex items-center gap-3 truncate">
+        <header className={`${isZenMode ? 'hidden' : 'px-3 sm:px-4 py-2 border-b flex items-center justify-between shrink-0 gap-2'} transition-all`} style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+          <div className="flex items-center gap-2 sm:gap-3 truncate">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs"
               style={{ backgroundColor: 'var(--accent-color)', color: 'var(--accent-contrast)' }}
             >
               ⚡
@@ -436,13 +436,13 @@ export default function App() {
               <h2 className="font-bold text-xs sm:text-sm truncate">
                 {GAME_HEADER_INFO[activeGame]?.[settings.language === 'en' ? 'en' : 'tr']?.title || activeGame}
               </h2>
-              <p className="text-[10px] text-gray-500 truncate">
+              <p className="text-[10px] text-gray-500 truncate hidden sm:block">
                 {GAME_HEADER_INFO[activeGame]?.[settings.language === 'en' ? 'en' : 'tr']?.desc}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-4 text-xs shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs shrink-0">
             {/* Header Integrated Compact Music Player & Playlist */}
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 shadow-2xs">
               {/* Previous Track */}
@@ -554,11 +554,10 @@ export default function App() {
               )}
             </button>
 
-            {/* Ticker Stats Group (Togglable) */}
+            {/* Ticker Stats Group (Shown on large 2xl screens, covered by Leaderboard Modal elsewhere) */}
             {!hideGameStats && (
-              <>
-                <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
-
+              <div className="hidden 2xl:flex items-center gap-2.5">
+                <div className="h-5 w-px bg-gray-200 dark:bg-gray-800"></div>
                 <div className="text-center">
                   <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'OYNANAN' : 'PLAYED'}</div>
                   <div className="font-bold text-xs">{currentStats.played}</div>
@@ -575,10 +574,9 @@ export default function App() {
                   <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
                   <div className="font-bold text-xs">{bestRecord}</div>
                 </div>
-              </>
+                <div className="h-5 w-px border-r" style={{ borderColor: 'var(--border-color)' }}></div>
+              </div>
             )}
-
-            <div className="h-6 w-px border-r hidden sm:block" style={{ borderColor: 'var(--border-color)' }}></div>
 
             {/* Hibrit Odaklanma Modu (Liderlik Sıralaması + Tiyatro + Tam Ekran) */}
             <div className="flex items-center bg-[var(--bg-secondary)] p-0.5 rounded-xl border border-[var(--border-color)]">
@@ -619,10 +617,10 @@ export default function App() {
               </button>
             </div>
 
-            {/* Google Account Profile Button - En Sağda */}
+            {/* Google Account Profile Button - En Sağda (Permanently Visible) */}
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] transition text-xs shadow-2xs group cursor-pointer"
+              className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] transition text-xs shadow-2xs group cursor-pointer shrink-0"
               title={currentUser.provider === 'google' ? 'Google Oyuncu Profili' : 'Google ile Giriş Yap'}
             >
               <img
@@ -630,7 +628,7 @@ export default function App() {
                 alt={currentUser.name}
                 className="w-5 h-5 rounded-full object-cover border border-blue-500/40 shrink-0"
               />
-              <span className="font-bold max-w-[90px] truncate hidden sm:inline">
+              <span className="font-bold max-w-[80px] sm:max-w-[100px] truncate">
                 {currentUser.provider === 'google' ? currentUser.name : (settings.language === 'tr' ? 'Giriş Yap' : 'Sign In')}
               </span>
               {currentUser.provider === 'google' && (

@@ -367,7 +367,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   const keyboardRows = isTr ? keyboardRowsTR : keyboardRowsEN;
 
   return (
-    <div className="w-full h-full max-h-[calc(100vh-80px)] flex flex-col items-center justify-between px-2 sm:px-4 py-1 select-none relative max-w-2xl sm:max-w-3xl xl:max-w-4xl mx-auto overflow-hidden">
+    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between px-2 sm:px-4 py-1 select-none relative max-w-2xl sm:max-w-3xl xl:max-w-4xl mx-auto overflow-hidden">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
@@ -395,185 +395,185 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       )}
 
       {/* UNIFORM CONTROL BAR */}
-        <div className="w-full max-w-xl flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
-          {/* Length selector */}
-          <div className="flex bg-gray-100 dark:bg-gray-800/80 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
-            {[5, 7, 9].map((len) => (
-              <button
-                key={len}
-                onClick={() => {
-                  if (isMultiplayer) return;
-                  setWordLength(len as any);
-                  startNewRound(len as any);
-                }}
-                disabled={isMultiplayer}
-                className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
-                  wordLength === len
-                    ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                {isTr ? `${len} Harf` : `${len} Letters`}
-              </button>
-            ))}
-          </div>
-
-          {/* Metric + Memory Progress */}
-          <div className="flex items-center gap-1.5 text-xs font-semibold">
-            <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
-              {isTr ? 'DENEME' : 'ATTEMPT'} <span className="font-extrabold text-[var(--accent-color)]">{guesses.length}/6</span>
-            </div>
-            <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
-              {isTr ? 'HAVUZ' : 'POOL'} <span className="font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5">
+      <div className="w-full max-w-xl flex items-center justify-between pb-1 border-b border-[var(--border-color)] shrink-0">
+        {/* Length selector */}
+        <div className="flex bg-gray-100 dark:bg-gray-800/80 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
+          {[5, 7, 9].map((len) => (
             <button
-              onClick={handleRequestHint}
-              disabled={gameStatus !== 'playing'}
-              className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
-              title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
+              key={len}
+              onClick={() => {
+                if (isMultiplayer) return;
+                setWordLength(len as any);
+                startNewRound(len as any);
+              }}
+              disabled={isMultiplayer}
+              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
+                wordLength === len
+                  ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
             >
-              <Lightbulb size={13} />
-              <span>{isTr ? 'İpucu' : 'Hint'}</span>
+              {isTr ? `${len} Harf` : `${len} Letters`}
+            </button>
+          ))}
+        </div>
+
+        {/* Metric + Memory Progress */}
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
+          <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
+            {isTr ? 'DENEME' : 'ATTEMPT'} <span className="font-extrabold text-[var(--accent-color)]">{guesses.length}/6</span>
+          </div>
+          <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
+            {isTr ? 'HAVUZ' : 'POOL'} <span className="font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleRequestHint}
+            disabled={gameStatus !== 'playing'}
+            className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
+          >
+            <Lightbulb size={13} />
+            <span>{isTr ? 'İpucu' : 'Hint'}</span>
+          </button>
+
+          <button
+            onClick={() => startNewRound()}
+            className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+          >
+            <RotateCcw size={12} />
+            <span>{isTr ? 'Yeni Oyun' : 'New'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* LÜKS ALTIN ÇERÇEVELİ OYUN ALANI (Option 1 Game Bezel Box - Zero Scroll Sizing) */}
+      <div className="p-1.5 sm:p-2.5 rounded-2xl border border-amber-500/40 bg-zinc-950/80 shadow-xl backdrop-blur-md ring-1 ring-amber-400/20 flex flex-col items-center justify-center shrink-0">
+        <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5">
+          {Array.from({ length: 6 }).map((_, rowIndex) => {
+            const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');
+            const isCompleted = rowIndex < guesses.length;
+            const isCurrent = rowIndex === guesses.length;
+
+            const cellSize =
+              wordLength === 9
+                ? 'w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 max-h-[calc((100vh-280px)/6)] max-w-[calc((100vh-280px)/6)] aspect-square text-xs sm:text-sm font-black'
+                : wordLength === 7
+                ? 'w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 max-h-[calc((100vh-270px)/6)] max-w-[calc((100vh-270px)/6)] aspect-square text-sm sm:text-base font-black'
+                : 'w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11 max-h-[calc((100vh-250px)/6)] max-w-[calc((100vh-250px)/6)] aspect-square text-base sm:text-lg font-black';
+
+            return (
+              <div
+                key={rowIndex}
+                className={`grid gap-1 sm:gap-1.5 transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
+                style={{ gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))` }}
+              >
+                {Array.from({ length: wordLength }).map((_, colIndex) => {
+                  const letter = guess[colIndex] || '';
+                  const isHintLetter = isCurrent && !letter && revealedIndices.includes(colIndex);
+                  let style = 'bg-zinc-900/90 border border-zinc-700/60 text-white shadow-inner';
+
+                  if (isCompleted) {
+                    style = getLetterStatus(letter, colIndex);
+                  } else if (letter) {
+                    style = 'bg-zinc-800/95 border border-amber-400 text-amber-200 scale-105 shadow-md shadow-amber-500/20';
+                  } else if (isHintLetter) {
+                    style = 'bg-amber-500/10 border border-amber-400 text-amber-400 font-normal border-dashed';
+                  }
+
+                  return (
+                    <div
+                      key={colIndex}
+                      className={`${cellSize} rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-150 select-none ${style}`}
+                    >
+                      {letter || (isHintLetter ? solution[colIndex] : '')}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Game End Banner with Dictionary Definition & Viral Share */}
+      {gameStatus !== 'playing' && (
+        <div className="text-center py-1.5 px-3 rounded-2xl border border-amber-500/40 bg-[var(--bg-card)] shadow-2xl animate-fadeIn max-w-md w-full my-0.5 shrink-0">
+          <div className={`text-xs font-bold mb-0.5 ${gameStatus === 'won' ? 'text-emerald-500' : 'text-rose-500'}`}>
+            {gameStatus === 'won'
+              ? (isTr ? 'Muhteşem! Kelimeyi Başarıyla Buldunuz! 🎉' : 'Awesome! You guessed the word correctly! 🎉')
+              : (isTr ? `Oyun Bitti! Doğru Kelime: ${solution}` : `Game Over! The word was: ${solution}`)}
+          </div>
+
+          {/* Dictionary meaning */}
+          {meaning && (
+            <div className="my-1 p-1.5 rounded-xl bg-zinc-900/80 border border-zinc-700/60 text-left text-[11px] text-gray-200 flex items-start gap-1.5">
+              <BookOpen size={13} className="text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-extrabold text-amber-400 mr-1">{solution}:</span>
+                <span className="italic">{meaning}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Share Buttons */}
+          <div className="flex items-center justify-center gap-1.5 mt-1">
+            <button
+              onClick={handleShare}
+              className="px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
+            >
+              <Share2 size={12} />
+              <span>{isTr ? 'Paylaş' : 'Share'}</span>
+            </button>
+
+            <button
+              onClick={handleShareWhatsApp}
+              className="px-2.5 py-0.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
+            >
+              <MessageSquare size={12} />
+              <span>WhatsApp</span>
             </button>
 
             <button
               onClick={() => startNewRound()}
-              className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+              className="px-3 py-0.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-lg font-bold text-[11px] transition shadow-sm cursor-pointer"
             >
-              <RotateCcw size={12} />
-              <span>{isTr ? 'Yeni Oyun' : 'New'}</span>
+              {isTr ? 'Sıradaki ➔' : 'Next ➔'}
             </button>
           </div>
         </div>
+      )}
 
-        {/* LÜKS ALTIN ÇERÇEVELİ OYUN ALANI (Option 1 Game Bezel Box) */}
-        <div className="p-3 sm:p-4.5 rounded-3xl border-2 border-amber-500/40 bg-zinc-950/80 shadow-2xl backdrop-blur-md ring-1 ring-amber-400/20 flex flex-col items-center justify-center">
-          <div className="flex flex-col items-center justify-center gap-1.5 sm:gap-2">
-            {Array.from({ length: 6 }).map((_, rowIndex) => {
-              const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');
-              const isCompleted = rowIndex < guesses.length;
-              const isCurrent = rowIndex === guesses.length;
-
-              const cellSize =
-                wordLength === 9
-                  ? 'w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-xs sm:text-base'
-                  : wordLength === 7
-                  ? 'w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 text-sm sm:text-lg'
-                  : 'w-11 h-11 sm:w-13 sm:h-13 md:w-15 md:h-15 text-lg sm:text-2xl font-black';
-
+      {/* LÜKS KLAVYE TEPSİSİ (Tactile Keyboard - Zero Hang, Perfect Fit) */}
+      <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl p-1 sm:p-1.5 rounded-2xl border border-amber-500/30 bg-zinc-950/80 shadow-xl backdrop-blur-xs space-y-1 shrink-0">
+        {keyboardRows.map((row, rIdx) => (
+          <div key={rIdx} className="flex justify-center gap-0.5 sm:gap-1 w-full">
+            {row.map((key) => {
+              const customStatus = getKeyStatus(key);
+              const isSpecial = key === 'GİR' || key === 'ENTER' || key === '⌫';
               return (
-                <div
-                  key={rowIndex}
-                  className={`grid gap-1.5 sm:gap-2 transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
-                  style={{ gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))` }}
+                <button
+                  key={key}
+                  onClick={() => handleKey(key === '⌫' ? 'BACKSPACE' : key)}
+                  className={`h-7 sm:h-8 md:h-8.5 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm border transition active:scale-95 shadow-xs cursor-pointer flex items-center justify-center ${
+                    customStatus
+                      ? customStatus
+                      : 'bg-zinc-900/90 border-zinc-700/70 text-zinc-100 hover:border-amber-400 hover:text-amber-200'
+                  } ${
+                    isSpecial
+                      ? 'flex-[1.4] max-w-[62px] px-1 sm:px-2 bg-amber-500/20 text-amber-300 border-amber-500/40 font-extrabold text-[10px] sm:text-xs'
+                      : 'flex-1 max-w-[42px]'
+                  }`}
                 >
-                  {Array.from({ length: wordLength }).map((_, colIndex) => {
-                    const letter = guess[colIndex] || '';
-                    const isHintLetter = isCurrent && !letter && revealedIndices.includes(colIndex);
-                    let style = 'bg-zinc-900/90 border-2 border-zinc-700/60 text-white shadow-inner';
-
-                    if (isCompleted) {
-                      style = getLetterStatus(letter, colIndex);
-                    } else if (letter) {
-                      style = 'bg-zinc-800/95 border-2 border-amber-400 text-amber-200 scale-105 shadow-lg shadow-amber-500/20';
-                    } else if (isHintLetter) {
-                      style = 'bg-amber-500/10 border-2 border-amber-400 text-amber-400 font-normal border-dashed';
-                    }
-
-                    return (
-                      <div
-                        key={colIndex}
-                        className={`${cellSize} rounded-xl sm:rounded-2xl flex items-center justify-center font-black transition-all duration-150 select-none ${style}`}
-                      >
-                        {letter || (isHintLetter ? solution[colIndex] : '')}
-                      </div>
-                    );
-                  })}
-                </div>
+                  {key}
+                </button>
               );
             })}
           </div>
-        </div>
-
-        {/* Game End Banner with Dictionary Definition & Viral Share */}
-        {gameStatus !== 'playing' && (
-          <div className="text-center py-2 px-3.5 rounded-2xl border-2 border-amber-500/40 bg-[var(--bg-card)] shadow-2xl animate-fadeIn max-w-md w-full my-1">
-            <div className={`text-xs font-bold mb-1 ${gameStatus === 'won' ? 'text-emerald-500' : 'text-rose-500'}`}>
-              {gameStatus === 'won'
-                ? (isTr ? 'Muhteşem! Kelimeyi Başarıyla Buldunuz! 🎉' : 'Awesome! You guessed the word correctly! 🎉')
-                : (isTr ? `Oyun Bitti! Doğru Kelime: ${solution}` : `Game Over! The word was: ${solution}`)}
-            </div>
-
-            {/* Dictionary meaning */}
-            {meaning && (
-              <div className="my-1.5 p-2 rounded-xl bg-zinc-900/80 border border-zinc-700/60 text-left text-[11px] text-gray-200 flex items-start gap-1.5">
-                <BookOpen size={13} className="text-amber-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-extrabold text-amber-400 mr-1">{solution}:</span>
-                  <span className="italic">{meaning}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Share Buttons */}
-            <div className="flex items-center justify-center gap-1.5 mt-2">
-              <button
-                onClick={handleShare}
-                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
-              >
-                <Share2 size={12} />
-                <span>{isTr ? 'Paylaş' : 'Share'}</span>
-              </button>
-
-              <button
-                onClick={handleShareWhatsApp}
-                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
-              >
-                <MessageSquare size={12} />
-                <span>WhatsApp</span>
-              </button>
-
-              <button
-                onClick={() => startNewRound()}
-                className="px-3.5 py-1 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-[11px] transition shadow-sm cursor-pointer"
-              >
-                {isTr ? 'Sıradaki ➔' : 'Next ➔'}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* LÜKS KLAVYE TEPSİSİ (Option 1 Tactile Keyboard Tray) */}
-        <div className={`w-full max-w-xl sm:max-w-2xl p-1.5 sm:p-2 rounded-2xl border border-amber-500/30 bg-zinc-950/80 shadow-xl backdrop-blur-xs space-y-1 sm:space-y-1.5 shrink-0`}>
-          {keyboardRows.map((row, rIdx) => (
-            <div key={rIdx} className="flex justify-center gap-1 sm:gap-1.5">
-              {row.map((key) => {
-                const customStatus = getKeyStatus(key);
-                const isSpecial = key === 'GİR' || key === 'ENTER' || key === '⌫';
-                return (
-                  <button
-                    key={key}
-                    onClick={() => handleKey(key === '⌫' ? 'BACKSPACE' : key)}
-                    className={`h-8 sm:h-9 md:h-10 rounded-xl font-black text-xs sm:text-sm border transition active:scale-95 shadow-xs cursor-pointer ${
-                      customStatus
-                        ? customStatus
-                        : 'bg-zinc-900/90 border-zinc-700/70 text-zinc-100 hover:border-amber-400 hover:text-amber-200'
-                    } ${
-                      isSpecial
-                        ? 'px-2.5 sm:px-3.5 bg-amber-500/20 text-amber-300 border-amber-500/40 font-extrabold text-[10px] sm:text-xs'
-                        : 'min-w-[24px] sm:min-w-[30px] md:min-w-[34px] px-1'
-                    }`}
-                  >
-                    {key}
-                  </button>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
+    </div>
   );
 };
