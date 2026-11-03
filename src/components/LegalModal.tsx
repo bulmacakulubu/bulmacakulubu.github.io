@@ -102,9 +102,18 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 <li><strong>Teknik Veriler:</strong> Sitemizi ziyaret ettiğinizde barındırma sağlayıcımız (GitHub Pages) ve Google AdSense tarafından standart web sunucu kayıtları (IP adresi, tarayıcı türü, yönlendiren sayfa) işlenebilir.</li>
               </ul>
 
-              <h4 className="font-bold text-gray-900 dark:text-gray-100 mt-3">Haklarınız:</h4>
+              <h4 className="font-bold text-gray-900 dark:text-gray-100 mt-3">Haklarınız ve İletişim:</h4>
               <p>
                 KVKK 11. maddesi ve GDPR uyarınca; verilerinizin işlenip işlenmediğini öğrenme, yerel depolama verilerinizi Ayarlar menüsünden sıfırlama veya tarayıcı geçmişinizi temizleme hakkına dilediğiniz zaman sahipsiniz.
+              </p>
+              <p className="mt-1">
+                Bu site <strong>Hakan Ulu</strong> tarafından geliştirilmiştir, iletişim için:{' '}
+                <a
+                  href="mailto:hknlaauu1@gmail.com"
+                  className="text-blue-600 dark:text-blue-400 font-bold hover:underline"
+                >
+                  hknlaauu1@gmail.com
+                </a>
               </p>
             </div>
           )}
@@ -161,9 +170,15 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 Platformda yer alan arayüz tasarımları, grafikler ve derlemeler Bulmaca Kulübü'ne aittir. Otomatik botlar, tersine mühendislik veya hile yazılımları kullanmak yasaktır.
               </p>
 
-              <h4 className="font-bold text-gray-900 dark:text-gray-100 mt-3">İletişim:</h4>
+              <h4 className="font-bold text-gray-900 dark:text-gray-100 mt-3">Geliştirici ve İletişim:</h4>
               <p>
-                Tüm yasal talepleriniz, telif hakkı bildirimleri veya sorularınız için <strong>bulmacakulubu.github.io</strong> platformu üzerinden bize ulaşabilirsiniz.
+                Bu site <strong>Hakan Ulu</strong> tarafından geliştirilmiştir. İletişim için:{' '}
+                <a
+                  href="mailto:hknlaauu1@gmail.com"
+                  className="text-blue-600 dark:text-blue-400 font-bold hover:underline"
+                >
+                  hknlaauu1@gmail.com
+                </a>
               </p>
             </div>
           )}
