@@ -119,9 +119,21 @@ export const BUILT_IN_TRACKS: Track[] = [
 
 // Ambient chill Lo-Fi background generator
 let currentAmbientVolume = 0.3;
+let ambientMasterGain: GainNode | null = null;
+
+function getAmbientMasterGain(ctx: AudioContext): GainNode {
+  if (!ambientMasterGain) {
+    ambientMasterGain = ctx.createGain();
+    ambientMasterGain.connect(ctx.destination);
+  }
+  return ambientMasterGain;
+}
 
 export function setAmbientVolume(vol: number) {
   currentAmbientVolume = Math.max(0, Math.min(1, vol));
+  if (ambientMasterGain && audioCtx) {
+    ambientMasterGain.gain.setValueAtTime(currentAmbientVolume, audioCtx.currentTime);
+  }
 }
 
 export function startAmbientMusic(volume = 0.3, trackIndex = 0) {
@@ -129,6 +141,8 @@ export function startAmbientMusic(volume = 0.3, trackIndex = 0) {
   currentAmbientVolume = Math.max(0, Math.min(1, volume));
   try {
     const ctx = getAudioContext();
+    const master = getAmbientMasterGain(ctx);
+    master.gain.setValueAtTime(currentAmbientVolume, ctx.currentTime);
     isPlayingMusic = true;
 
     // Pentatonic chord frequencies (C Major / Am chill ambient)
@@ -150,13 +164,13 @@ export function startAmbientMusic(volume = 0.3, trackIndex = 0) {
           osc.type = i % 2 === 0 ? 'sine' : 'triangle';
           osc.frequency.setValueAtTime(freq * (Math.random() > 0.5 ? 1 : 0.5), ctx.currentTime);
 
-          const vol = currentAmbientVolume * 0.12;
+          const vol = 0.12;
           gain.gain.setValueAtTime(0.001, ctx.currentTime);
           gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 1.5);
           gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 4.5);
 
           osc.connect(gain);
-          gain.connect(ctx.destination);
+          gain.connect(getAmbientMasterGain(ctx));
           osc.start(ctx.currentTime);
           osc.stop(ctx.currentTime + 4.5);
         });

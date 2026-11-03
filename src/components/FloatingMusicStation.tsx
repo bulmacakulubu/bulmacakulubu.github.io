@@ -306,7 +306,13 @@ export const FloatingMusicStation: React.FC<FloatingMusicStationProps> = ({
                   min="0"
                   max="100"
                   value={soundEnabled ? volume : 0}
-                  onChange={(e) => onVolumeChange(Number(e.target.value))}
+                  onChange={(e) => {
+                    const newVol = Number(e.target.value);
+                    onVolumeChange(newVol);
+                    if (!soundEnabled && newVol > 0) {
+                      onToggleSound();
+                    }
+                  }}
                   className="w-full h-1.5 accent-[var(--accent-color)] rounded-lg cursor-pointer bg-gray-200 dark:bg-gray-700"
                 />
               </div>

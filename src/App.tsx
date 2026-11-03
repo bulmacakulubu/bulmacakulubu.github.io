@@ -135,11 +135,25 @@ export default function App() {
     } else {
       document.documentElement.classList.remove('dark');
     }
-    setAmbientVolume(settings.volume / 100);
+
+    const effectiveVolume = settings.soundEnabled ? settings.volume / 100 : 0;
+    setAmbientVolume(effectiveVolume);
     if (audioRef.current) {
-      audioRef.current.volume = settings.volume / 100;
+      audioRef.current.muted = !settings.soundEnabled;
+      audioRef.current.volume = effectiveVolume;
     }
   }, [settings]);
+
+  const handleToggleSound = () => {
+    setSettings((prev) => {
+      const nextSound = !prev.soundEnabled;
+      return {
+        ...prev,
+        soundEnabled: nextSound,
+        volume: nextSound && prev.volume === 0 ? 50 : prev.volume,
+      };
+    });
+  };
 
   const handleGameEnd = (gameId: GameId, won: boolean, scoreOrTime?: number) => {
     const updated = updateGameStats(gameId, won, scoreOrTime);
@@ -162,7 +176,7 @@ export default function App() {
   };
 
   const playCurrentTrack = (track: Track) => {
-    if (!settings.soundEnabled) return;
+    const effectiveVolume = settings.soundEnabled ? settings.volume / 100 : 0;
 
     if (track.audioUrl) {
       stopAmbientMusic();
@@ -171,8 +185,16 @@ export default function App() {
       } else {
         audioRef.current.src = track.audioUrl;
       }
-      audioRef.current.volume = settings.volume / 100;
+      audioRef.current.muted = !settings.soundEnabled;
+      audioRef.current.volume = effectiveVolume;
       audioRef.current.play().catch(() => {});
+    } else {
+      // Built-in synthetic ambient track
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      const idx = BUILT_IN_TRACKS.findIndex((t) => t.id === track.id);
+      startAmbientMusic(effectiveVolume, Math.max(0, idx));
     }
   };
 
@@ -181,7 +203,6 @@ export default function App() {
       setIsFloatingMusicOpen(true);
       return;
     }
-    if (!settings.soundEnabled) return;
     const currentTrack = tracks.find((t) => t.id === currentTrackId) || tracks[0];
     if (!currentTrack) return;
 
@@ -192,6 +213,9 @@ export default function App() {
       stopAmbientMusic();
       setIsPlayingMusic(false);
     } else {
+      if (!settings.soundEnabled) {
+        setSettings((prev) => ({ ...prev, soundEnabled: true, volume: prev.volume === 0 ? 50 : prev.volume }));
+      }
       playCurrentTrack(currentTrack);
       setIsPlayingMusic(true);
     }
@@ -340,8 +364,8 @@ export default function App() {
 
               {/* Mute/Unmute Quick Toggle */}
               <button
-                onClick={() => setSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
-                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-400 hover:text-[var(--text-primary)] transition"
+                onClick={handleToggleSound}
+                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-400 hover:text-[var(--text-primary)] transition cursor-pointer"
                 title={settings.soundEnabled ? (settings.language === 'tr' ? 'Sesi Kapat' : 'Mute') : (settings.language === 'tr' ? 'Sesi Aç' : 'Unmute')}
               >
                 {settings.soundEnabled && settings.volume > 0 ? (
@@ -584,7 +608,7 @@ export default function App() {
         volume={settings.volume}
         onVolumeChange={(v) => setSettings({ ...settings, volume: v })}
         soundEnabled={settings.soundEnabled}
-        onToggleSound={() => setSettings({ ...settings, soundEnabled: !settings.soundEnabled })}
+        onToggleSound={handleToggleSound}
         language={settings.language}
       />
 
