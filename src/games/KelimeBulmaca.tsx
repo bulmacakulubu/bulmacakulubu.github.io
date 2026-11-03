@@ -306,7 +306,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   const keyboardRows = isTr ? keyboardRowsTR : keyboardRowsEN;
 
   return (
-    <div className="w-full flex flex-col items-center justify-center select-none space-y-2 pt-0.5 relative">
+    <div className="w-full flex flex-col items-center justify-start select-none space-y-1 sm:space-y-1.5 pt-0 relative">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="absolute -top-3 z-30 px-3.5 py-1.5 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
@@ -317,9 +317,9 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
       {/* 1v1 Multiplayer Opponent Live Bar */}
       {isMultiplayer && (
-        <div className="w-full max-w-xl p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-300 animate-fadeIn">
+        <div className="w-full max-w-xl p-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-300 animate-fadeIn">
           <div className="flex items-center gap-2">
-            <Users size={16} />
+            <Users size={15} />
             <span>1v1 Düello: {multiplayerSession?.opponentName || 'Rakip'}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -334,7 +334,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       )}
 
       {/* UNIFORM CONTROL BAR */}
-      <div className="w-full max-w-xl flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
+      <div className="w-full max-w-xl flex items-center justify-between pb-1 border-b border-[var(--border-color)]">
         {/* LEFT: Length selector */}
         <div className="flex bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {[5, 7, 9].map((len) => (
@@ -346,7 +346,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 startNewRound(len as any);
               }}
               disabled={isMultiplayer}
-              className={`px-2.5 py-1 rounded-lg transition font-extrabold text-[11px] ${
+              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
                 wordLength === len
                   ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -359,10 +359,10 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
         {/* CENTER: Live Metric + Memory Progress */}
         <div className="flex items-center gap-1.5 text-xs font-semibold">
-          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
+          <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
             {isTr ? 'DENEME' : 'ATTEMPT'} <span className="font-extrabold text-[var(--accent-color)]">{guesses.length}/6</span>
           </div>
-          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
+          <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
             {isTr ? 'HAVUZ' : 'POOL'} <span className="font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
           </div>
         </div>
@@ -389,12 +389,19 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         </div>
       </div>
 
-      {/* Grid (Compact & Responsive to prevent cutting off keyboard) */}
-      <div className="flex flex-col items-center justify-center gap-1 my-0.5">
+      {/* Grid (Compact & Perfectly Scaled to Fit Viewport without Scroll) */}
+      <div className="flex flex-col items-center justify-center gap-1 py-0.5">
         {Array.from({ length: 6 }).map((_, rowIndex) => {
           const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');
           const isCompleted = rowIndex < guesses.length;
           const isCurrent = rowIndex === guesses.length;
+
+          const cellSize =
+            wordLength === 9
+              ? 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-xs sm:text-sm'
+              : wordLength === 7
+              ? 'w-7 h-7 sm:w-8 sm:h-8 md:w-8.5 md:h-8.5 text-xs sm:text-sm'
+              : 'w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 md:w-9 md:h-9 text-sm sm:text-base';
 
           return (
             <div
@@ -418,7 +425,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 return (
                   <div
                     key={colIndex}
-                    className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-2 rounded-xl flex items-center justify-center font-black text-base sm:text-lg transition-all duration-150 ${style}`}
+                    className={`${cellSize} border-2 rounded-xl flex items-center justify-center font-black transition-all duration-150 ${style}`}
                   >
                     {letter || (isHintLetter ? solution[colIndex] : '')}
                   </div>
@@ -431,8 +438,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
       {/* Game End Banner with Dictionary Definition & Viral Share */}
       {gameStatus !== 'playing' && (
-        <div className="text-center py-2 px-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg animate-fadeIn max-w-md w-full my-0.5">
-          <div className={`text-xs sm:text-sm font-bold mb-1 ${gameStatus === 'won' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+        <div className="text-center py-1.5 px-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg animate-fadeIn max-w-md w-full my-0.5">
+          <div className={`text-xs font-bold mb-1 ${gameStatus === 'won' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {gameStatus === 'won'
               ? (isTr ? 'Muhteşem! Kelimeyi Başarıyla Buldunuz! 🎉' : 'Awesome! You guessed the word correctly! 🎉')
               : (isTr ? `Oyun Bitti! Doğru Kelime: ${solution}` : `Game Over! The word was: ${solution}`)}
@@ -440,7 +447,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
           {/* Dictionary meaning */}
           {meaning && (
-            <div className="my-1.5 p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-left text-[11px] text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
+            <div className="my-1 p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-left text-[11px] text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
               <BookOpen size={13} className="text-[var(--accent-color)] shrink-0 mt-0.5" />
               <div>
                 <span className="font-extrabold text-[var(--accent-color)] mr-1">{solution}:</span>
@@ -450,34 +457,34 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           )}
 
           {/* Share Buttons */}
-          <div className="flex items-center justify-center gap-2 mt-2">
+          <div className="flex items-center justify-center gap-1.5 mt-1.5">
             <button
               onClick={handleShare}
-              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
             >
-              <Share2 size={13} />
-              <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
+              <Share2 size={12} />
+              <span>{isTr ? 'Paylaş' : 'Share'}</span>
             </button>
 
             <button
               onClick={handleShareWhatsApp}
-              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
             >
-              <MessageSquare size={13} />
+              <MessageSquare size={12} />
               <span>WhatsApp</span>
             </button>
 
             <button
               onClick={() => startNewRound()}
-              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+              className="px-3.5 py-1 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-[11px] transition shadow-sm cursor-pointer"
             >
-              {isTr ? 'Sıradaki Kelime ➔' : 'Next Word ➔'}
+              {isTr ? 'Sıradaki ➔' : 'Next ➔'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Virtual Keyboard (Compact, perfectly fitting viewport) */}
+      {/* Virtual Keyboard (Ultra-Fitted, Never Cut Off) */}
       <div className="w-full max-w-lg space-y-1 pt-0.5">
         {keyboardRows.map((row, rIdx) => (
           <div key={rIdx} className="flex justify-center gap-1">
@@ -488,11 +495,11 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 <button
                   key={key}
                   onClick={() => handleKey(key === '⌫' ? 'BACKSPACE' : key)}
-                  className={`h-8 sm:h-9 rounded-lg font-bold text-xs border transition active:scale-95 shadow-2xs cursor-pointer ${
+                  className={`h-7 sm:h-8 md:h-8.5 rounded-lg font-bold text-xs border transition active:scale-95 shadow-2xs cursor-pointer ${
                     customStatus
                       ? customStatus
                       : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800'
-                  } ${isSpecial ? 'px-2.5 sm:px-3.5 font-extrabold text-[10px] sm:text-xs' : 'min-w-[24px] sm:min-w-[32px] px-1'}`}
+                  } ${isSpecial ? 'px-2 sm:px-3 font-extrabold text-[10px] sm:text-[11px]' : 'min-w-[22px] sm:min-w-[28px] md:min-w-[32px] px-1'}`}
                 >
                   {key}
                 </button>

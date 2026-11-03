@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Lightbulb, Share2, MessageSquare } from 'lucide-react';
 import { generateWordSearch } from '../utils/wordSearchGenerator';
+import { triggerAdBreak } from '../utils/adSenseService';
+import { shareScore, openWhatsAppShare } from '../utils/shareService';
 
 interface SozcukAviProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
   soundEnabled: boolean;
   language?: 'tr' | 'en';
+  isPremium?: boolean;
 }
 
 const CATEGORIES_TR: Record<string, string[]> = {
@@ -46,6 +49,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
   onGameEnd,
   soundEnabled,
   language = 'tr',
+  isPremium = false,
 }) => {
   const isTr = language === 'tr';
   const categories = isTr ? CATEGORIES_TR : CATEGORIES_EN;
@@ -60,6 +64,30 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
   const [foundColors, setFoundColors] = useState<Record<string, string>>({});
   const [seconds, setSeconds] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+
+  // Rewarded Hint
+  const handleHint = () => {
+    if (!isPlaying) return;
+    const unfound = words.filter((w) => !foundWords.includes(w));
+    if (unfound.length === 0) return;
+
+    const targetWord = unfound[0];
+    const doHint = () => {
+      handleWordListClick(targetWord);
+    };
+
+    if (isPremium) {
+      doHint();
+    } else {
+      triggerAdBreak({
+        type: 'reward',
+        name: 'word_search_hint',
+        adBreakDone: () => {
+          doHint();
+        },
+      });
+    }
+  };
 
   // Drag selection state
   const [isDragging, setIsDragging] = useState(false);
@@ -304,20 +332,31 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
           ))}
         </div>
 
-        {/* METRICS & RESTART BUTTON */}
-        <div className="flex items-center gap-2 text-xs font-semibold shrink-0">
-          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
+        {/* METRICS, HINT & RESTART BUTTON */}
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold shrink-0">
+          <div className="px-2.5 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
             ⏱ {formatTime(seconds)}
           </div>
-          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
+          <div className="px-2.5 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
             {isTr ? 'BULUNAN' : 'FOUND'}{' '}
             <span className="font-extrabold text-[var(--accent-color)]">
               {foundWords.length}/{words.length}
             </span>
           </div>
+
+          <button
+            onClick={handleHint}
+            disabled={foundWords.length === words.length}
+            className="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
+          >
+            <Lightbulb size={13} />
+            <span>{isTr ? 'İpucu' : 'Hint'}</span>
+          </button>
+
           <button
             onClick={() => initBoard(activeCategory)}
-            className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
           >
             <RotateCcw size={13} />
             <span>{isTr ? 'Yeni Tahta' : 'New Board'}</span>
@@ -392,6 +431,53 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Completion Victory Card */}
+      {foundWords.length === words.length && words.length > 0 && (
+        <div className="p-3 sm:p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] text-center shadow-lg animate-fadeIn max-w-md w-full my-1">
+          <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+            {isTr ? 'Tebrikler! Tüm Kelimeleri Buldunuz! 🎉' : 'Awesome! You found all hidden words! 🎉'}
+          </div>
+          <div className="text-xs text-gray-500 mb-3">
+            {isTr
+              ? `Kategori: ${activeCategory} • Süre: ${formatTime(seconds)}`
+              : `Category: ${activeCategory} • Time: ${formatTime(seconds)}`}
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={async () => {
+                await shareScore({
+                  title: 'Sözcük Avı',
+                  gameName: isTr ? `Sözcük Avı (${activeCategory})` : `Word Search (${activeCategory})`,
+                  scoreOrAttempts: `${formatTime(seconds)} ${isTr ? 'sürede tamamlandı' : 'completion time'}`,
+                });
+              }}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <Share2 size={13} />
+              <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
+            </button>
+            <button
+              onClick={() => {
+                const text = isTr
+                  ? `🔍 Sözcük Avı - "${activeCategory}" kategorisini ${formatTime(seconds)} sürede bitirdim! https://bulmacakulubu.github.io`
+                  : `🔍 Word Search - Finished "${activeCategory}" in ${formatTime(seconds)}! https://bulmacakulubu.github.io`;
+                openWhatsAppShare(text);
+              }}
+              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <MessageSquare size={13} />
+              <span>WhatsApp</span>
+            </button>
+            <button
+              onClick={() => initBoard(activeCategory)}
+              className="px-3.5 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+            >
+              {isTr ? 'Yeni Tahta ➔' : 'Next Board ➔'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

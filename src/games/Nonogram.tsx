@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { RotateCcw, Paintbrush, X, CheckCircle2, Sparkles, AlertCircle } from 'lucide-react';
+import { RotateCcw, Paintbrush, X, CheckCircle2, Sparkles, AlertCircle, Lightbulb, Share2, MessageSquare } from 'lucide-react';
+import { triggerAdBreak } from '../utils/adSenseService';
+import { shareScore, openWhatsAppShare } from '../utils/shareService';
 
 interface NonogramProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
   soundEnabled: boolean;
   language?: 'tr' | 'en';
+  isPremium?: boolean;
 }
 
 type SizeMode = '5x5' | '10x10';
@@ -158,7 +161,12 @@ const PUZZLES_10X10: PixelPuzzle[] = [
   },
 ];
 
-export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, language = 'tr' }) => {
+export const Nonogram: React.FC<NonogramProps> = ({
+  onGameEnd,
+  soundEnabled,
+  language = 'tr',
+  isPremium = false,
+}) => {
   const isEn = language === 'en';
   const [sizeMode, setSizeMode] = useState<SizeMode>('5x5');
   const [puzzleIndex, setPuzzleIndex] = useState(0);
@@ -175,6 +183,66 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
   const [isPlaying, setIsPlaying] = useState(true);
   const [seconds, setSeconds] = useState(0);
   const [errors, setErrors] = useState(0);
+
+  const isRowSolved = (r: number) => {
+    for (let c = 0; c < size; c++) {
+      const target = currentPuzzle.grid[r][c] === 1;
+      const user = gridState[r][c] === 1;
+      if (target !== user) return false;
+    }
+    return true;
+  };
+
+  const isColSolved = (c: number) => {
+    for (let r = 0; r < size; r++) {
+      const target = currentPuzzle.grid[r][c] === 1;
+      const user = gridState[r][c] === 1;
+      if (target !== user) return false;
+    }
+    return true;
+  };
+
+  // Rewarded Hint
+  const handleHint = () => {
+    if (!isPlaying) return;
+
+    // Find first incorrect or unfilled cell and reveal it
+    let targetR = -1;
+    let targetC = -1;
+    outer: for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        const isTarget = currentPuzzle.grid[r][c] === 1;
+        const isUser = gridState[r][c] === 1;
+        if (isTarget && !isUser) {
+          targetR = r;
+          targetC = c;
+          break outer;
+        }
+      }
+    }
+
+    if (targetR === -1) return;
+
+    const doHint = () => {
+      const nextState = gridState.map((row) => [...row]);
+      nextState[targetR][targetC] = 1;
+      setGridState(nextState);
+      if (soundEnabled) playSound('tile');
+      checkWinCondition(nextState);
+    };
+
+    if (isPremium) {
+      doHint();
+    } else {
+      triggerAdBreak({
+        type: 'reward',
+        name: 'nonogram_hint',
+        adBreakDone: () => {
+          doHint();
+        },
+      });
+    }
+  };
 
   // Compute row clues
   const rowClues = currentPuzzle.grid.map((row) => {
@@ -338,14 +406,26 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
           </div>
         </div>
 
-        {/* RIGHT: Restart Button */}
-        <button
-          onClick={() => startNewGame(sizeMode, true)}
-          className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs"
-        >
-          <RotateCcw size={13} />
-          <span>{isEn ? 'New Game' : 'Yeni Oyun'}</span>
-        </button>
+        {/* RIGHT: Hint & Restart Button */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleHint}
+            disabled={!isPlaying}
+            className="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
+          >
+            <Lightbulb size={13} />
+            <span>{isEn ? 'Hint' : 'İpucu'}</span>
+          </button>
+
+          <button
+            onClick={() => startNewGame(sizeMode, true)}
+            className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+          >
+            <RotateCcw size={13} />
+            <span>{isEn ? 'New' : 'Yeni'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Paint Mode Toggle (Fill vs Cross) */}
@@ -390,37 +470,46 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
 
           {/* Column Clues */}
           <div className="flex border-b-2 border-[var(--border-color)]">
-            {colClues.map((clues, c) => (
-              <div
-                key={c}
-                className={`${is5x5 ? 'w-9 sm:w-11 md:w-12 text-xs sm:text-sm' : 'w-6 sm:w-7.5 md:w-8.5 text-[10px] sm:text-[11px]'} flex flex-col justify-end items-center pb-1 font-extrabold text-gray-600 dark:text-gray-300 leading-tight ${
-                  c % 5 === 4 && c !== size - 1 ? 'border-r-2 border-r-gray-900 dark:border-r-gray-100' : 'border-r border-r-gray-200 dark:border-r-gray-800'
-                }`}
-              >
-                {clues.map((num, i) => (
-                  <span key={i} className="my-0.5">
-                    {num}
-                  </span>
-                ))}
-              </div>
-            ))}
+            {colClues.map((clues, c) => {
+              const colDone = isColSolved(c);
+              return (
+                <div
+                  key={c}
+                  className={`${is5x5 ? 'w-9 sm:w-11 md:w-12 text-xs sm:text-sm' : 'w-6 sm:w-7.5 md:w-8.5 text-[10px] sm:text-[11px]'} flex flex-col justify-end items-center pb-1 font-extrabold leading-tight ${
+                    colDone ? 'text-emerald-500 opacity-40 line-through' : 'text-gray-600 dark:text-gray-300'
+                  } ${
+                    c % 5 === 4 && c !== size - 1 ? 'border-r-2 border-r-gray-900 dark:border-r-gray-100' : 'border-r border-r-gray-200 dark:border-r-gray-800'
+                  }`}
+                >
+                  {clues.map((num, i) => (
+                    <span key={i} className="my-0.5">
+                      {num}
+                    </span>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </div>
 
         {/* Rows with clues and cells */}
         <div>
-          {rowClues.map((clues, r) => (
-            <div key={r} className="flex">
-              {/* Row Clue */}
-              <div
-                className={`${is5x5 ? 'w-14 sm:w-18 text-xs sm:text-sm' : 'w-11 sm:w-14 text-[10px] sm:text-[11px]'} shrink-0 flex items-center justify-end pr-2 gap-1.5 font-extrabold text-gray-600 dark:text-gray-300 border-r-2 border-[var(--border-color)] ${
-                  r % 5 === 4 && r !== size - 1 ? 'border-b-2 border-b-gray-900 dark:border-b-gray-100' : 'border-b border-b-gray-200 dark:border-b-gray-800'
-                }`}
-              >
-                {clues.map((num, i) => (
-                  <span key={i}>{num}</span>
-                ))}
-              </div>
+          {rowClues.map((clues, r) => {
+            const rowDone = isRowSolved(r);
+            return (
+              <div key={r} className="flex">
+                {/* Row Clue */}
+                <div
+                  className={`${is5x5 ? 'w-14 sm:w-18 text-xs sm:text-sm' : 'w-11 sm:w-14 text-[10px] sm:text-[11px]'} shrink-0 flex items-center justify-end pr-2 gap-1.5 font-extrabold border-r-2 border-[var(--border-color)] ${
+                    rowDone ? 'text-emerald-500 opacity-40 line-through' : 'text-gray-600 dark:text-gray-300'
+                  } ${
+                    r % 5 === 4 && r !== size - 1 ? 'border-b-2 border-b-gray-900 dark:border-b-gray-100' : 'border-b border-b-gray-200 dark:border-b-gray-800'
+                  }`}
+                >
+                  {clues.map((num, i) => (
+                    <span key={i}>{num}</span>
+                  ))}
+                </div>
 
               {/* Row Cells */}
               <div className="flex">
@@ -449,29 +538,55 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
                 })}
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
       </div>
 
       {/* GAME COMPLETED REVEAL CARD */}
       {!isPlaying && (
-        <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] text-center shadow-lg w-full animate-fadeIn mt-2">
-          <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 mb-0.5">
+        <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-center shadow-lg w-full animate-fadeIn mt-2 max-w-md">
+          <div className="text-sm font-black text-emerald-700 dark:text-emerald-300 mb-0.5">
             {isEn
-              ? `Pixel Artwork Discovered: "${puzzleDisplayName}"! 🎉`
-              : `Piksel Resmi Keşfedildi: "${puzzleDisplayName}"! 🎉`}
+              ? `🎨 Pixel Artwork Discovered: "${puzzleDisplayName}"! 🎉`
+              : `🎨 Piksel Resmi Keşfedildi: "${puzzleDisplayName}"! 🎉`}
           </div>
-          <div className="text-xs text-gray-500 mb-3">
+          <div className="text-xs text-gray-600 dark:text-gray-300 mb-3">
             {isEn
               ? `Total time: ${formatTime(seconds)} · Errors: ${errors}`
               : `Toplam süre: ${formatTime(seconds)} · Hata: ${errors}`}
           </div>
-          <button
-            onClick={() => startNewGame(sizeMode, true)}
-            className="px-6 py-2.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm"
-          >
-            {isEn ? 'Next Pixel Artwork ➔' : 'Sıradaki Piksel Resmine Geç ➔'}
-          </button>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={async () => {
+                await shareScore({
+                  title: 'Bulmaca Kulübü - Nonogram',
+                  gameName: 'Nonogram (Piksel)',
+                  scoreOrAttempts: `"${puzzleDisplayName}" resmini ${formatTime(seconds)} içinde çözdüm!`,
+                });
+              }}
+              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Share2 size={13} />
+              <span>Skoru Paylaş</span>
+            </button>
+            <button
+              onClick={() => {
+                const text = `🧩 Bulmaca Kulübü: Nonogram\n🎨 "${puzzleDisplayName}" piksel resmini ${formatTime(seconds)} içinde tamamladım!\nSen de oyna: https://bulmacakulubu.github.io`;
+                openWhatsAppShare(text);
+              }}
+              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <MessageSquare size={13} />
+              <span>WhatsApp</span>
+            </button>
+            <button
+              onClick={() => startNewGame(sizeMode, true)}
+              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+            >
+              {isEn ? 'Next Artwork ➔' : 'Sıradaki Resim ➔'}
+            </button>
+          </div>
         </div>
       )}
     </div>

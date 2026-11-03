@@ -1,5 +1,5 @@
 // Bulmaca Kulübü PWA Service Worker
-const CACHE_NAME = 'bk-pwa-v1';
+const CACHE_NAME = 'bk-pwa-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -44,7 +44,23 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stale-while-revalidate for local origin requests
+  // Network-First for HTML navigation so updates appear immediately
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(event.request).then((res) => res || caches.match('/index.html')))
+    );
+    return;
+  }
+
+  // Stale-while-revalidate for local origin static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request)

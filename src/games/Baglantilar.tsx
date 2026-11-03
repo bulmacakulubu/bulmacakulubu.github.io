@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { RotateCcw, Shuffle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { RotateCcw, Shuffle, CheckCircle2, AlertCircle, Share2, Lightbulb, MessageSquare } from 'lucide-react';
+import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
+import { triggerAdBreak } from '../utils/adSenseService';
+import { shareScore, openWhatsAppShare } from '../utils/shareService';
 
 interface BaglantilarProps {
   onGameEnd: (won: boolean, timeSec?: number) => void;
   soundEnabled: boolean;
   language?: 'tr' | 'en';
+  isPremium?: boolean;
 }
 
 interface Group {
@@ -328,7 +332,12 @@ const PUZZLE_SETS_EN: PuzzleSet[] = [
   },
 ];
 
-export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnabled, language = 'tr' }) => {
+export const Baglantilar: React.FC<BaglantilarProps> = ({
+  onGameEnd,
+  soundEnabled,
+  language = 'tr',
+  isPremium = false,
+}) => {
   const isEn = language === 'en';
   const puzzleSets = isEn ? PUZZLE_SETS_EN : PUZZLE_SETS_TR;
 
@@ -361,6 +370,8 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
   const [seconds, setSeconds] = useState(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
+  const [guessHistory, setGuessHistory] = useState<number[][]>([]);
 
   useEffect(() => {
     initRound(currentSetIndex);
@@ -375,7 +386,12 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
   }, [isPlaying]);
 
   const initRound = (setIdx: number) => {
-    const p = puzzleSets[setIdx] || puzzleSets[0];
+    const poolKey = `connections_${language}`;
+    const result = pickUnseenWord(poolKey, puzzleSets, (p) => p.name);
+    const chosenIdx = puzzleSets.findIndex((p) => p.name === result.item.name);
+    const effectiveIdx = chosenIdx !== -1 ? chosenIdx : setIdx;
+
+    const p = puzzleSets[effectiveIdx] || puzzleSets[0];
     const distributed = distributeAcrossDifferentRows(p.groups);
     setUnsolvedWords(distributed);
     setSelectedWords([]);
@@ -384,6 +400,14 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
     setIsPlaying(true);
     setSeconds(0);
     setToastMessage(null);
+    setGuessHistory([]);
+
+    const progress = getPoolProgress(poolKey, puzzleSets.length);
+    setPoolStats({ seenCount: progress.seenCount, totalCount: progress.totalCount });
+
+    if (result.isCycleReset) {
+      showToast(isEn ? 'All sets completed! Resetting 🏆' : 'Tüm setler tamamlandı! Baştan başlıyor 🏆');
+    }
   };
 
   const showToast = (msg: string) => {
@@ -419,8 +443,79 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
     setSelectedWords([]);
   };
 
+  // Rewarded Hint
+  const handleHint = () => {
+    if (!isPlaying) return;
+    const unsolved = puzzle.groups.filter((g) => !solvedGroups.some((sg) => sg.category === g.category));
+    if (unsolved.length === 0) return;
+
+    const targetGroup = unsolved[0];
+    const wordsToPick = targetGroup.words.slice(0, 2);
+
+    const doHint = () => {
+      setSelectedWords(wordsToPick);
+      if (soundEnabled) playSound('tile');
+      showToast(
+        isEn
+          ? `💡 Hint: "${wordsToPick.join(' & ')}" are linked!`
+          : `💡 İpucu: "${wordsToPick.join(' & ')}" birbiriyle bağlantılı!`
+      );
+    };
+
+    if (isPremium) {
+      doHint();
+    } else {
+      triggerAdBreak({
+        type: 'reward',
+        name: 'connections_hint',
+        adBreakDone: () => {
+          doHint();
+        },
+      });
+    }
+  };
+
+  const LEVEL_EMOJIS: Record<number, string> = {
+    1: '🟨',
+    2: '🟩',
+    3: '🟦',
+    4: '🟪',
+  };
+
+  const generateEmojiGrid = () => {
+    return guessHistory
+      .map((row) => row.map((lvl) => LEVEL_EMOJIS[lvl] || '⬜').join(''))
+      .join('\n');
+  };
+
+  const handleShare = async () => {
+    const grid = generateEmojiGrid();
+    const isWon = solvedGroups.length === 4;
+    await shareScore({
+      title: 'Bulmaca Kulübü - Bağlantılar',
+      gameName: isEn ? 'Connections' : 'Bağlantılar',
+      scoreOrAttempts: isWon ? `${formatTime(seconds)} içinde çözüldü` : 'Tamamlanamadı',
+      emojiGrid: grid,
+    });
+    showToast(isEn ? 'Result copied to clipboard! 📋' : 'Sonuç panoya kopyalandı! 📋');
+  };
+
+  const handleShareWhatsApp = () => {
+    const grid = generateEmojiGrid();
+    const isWon = solvedGroups.length === 4;
+    const text = `🧩 Bulmaca Kulübü: ${isEn ? 'Connections' : 'Bağlantılar'}\n🏆 Sonuç: ${isWon ? `${formatTime(seconds)}` : 'X'}\n\n${grid}`;
+    openWhatsAppShare(text);
+  };
+
   const handleCheckGroup = () => {
     if (selectedWords.length !== 4 || !isPlaying) return;
+
+    // Track level of each chosen word for emoji grid
+    const wordLevels = selectedWords.map((w) => {
+      const g = puzzle.groups.find((grp) => grp.words.includes(w));
+      return g ? g.level : 1;
+    });
+    setGuessHistory((prev) => [...prev, wordLevels]);
 
     let matchedGroup: Group | null = null;
     for (const group of puzzle.groups) {
@@ -462,7 +557,7 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
       setMistakesRemaining(nextMistakes);
 
       if (isOneAway) {
-        showToast(isEn ? 'One away!' : '1 kelime uzaktasınız!');
+        showToast(isEn ? 'One away! (3/4 correct)' : '1 kelime uzaktasınız! (3 tanesi doğru)');
       } else {
         showToast(isEn ? 'No match found' : 'Eşleşme bulunamadı');
       }
@@ -501,42 +596,52 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
 
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
-        {/* LEFT: Set Indicator */}
-        <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-xs font-semibold">
-          {isEn ? 'SET' : 'SET'}{' '}
-          <span className="text-[var(--accent-color)] font-extrabold ml-1">
-            {currentSetIndex + 1} / {puzzleSets.length}
-          </span>
+        {/* LEFT: Mistakes Remaining */}
+        <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs flex items-center gap-1.5 text-xs font-semibold">
+          <span>{isEn ? 'MISTAKES' : 'HATA'}</span>
+          <div className="flex gap-1.5 ml-1">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <span
+                key={i}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  i < mistakesRemaining ? 'bg-amber-500 scale-100' : 'bg-gray-300 dark:bg-gray-700 scale-75 opacity-40'
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* CENTER: Mistakes Remaining & Timer */}
+        {/* CENTER: Pool Progress & Timer */}
         <div className="flex items-center gap-2 text-xs font-semibold">
-          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
+          <div className="px-2.5 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px] text-gray-500">
+            {isEn ? 'POOL' : 'HAVUZ'}{' '}
+            <span className="font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
+          </div>
+          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs font-mono">
             ⏱ {formatTime(seconds)}
           </div>
-          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs flex items-center gap-1">
-            <span>{isEn ? 'MISTAKES' : 'HATA'}</span>
-            <div className="flex gap-1 ml-1">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <span
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition ${
-                    i < mistakesRemaining ? 'bg-amber-500' : 'bg-gray-300 dark:bg-gray-700'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
         </div>
 
-        {/* RIGHT: Restart Button */}
-        <button
-          onClick={handleNextSet}
-          className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs"
-        >
-          <RotateCcw size={13} />
-          <span>{isEn ? 'New Game' : 'Yeni Oyun'}</span>
-        </button>
+        {/* RIGHT: Hint (Rewarded Ad) & Next Round */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleHint}
+            disabled={!isPlaying}
+            className="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
+          >
+            <Lightbulb size={13} />
+            <span>{isEn ? 'Hint' : 'İpucu'}</span>
+          </button>
+
+          <button
+            onClick={handleNextSet}
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+          >
+            <RotateCcw size={13} />
+            <span>{isEn ? 'New' : 'Yeni'}</span>
+          </button>
+        </div>
       </div>
 
       <div className="w-full text-center text-xs text-gray-500 font-medium">
@@ -614,12 +719,44 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
         </div>
       )}
 
-      {/* Completion message */}
-      {!isPlaying && solvedGroups.length === 4 && (
-        <div className="w-full p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-center font-bold text-xs animate-fadeIn">
-          {isEn
-            ? '🎉 Bravo! You found all connections in ' + formatTime(seconds) + '!'
-            : '🎉 Tebrikler! Tüm bağlantıları ' + formatTime(seconds) + ' içinde çözdünüz!'}
+      {/* Completion & Share message */}
+      {!isPlaying && (
+        <div className={`w-full p-4 rounded-2xl border text-center font-bold text-xs animate-fadeIn shadow-lg mt-2 ${
+          solvedGroups.length === 4
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+            : 'bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300'
+        }`}>
+          <div className="text-sm font-black mb-1">
+            {solvedGroups.length === 4
+              ? (isEn ? `🎉 Bravo! Solved in ${formatTime(seconds)}!` : `🎉 Tebrikler! ${formatTime(seconds)} içinde çözdünüz!`)
+              : (isEn ? 'Game Over! Better luck next time!' : 'Oyun Bitti! Bir dahaki sefere!')}
+          </div>
+
+          {/* Social Share Buttons */}
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <button
+              onClick={handleShare}
+              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Share2 size={13} />
+              <span>{isEn ? 'Share Grid' : 'Skoru Paylaş'}</span>
+            </button>
+
+            <button
+              onClick={handleShareWhatsApp}
+              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <MessageSquare size={13} />
+              <span>WhatsApp</span>
+            </button>
+
+            <button
+              onClick={handleNextSet}
+              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+            >
+              {isEn ? 'Next Puzzle ➔' : 'Sıradaki Set ➔'}
+            </button>
+          </div>
         </div>
       )}
     </div>

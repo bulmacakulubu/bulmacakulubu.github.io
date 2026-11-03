@@ -1,21 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, Edit3, Lightbulb, Share2, MessageSquare, Check, Sparkles } from 'lucide-react';
 import { generateSudoku, SudokuDifficulty } from '../utils/sudokuGenerator';
+import { triggerAdBreak } from '../utils/adSenseService';
+import { shareScore, openWhatsAppShare } from '../utils/shareService';
 
 interface SudokuProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
   soundEnabled: boolean;
   language?: 'tr' | 'en';
+  isPremium?: boolean;
 }
 
-export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, language = 'tr' }) => {
+export const Sudoku: React.FC<SudokuProps> = ({
+  onGameEnd,
+  soundEnabled,
+  language = 'tr',
+  isPremium = false,
+}) => {
   const isEn = language === 'en';
   const [difficulty, setDifficulty] = useState<SudokuDifficulty>('easy');
   const [board, setBoard] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [initialBoard, setInitialBoard] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
   const [solutionBoard, setSolutionBoard] = useState<number[][]>(() => Array.from({ length: 9 }, () => Array(9).fill(0)));
+  const [notes, setNotes] = useState<number[][][]>(() =>
+    Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => []))
+  );
+  const [isNotesMode, setIsNotesMode] = useState(false);
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   const [errors, setErrors] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -27,6 +39,7 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
     setBoard(generated.initial.map((r) => [...r]));
     setInitialBoard(generated.initial.map((r) => [...r]));
     setSolutionBoard(generated.solution.map((r) => [...r]));
+    setNotes(Array.from({ length: 9 }, () => Array.from({ length: 9 }, () => [])));
     setSelectedCell(null);
     setErrors(0);
     setSeconds(0);
@@ -45,10 +58,36 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
     return () => clearInterval(timer);
   }, [isPlaying]);
 
+  // Count placed instances of each digit 1-9
+  const digitCounts: Record<number, number> = {};
+  for (let d = 1; d <= 9; d++) digitCounts[d] = 0;
+  board.forEach((row) => {
+    row.forEach((num) => {
+      if (num >= 1 && num <= 9) digitCounts[num]++;
+    });
+  });
+
   const handleNumberInput = (num: number) => {
     if (!selectedCell || !isPlaying) return;
     const [r, c] = selectedCell;
     if (initialBoard[r][c] !== 0) return;
+
+    if (isNotesMode) {
+      // Toggle note in this cell
+      if (soundEnabled) playSound('click');
+      const newNotes = notes.map((rowArr, rIdx) =>
+        rowArr.map((cellNotes, cIdx) => {
+          if (rIdx === r && cIdx === c) {
+            return cellNotes.includes(num)
+              ? cellNotes.filter((n) => n !== num)
+              : [...cellNotes, num].sort((a, b) => a - b);
+          }
+          return cellNotes;
+        })
+      );
+      setNotes(newNotes);
+      return;
+    }
 
     const isCorrect = solutionBoard[r][c] === num;
 
@@ -60,6 +99,11 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
       setErrors((prev) => prev + 1);
     } else {
       if (soundEnabled) playSound('tile');
+      // Clear notes in this cell
+      const newNotes = notes.map((rowArr, rIdx) =>
+        rowArr.map((cellNotes, cIdx) => (rIdx === r && cIdx === c ? [] : cellNotes))
+      );
+      setNotes(newNotes);
     }
 
     setBoard(newBoard);
@@ -78,7 +122,7 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
     if (isComplete) {
       setIsPlaying(false);
       if (soundEnabled) playSound('win');
-      confetti({ particleCount: 110, spread: 75 });
+      confetti({ particleCount: 120, spread: 80 });
       onGameEnd(true, seconds);
     }
   };
@@ -93,6 +137,51 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
     setBoard(newBoard);
   };
 
+  // Rewarded Hint
+  const handleHint = () => {
+    if (!isPlaying) return;
+
+    // Pick selected cell if empty, or first empty cell
+    let targetR = selectedCell ? selectedCell[0] : -1;
+    let targetC = selectedCell ? selectedCell[1] : -1;
+
+    if (targetR === -1 || board[targetR][targetC] !== 0) {
+      outer: for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (board[r][c] === 0) {
+            targetR = r;
+            targetC = c;
+            break outer;
+          }
+        }
+      }
+    }
+
+    if (targetR === -1) return;
+
+    const doHint = () => {
+      const correctNum = solutionBoard[targetR][targetC];
+      const newBoard = board.map((row, r) =>
+        row.map((val, c) => (r === targetR && c === targetC ? correctNum : val))
+      );
+      setBoard(newBoard);
+      setSelectedCell([targetR, targetC]);
+      if (soundEnabled) playSound('tile');
+    };
+
+    if (isPremium) {
+      doHint();
+    } else {
+      triggerAdBreak({
+        type: 'reward',
+        name: 'sudoku_hint',
+        adBreakDone: () => {
+          doHint();
+        },
+      });
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isPlaying) return;
@@ -101,6 +190,8 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
         handleNumberInput(parseInt(e.key, 10));
       } else if (e.key === 'Backspace' || e.key === 'Delete') {
         handleClear();
+      } else if (e.key.toLowerCase() === 'n') {
+        setIsNotesMode((prev) => !prev);
       } else if (e.key.startsWith('Arrow')) {
         e.preventDefault();
         setSelectedCell((curr) => {
@@ -117,7 +208,7 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedCell, isPlaying, board, difficulty, initialBoard, solutionBoard]);
+  }, [selectedCell, isPlaying, board, difficulty, initialBoard, solutionBoard, isNotesMode, notes]);
 
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60);
@@ -127,17 +218,30 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
 
   const selectedValue = selectedCell ? board[selectedCell[0]][selectedCell[1]] : 0;
 
+  const handleShare = async () => {
+    await shareScore({
+      title: 'Bulmaca Kulübü - Sudoku',
+      gameName: 'Sudoku',
+      scoreOrAttempts: `${difficulty.toUpperCase()} | ${formatTime(seconds)} | ${errors} Hata`,
+    });
+  };
+
+  const handleShareWhatsApp = () => {
+    const text = `🧩 Bulmaca Kulübü: Sudoku (${difficulty.toUpperCase()})\n⏱️ Süre: ${formatTime(seconds)}\n❌ Hata: ${errors}\nSen de oyna: https://bulmacakulubu.github.io`;
+    openWhatsAppShare(text);
+  };
+
   return (
-    <div className="w-full max-w-2xl flex flex-col items-center justify-start select-none space-y-3">
+    <div className="w-full max-w-xl flex flex-col items-center justify-start select-none space-y-2 pt-0.5">
       {/* UNIFORM CONTROL BAR */}
-      <div className="w-full flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+      <div className="w-full flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
         {/* LEFT: Difficulty selector */}
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
+        <div className="flex bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {(['easy', 'medium', 'hard'] as SudokuDifficulty[]).map((d) => (
             <button
               key={d}
               onClick={() => startNewGame(d)}
-              className={`px-3 py-1.5 rounded-lg transition font-extrabold ${
+              className={`px-2.5 py-1 rounded-lg transition font-extrabold text-[11px] ${
                 difficulty === d
                   ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -148,62 +252,88 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
           ))}
         </div>
 
-        {/* CENTER: Live Metrics */}
-        <div className="flex items-center gap-2 text-xs font-semibold">
-          <div className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs">
+        {/* CENTER: Timer & Errors */}
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
+          <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs font-mono text-[11px]">
             ⏱ {formatTime(seconds)}
           </div>
-          <div className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-rose-500 font-bold">
-            {isEn ? 'ERRORS' : 'HATA'} {errors}
+          <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px]">
+            {isEn ? 'ERRORS' : 'HATA'}:{' '}
+            <span className={`font-extrabold ${errors > 0 ? 'text-rose-500' : 'text-emerald-500'}`}>
+              {errors}
+            </span>
           </div>
         </div>
 
-        {/* RIGHT: Restart Button (Always in the same top-right spot) */}
-        <button
-          onClick={() => startNewGame(difficulty)}
-          className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs"
-        >
-          <RotateCcw size={13} />
-          <span>{isEn ? 'New Game' : 'Yeni Oyun'}</span>
-        </button>
+        {/* RIGHT: Hint & New Game */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleHint}
+            disabled={!isPlaying}
+            className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
+          >
+            <Lightbulb size={13} />
+            <span>{isEn ? 'Hint' : 'İpucu'}</span>
+          </button>
+
+          <button
+            onClick={() => startNewGame(difficulty)}
+            className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+          >
+            <RotateCcw size={12} />
+            <span>{isEn ? 'New' : 'Yeni'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* COMPACT & RESPONSIVE 9x9 SUDOKU BOARD */}
-      <div className="p-1 sm:p-1.5 rounded-2xl border-2 border-gray-900 dark:border-gray-100 bg-[var(--bg-card)] shadow-md">
-        <div className="grid grid-cols-9 gap-0 border border-gray-300 dark:border-gray-700">
+      {/* SUDOKU BOARD (NYT Style Smart Lighting) */}
+      <div className="p-2 sm:p-3 rounded-2xl border-2 border-gray-400 dark:border-gray-600 bg-[var(--bg-card)] shadow-md">
+        <div className="grid grid-cols-9 border-2 border-gray-800 dark:border-gray-200">
           {board.map((row, r) =>
             row.map((val, c) => {
               const isInitial = initialBoard[r][c] !== 0;
               const isSelected = selectedCell && selectedCell[0] === r && selectedCell[1] === c;
-              const isSameRowOrCol =
-                selectedCell && (selectedCell[0] === r || selectedCell[1] === c);
-              const isSameValue = selectedValue > 0 && val === selectedValue;
-              const isWrong = !isInitial && val !== 0 && val !== solutionBoard[r][c];
+              const isSameRegion =
+                selectedCell &&
+                (selectedCell[0] === r ||
+                  selectedCell[1] === c ||
+                  (Math.floor(selectedCell[0] / 3) === Math.floor(r / 3) &&
+                    Math.floor(selectedCell[1] / 3) === Math.floor(c / 3)));
+              const isSameNumber = selectedValue > 0 && val === selectedValue;
+              const isWrong = val !== 0 && val !== solutionBoard[r][c];
 
-              const borderRight = c % 3 === 2 && c !== 8 ? 'border-r-2 border-r-gray-900 dark:border-r-gray-100' : 'border-r border-r-gray-200 dark:border-r-gray-800';
-              const borderBottom = r % 3 === 2 && r !== 8 ? 'border-b-2 border-b-gray-900 dark:border-b-gray-100' : 'border-b border-b-gray-200 dark:border-b-gray-800';
+              // Block border styling
+              const borderR = c % 3 === 2 && c !== 8 ? 'border-r-2 border-r-gray-800 dark:border-r-gray-200' : 'border-r border-r-gray-200 dark:border-r-gray-700';
+              const borderB = r % 3 === 2 && r !== 8 ? 'border-b-2 border-b-gray-800 dark:border-b-gray-200' : 'border-b border-b-gray-200 dark:border-b-gray-700';
+
+              const cellNotes = notes[r]?.[c] || [];
 
               return (
                 <button
                   key={`${r}-${c}`}
                   onClick={() => setSelectedCell([r, c])}
-                  className={`w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 md:w-9.5 md:h-9.5 flex items-center justify-center font-extrabold text-sm sm:text-base md:text-lg transition-colors ${borderRight} ${borderBottom} ${
+                  className={`w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 flex items-center justify-center font-bold text-sm sm:text-base relative transition-all cursor-pointer ${borderR} ${borderB} ${
                     isSelected
-                      ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] font-black'
-                      : isSameValue
-                      ? 'bg-[var(--accent-light)] text-[var(--accent-color)] font-black'
-                      : isSameRowOrCol
-                      ? 'bg-gray-100/70 dark:bg-gray-800/60'
-                      : 'bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800/30'
-                  } ${
-                    isWrong
-                      ? 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30'
-                      : isInitial
-                      ? 'text-gray-900 dark:text-gray-100 font-black'
-                      : 'text-[var(--accent-color)]'
-                  }`}
+                      ? 'bg-blue-600 text-white z-10 scale-105 shadow-sm'
+                      : isSameNumber
+                      ? 'bg-blue-200/80 dark:bg-blue-900/60 font-black'
+                      : isSameRegion
+                      ? 'bg-blue-50/70 dark:bg-gray-800/60'
+                      : 'bg-transparent'
+                  } ${isWrong ? 'text-rose-600 dark:text-rose-400 font-black' : isInitial ? 'text-gray-900 dark:text-white font-extrabold' : 'text-blue-600 dark:text-blue-400'}`}
                 >
-                  {val !== 0 ? val : ''}
+                  {val !== 0 ? (
+                    val
+                  ) : cellNotes.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-0 w-full h-full p-0.5 text-[8px] sm:text-[9px] font-normal leading-none text-gray-500 dark:text-gray-400">
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                        <span key={n} className="flex items-center justify-center">
+                          {cellNotes.includes(n) ? n : ''}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                 </button>
               );
             })
@@ -211,30 +341,88 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
         </div>
       </div>
 
-      {/* COMPACT NUMBER PAD */}
-      <div className="w-full max-w-md flex flex-col items-center gap-2 pt-1">
-        <div className="grid grid-cols-9 gap-1.5 w-full">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-            <button
-              key={num}
-              onClick={() => handleNumberInput(num)}
-              className="py-1.5 sm:py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-color)] hover:text-[var(--accent-contrast)] font-extrabold text-xs sm:text-sm text-gray-900 dark:text-gray-100 transition shadow-2xs active:scale-95"
-            >
-              {num}
-            </button>
-          ))}
+      {/* Number Pad & Note Toggle (NYT Style) */}
+      <div className="w-full max-w-md flex flex-col items-center gap-1.5 pt-1">
+        {/* Digits 1-9 */}
+        <div className="grid grid-cols-9 gap-1 sm:gap-1.5 w-full">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+            const placedCount = digitCounts[num] || 0;
+            const isCompleted = placedCount >= 9;
+
+            return (
+              <button
+                key={num}
+                onClick={() => handleNumberInput(num)}
+                disabled={!isPlaying || isCompleted}
+                className={`h-10 sm:h-11 rounded-xl border flex flex-col items-center justify-center transition active:scale-95 shadow-2xs cursor-pointer ${
+                  isCompleted
+                    ? 'border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900 text-gray-300 dark:text-gray-700 opacity-40'
+                    : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:border-blue-500'
+                }`}
+              >
+                <span className="font-extrabold text-sm sm:text-base leading-none">{num}</span>
+                <span className="text-[9px] text-gray-400 font-semibold">{9 - placedCount}</span>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="flex items-center justify-between w-full text-xs font-semibold text-gray-400 px-1">
-          <span>{isEn ? 'Keyboard 1-9 & arrow keys supported' : 'Klavyeden 1-9 & ok tuşları desteklenir'}</span>
+        {/* Action Bar (Notes Toggle & Erase) */}
+        <div className="flex items-center justify-center gap-2 pt-1 w-full">
+          <button
+            onClick={() => setIsNotesMode((prev) => !prev)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border shadow-2xs cursor-pointer ${
+              isNotesMode
+                ? 'bg-amber-500 text-white border-amber-600 shadow-sm scale-102'
+                : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <Edit3 size={14} />
+            <span>{isNotesMode ? (isEn ? 'Notes: ON' : 'Not Modu: AÇIK') : (isEn ? 'Notes: OFF' : 'Not Modu (N)')}</span>
+          </button>
+
           <button
             onClick={handleClear}
-            className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/30 transition text-xs font-bold text-gray-600 dark:text-gray-300 shadow-2xs"
+            className="px-4 py-2 bg-[var(--bg-card)] hover:bg-gray-100 dark:hover:bg-gray-800 border border-[var(--border-color)] rounded-xl text-xs font-bold transition shadow-2xs cursor-pointer"
           >
             {isEn ? 'Erase (⌫)' : 'Sil (⌫)'}
           </button>
         </div>
       </div>
+
+      {/* Completion Banner */}
+      {!isPlaying && (
+        <div className="w-full max-w-md p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-center animate-fadeIn shadow-xl mt-1">
+          <div className="text-sm font-black text-emerald-700 dark:text-emerald-300 mb-1">
+            🎉 {isEn ? 'Sudoku Solved!' : 'Tebrikler! Sudoku Çözüldü!'}
+          </div>
+          <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
+            Süre: <b>{formatTime(seconds)}</b> | Hatalar: <b>{errors}</b>
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={handleShare}
+              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Share2 size={13} />
+              <span>Skoru Paylaş</span>
+            </button>
+            <button
+              onClick={handleShareWhatsApp}
+              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <MessageSquare size={13} />
+              <span>WhatsApp</span>
+            </button>
+            <button
+              onClick={() => startNewGame(difficulty)}
+              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+            >
+              Yeni Oyun ➔
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

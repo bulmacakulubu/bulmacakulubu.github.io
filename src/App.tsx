@@ -505,6 +505,7 @@ export default function App() {
               <KelimeTuretme
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
                 onGameEnd={(won, score) => handleGameEnd('kelime-turetme', won, score)}
               />
             )}
@@ -537,6 +538,7 @@ export default function App() {
               <Sudoku
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
                 onGameEnd={(won, time) => handleGameEnd('sudoku', won, time)}
               />
             )}
@@ -544,6 +546,7 @@ export default function App() {
               <KelimeZinciri
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
                 onGameEnd={(won, score) => handleGameEnd('kelime-zinciri', won, score)}
               />
             )}
@@ -551,6 +554,7 @@ export default function App() {
               <HafizaKartlari
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
                 onGameEnd={(won, time) => handleGameEnd('hafiza-kartlari', won, time)}
               />
             )}
@@ -565,6 +569,7 @@ export default function App() {
               <Baglantilar
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
                 onGameEnd={(won, time) => handleGameEnd('baglantilar', won, time)}
               />
             )}
@@ -572,6 +577,7 @@ export default function App() {
               <Nonogram
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
                 onGameEnd={(won, time) => handleGameEnd('nonogram', won, time)}
               />
             )}
