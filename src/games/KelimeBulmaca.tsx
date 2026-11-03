@@ -22,6 +22,8 @@ import {
   Shuffle,
   Shield,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { WORDLE_WORDS_TR, WORDLE_WORDS_EN } from '../data/wordBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
@@ -42,6 +44,8 @@ interface KelimeBulmacaProps {
   multiplayerSession?: MultiplayerSession | null;
   onSendMultiplayerAction?: (msg: MultiplayerMessage) => void;
   incomingMultiplayerMessage?: MultiplayerMessage | null;
+  isZenMode?: boolean;
+  hideStats?: boolean;
 }
 
 export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
@@ -54,9 +58,14 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   multiplayerSession,
   onSendMultiplayerAction,
   incomingMultiplayerMessage,
+  isZenMode = false,
+  hideStats = false,
 }) => {
   const isTr = language === 'tr';
   const isMultiplayer = !!multiplayerSession && multiplayerSession.connected;
+
+  const [showSideDashboards, setShowSideDashboards] = useState(true);
+  const isDashboardVisible = showSideDashboards && !hideStats;
 
   const [wordLength, setWordLength] = useState<5 | 7 | 9>(5);
   const [solution, setSolution] = useState(isTr ? 'KİTAP' : 'APPLE');
@@ -430,7 +439,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       {/* ======================================================== */}
       {/* LEFT DASHBOARD: PROFILE, COMBO & STATS (Option 1 Panel)  */}
       {/* ======================================================== */}
-      <aside className="hidden lg:flex flex-col w-56 lg:w-64 xl:w-72 shrink-0 space-y-2.5 text-xs select-none">
+      {isDashboardVisible && (
+        <aside className="hidden lg:flex flex-col w-56 lg:w-64 xl:w-72 shrink-0 space-y-2.5 text-xs select-none animate-fadeIn">
         {/* Oyuncu Profil Kartı (Arthur Pendelton Style) */}
         <div className="p-3.5 rounded-2xl border-2 border-amber-500/30 bg-[var(--bg-card)] shadow-md relative overflow-hidden group">
           <div className="flex items-center gap-3">
@@ -589,11 +599,12 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           </div>
         </div>
       </aside>
+      )}
 
       {/* ======================================================== */}
       {/* CENTER COLUMN: OPTION 1 GOLD-BEVELED GAME BOARD & TRAY   */}
       {/* ======================================================== */}
-      <div className="flex-1 max-w-xl flex flex-col items-center justify-start select-none space-y-2 pt-0">
+      <div className={`flex-1 ${!isDashboardVisible ? 'max-w-2xl xl:max-w-3xl 2xl:max-w-4xl' : 'max-w-xl'} flex flex-col items-center justify-start select-none space-y-2 pt-0 transition-all duration-300`}>
         {/* 1v1 Multiplayer Opponent Live Bar */}
         {isMultiplayer && (
           <div className="w-full max-w-xl p-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-300 animate-fadeIn">
@@ -646,8 +657,22 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
             </div>
           </div>
 
-          {/* Hint & Restart */}
+          {/* Side Dashboards Toggle, Hint & Restart */}
           <div className="flex items-center gap-1.5">
+            {/* Side Dashboards (Misafir, Kombo, Sıralama) Toggle Button */}
+            <button
+              onClick={() => setShowSideDashboards((p) => !p)}
+              className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] shadow-2xs cursor-pointer ${
+                !isDashboardVisible
+                  ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)]'
+                  : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200'
+              }`}
+              title={isDashboardVisible ? (isTr ? 'Yan Panelleri Gizle (Misafir, Kombo, Sıralama)' : 'Hide Side Panels (Board Focus)') : (isTr ? 'Yan Panelleri Göster (Misafir, Kombo, Sıralama)' : 'Show Side Panels')}
+            >
+              {!isDashboardVisible ? <EyeOff size={12} /> : <Eye size={12} />}
+              <span>{!isDashboardVisible ? (isTr ? 'Odaklanıldı' : 'Focused') : (isTr ? 'Paneller' : 'Panels')}</span>
+            </button>
+
             <button
               onClick={handleRequestHint}
               disabled={gameStatus !== 'playing'}
@@ -676,12 +701,17 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
               const isCompleted = rowIndex < guesses.length;
               const isCurrent = rowIndex === guesses.length;
 
-              const cellSize =
-                wordLength === 9
-                  ? 'w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 md:w-9.5 md:h-9.5 text-xs sm:text-sm'
+              const cellSize = !isDashboardVisible
+                ? wordLength === 9
+                  ? 'w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 lg:w-15 lg:h-15 text-sm sm:text-lg lg:text-xl'
                   : wordLength === 7
-                  ? 'w-8.5 h-8.5 sm:w-10 sm:h-10 md:w-11 md:h-11 text-sm sm:text-base'
-                  : 'w-10 h-10 sm:w-12 sm:h-12 md:w-13 md:h-13 text-base sm:text-2xl';
+                  ? 'w-11 h-11 sm:w-13 sm:h-13 md:w-15 md:h-15 lg:w-17 lg:h-17 text-base sm:text-xl lg:text-2xl'
+                  : 'w-12 h-12 sm:w-15 sm:h-15 md:w-17 md:h-17 lg:w-20 lg:h-20 xl:w-22 xl:h-22 text-xl sm:text-3xl lg:text-4xl xl:text-5xl'
+                : wordLength === 9
+                ? 'w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 md:w-9.5 md:h-9.5 text-xs sm:text-sm'
+                : wordLength === 7
+                ? 'w-8.5 h-8.5 sm:w-10 sm:h-10 md:w-11 md:h-11 text-sm sm:text-base'
+                : 'w-10 h-10 sm:w-12 sm:h-12 md:w-13 md:h-13 text-base sm:text-2xl';
 
               return (
                 <div
@@ -766,7 +796,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         )}
 
         {/* LÜKS KLAVYE TEPSİSİ (Option 1 Tactile Keyboard Tray) */}
-        <div className="w-full max-w-lg p-2 sm:p-2.5 rounded-2xl border border-amber-500/30 bg-zinc-950/80 shadow-xl backdrop-blur-xs space-y-1 sm:space-y-1.5">
+        <div className={`w-full ${!isDashboardVisible ? 'max-w-2xl xl:max-w-3xl' : 'max-w-lg'} p-2 sm:p-2.5 rounded-2xl border border-amber-500/30 bg-zinc-950/80 shadow-xl backdrop-blur-xs space-y-1 sm:space-y-1.5 transition-all duration-300`}>
           {keyboardRows.map((row, rIdx) => (
             <div key={rIdx} className="flex justify-center gap-1 sm:gap-1.5">
               {row.map((key) => {
@@ -776,7 +806,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                   <button
                     key={key}
                     onClick={() => handleKey(key === '⌫' ? 'BACKSPACE' : key)}
-                    className={`h-8 sm:h-9 md:h-10 rounded-xl font-black text-xs sm:text-sm border transition active:scale-95 shadow-xs cursor-pointer ${
+                    className={`h-8 sm:h-9 md:h-10 ${!isDashboardVisible ? 'lg:h-11 xl:h-12 text-xs sm:text-base' : 'text-xs sm:text-sm'} rounded-xl font-black border transition active:scale-95 shadow-xs cursor-pointer ${
                       customStatus
                         ? customStatus
                         : 'bg-zinc-900/90 border-zinc-700/70 text-zinc-100 hover:border-amber-400 hover:text-amber-200'
@@ -798,7 +828,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       {/* ======================================================== */}
       {/* RIGHT DASHBOARD: LIVE RANKINGS, USED LETTERS & TROPHIES   */}
       {/* ======================================================== */}
-      <aside className="hidden lg:flex flex-col w-56 lg:w-64 xl:w-72 shrink-0 space-y-2.5 text-xs select-none">
+      {isDashboardVisible && (
+        <aside className="hidden lg:flex flex-col w-56 lg:w-64 xl:w-72 shrink-0 space-y-2.5 text-xs select-none animate-fadeIn">
         {/* Canlı Liderlik Tablosu (Option 1 Live Rankings) */}
         <div className="p-3 rounded-2xl border-2 border-amber-500/30 bg-[var(--bg-card)] shadow-md">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--border-color)]">
@@ -924,6 +955,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           </button>
         </div>
       </aside>
+      )}
     </div>
   );
 };

@@ -660,6 +660,8 @@ export default function App() {
                 onSendMultiplayerAction={(msg) => multiplayerService.sendMessage(msg)}
                 incomingMultiplayerMessage={incomingMultiplayerMessage}
                 onGameEnd={(won, time) => handleGameEnd('kelime-bulmaca', won, time)}
+                isZenMode={isZenMode}
+                hideStats={hideGameStats}
               />
             )}
             {activeGame === 'kare-bulmaca' && (
