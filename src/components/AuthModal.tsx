@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
-import { X, LogOut, CheckCircle2, Cloud, ShieldCheck, Mail, User, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, LogOut, CheckCircle2, Cloud, ShieldCheck, Mail, User, Sparkles, KeyRound } from 'lucide-react';
 import { UserProfile, AllStats } from '../types';
-import { loginWithGoogleData, signOutUser } from '../utils/auth';
+import { loginWithGoogleData, loginWithGoogleCredential, signOutUser, GOOGLE_AUTH_CONFIG } from '../utils/auth';
+
+declare global {
+  interface Window {
+    google?: any;
+  }
+}
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -20,8 +26,49 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const [customEmail, setCustomEmail] = useState('');
   const [customName, setCustomName] = useState('');
-  const [isCustomMode, setIsCustomMode] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
+
+  const [googleClientId, setGoogleClientId] = useState(() => {
+    return localStorage.getItem('bulmaca_google_client_id') || GOOGLE_AUTH_CONFIG.clientId || '';
+  });
+  const [tempClientId, setTempClientId] = useState(googleClientId);
+  const [showConfigId, setShowConfigId] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || user.provider === 'google') return;
+
+    if (window.google?.accounts?.id && googleClientId) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: (response: any) => {
+            if (response.credential) {
+              const profile = loginWithGoogleCredential(response.credential);
+              if (profile) {
+                onUserChange(profile);
+                setSyncSuccess(true);
+                setTimeout(() => setSyncSuccess(false), 2000);
+              }
+            }
+          },
+        });
+
+        const btnContainer = document.getElementById('google-btn-container');
+        if (btnContainer) {
+          btnContainer.innerHTML = '';
+          window.google.accounts.id.renderButton(btnContainer, {
+            theme: 'outline',
+            size: 'large',
+            width: 320,
+            text: 'signin_with',
+            shape: 'pill',
+          });
+        }
+      } catch (e) {
+        console.warn('Google Sign In init failed', e);
+      }
+    }
+  }, [isOpen, googleClientId, user.provider]);
 
   if (!isOpen) return null;
 
@@ -46,7 +93,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     onUserChange(updated);
     setSyncSuccess(true);
     setTimeout(() => setSyncSuccess(false), 3000);
-    setIsCustomMode(false);
   };
 
   const handleSignOut = () => {
@@ -153,13 +199,63 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-2 shadow-xs">
                   <User size={24} />
                 </div>
-                <h3 className="font-bold text-base text-[var(--text-primary)]">Oyuncu Profilinizi Belirleyin</h3>
+                <h3 className="font-bold text-base text-[var(--text-primary)]">Giriş Yapın veya Profil Oluşturun</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs mx-auto">
-                  Skorlarınızı korumak, liderlik tablosunda yer almak ve 1v1 maçlara katılmak için adınızı girin.
+                  Skorlarınızı korumak, liderlik tablosunda yer almak ve 1v1 maçlara katılmak için profilinizi belirleyin.
                 </p>
               </div>
 
-              <form onSubmit={handleCustomGoogleSubmit} className="space-y-3 pt-1">
+              {/* Official Google Sign-In Container */}
+              <div className="flex flex-col items-center justify-center pt-1 space-y-2">
+                <div id="google-btn-container" className="flex justify-center w-full min-h-[44px]"></div>
+
+                {!googleClientId && (
+                  <div className="w-full text-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowConfigId(!showConfigId)}
+                      className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 font-semibold cursor-pointer"
+                    >
+                      <KeyRound size={12} />
+                      <span>{showConfigId ? 'İptal' : 'Google Client ID Tanımla'}</span>
+                    </button>
+                  </div>
+                )}
+
+                {showConfigId && (
+                  <div className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-[var(--border-color)] text-xs space-y-2 text-left">
+                    <div className="font-bold text-gray-700 dark:text-gray-300">
+                      Google Cloud Web Client ID:
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="123456789-xxx.apps.googleusercontent.com"
+                      value={tempClientId}
+                      onChange={(e) => setTempClientId(e.target.value)}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-xs focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem('bulmaca_google_client_id', tempClientId.trim());
+                        setGoogleClientId(tempClientId.trim());
+                        setShowConfigId(false);
+                      }}
+                      className="w-full py-1.5 rounded-lg bg-blue-600 text-white font-bold text-xs cursor-pointer"
+                    >
+                      Kaydet ve Butonu Göster
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center my-2">
+                <div className="flex-1 border-t border-[var(--border-color)]"></div>
+                <span className="px-2 text-[10px] font-bold text-gray-400 uppercase">veya Oyuncu Adı Belirle</span>
+                <div className="flex-1 border-t border-[var(--border-color)]"></div>
+              </div>
+
+              <form onSubmit={handleCustomGoogleSubmit} className="space-y-3 pt-0">
                 <div>
                   <label className="text-[11px] font-bold text-gray-600 dark:text-gray-300">Oyuncu Adı / Rumuz</label>
                   <input
@@ -183,7 +279,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer mt-2"
+                  className="w-full py-2.5 rounded-xl bg-[var(--accent-color)] hover:opacity-90 text-[var(--accent-contrast)] font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer mt-2"
                 >
                   <CheckCircle2 size={15} />
                   <span>Profili Kaydet ve Oyna</span>

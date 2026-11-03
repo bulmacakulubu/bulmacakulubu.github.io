@@ -66,6 +66,32 @@ export function loginWithGoogleData(userData: { name: string; email: string; ava
   return profile;
 }
 
+export const GOOGLE_AUTH_CONFIG = {
+  // Google Cloud Console'dan alınan Web Client ID
+  // Örn: 1234567890-abcdef.apps.googleusercontent.com
+  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+};
+
+export function loginWithGoogleCredential(credential: string): UserProfile | null {
+  const payload = parseJwt(credential);
+  if (!payload) return null;
+  const name = payload.name || payload.given_name || payload.email?.split('@')[0] || 'Google Oyuncusu';
+  const email = payload.email || '';
+  const avatar = payload.picture || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=2563eb`;
+  
+  const profile: UserProfile = {
+    id: payload.sub ? `g_${payload.sub}` : 'g_' + Math.random().toString(36).substring(2, 9),
+    name,
+    email,
+    avatar,
+    provider: 'google',
+    createdAt: new Date().toISOString(),
+    rating: 1250,
+  };
+  saveUserProfile(profile);
+  return profile;
+}
+
 export function signOutUser(): UserProfile {
   localStorage.removeItem(STORAGE_KEY);
   return DEFAULT_GUEST;
