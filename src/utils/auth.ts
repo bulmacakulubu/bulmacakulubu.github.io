@@ -70,7 +70,7 @@ export const GOOGLE_AUTH_CONFIG = {
   // Google Cloud Console Web Client ID
   clientId:
     import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-    '892768491664-j9gnqqclp2djh7iimce6sk0ph2lr92et.apps.googleusercontent.com',
+    '892768491664-3elskl9kv3483ggbmfjkkp5fdm4nd8ph.apps.googleusercontent.com',
 };
 
 export function loginWithGoogleCredential(credential: string): UserProfile | null {
