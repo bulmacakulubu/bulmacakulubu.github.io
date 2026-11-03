@@ -10,7 +10,7 @@ import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
 import { BUILT_IN_TRACKS, startAmbientMusic, stopAmbientMusic, setAmbientVolume } from './utils/audio';
-import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan } from 'lucide-react';
+import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
 import confetti from 'canvas-confetti';
@@ -140,10 +140,21 @@ export default function App() {
   const [isZenMode, setIsZenMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isSidebarPeeking, setIsSidebarPeeking] = useState(false);
+  const [hideGameStats, setHideGameStats] = useState(false);
 
   const toggleZenMode = () => {
-    setIsZenMode((prev) => !prev);
+    setIsZenMode((prev) => {
+      const next = !prev;
+      if (next) {
+        setHideGameStats(true); // Odak modunda istatistikler ve kalabalık doğrudan gizlenir
+      }
+      return next;
+    });
     setIsSidebarPeeking(false);
+  };
+
+  const toggleHideStats = () => {
+    setHideGameStats((prev) => !prev);
   };
 
   const toggleNativeFullscreen = () => {
@@ -334,6 +345,17 @@ export default function App() {
             </span>
           </div>
           <div className="h-4 w-px border-r border-[var(--border-color)]"></div>
+          <button
+            onClick={toggleHideStats}
+            className={`p-1.5 rounded-lg text-xs transition cursor-pointer ${
+              hideGameStats
+                ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
+                : 'hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+            title={hideGameStats ? (settings.language === 'tr' ? 'Detayları ve İstatistikleri Göster' : 'Show Details') : (settings.language === 'tr' ? 'Detayları Gizle (Tam Odaklanma)' : 'Hide Details')}
+          >
+            {hideGameStats ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+          </button>
           <button
             onClick={toggleNativeFullscreen}
             className={`p-1.5 rounded-lg text-xs transition cursor-pointer ${
@@ -534,29 +556,49 @@ export default function App() {
               )}
             </button>
 
-            <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+            {/* Ticker Stats Group (Togglable) */}
+            {!hideGameStats && (
+              <>
+                <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
 
-            <div className="text-center">
-              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'OYNANAN' : 'PLAYED'}</div>
-              <div className="font-bold text-xs">{currentStats.played}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'BAŞARI' : 'WIN %'}</div>
-              <div className="font-bold text-xs">{winRate}%</div>
-            </div>
-            <div className="text-center">
-              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'SERİ' : 'STREAK'}</div>
-              <div className="font-bold text-xs">{currentStats.streak}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
-              <div className="font-bold text-xs">{bestRecord}</div>
-            </div>
+                <div className="text-center">
+                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'OYNANAN' : 'PLAYED'}</div>
+                  <div className="font-bold text-xs">{currentStats.played}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'BAŞARI' : 'WIN %'}</div>
+                  <div className="font-bold text-xs">{winRate}%</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'SERİ' : 'STREAK'}</div>
+                  <div className="font-bold text-xs">{currentStats.streak}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
+                  <div className="font-bold text-xs">{bestRecord}</div>
+                </div>
+              </>
+            )}
 
             <div className="h-6 w-px border-r hidden sm:block" style={{ borderColor: 'var(--border-color)' }}></div>
 
-            {/* Hibrit Odaklanma Modu (Tiyatro + Tam Ekran) */}
+            {/* Hibrit Odaklanma Modu (Tiyatro + Tam Ekran + İstatistikleri Gizle) */}
             <div className="flex items-center bg-[var(--bg-secondary)] p-0.5 rounded-xl border border-[var(--border-color)]">
+              <button
+                onClick={toggleHideStats}
+                className={`p-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
+                  hideGameStats
+                    ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
+                    : 'hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+                title={hideGameStats ? (settings.language === 'tr' ? 'İstatistikleri Göster' : 'Show Stats') : (settings.language === 'tr' ? 'İstatistikleri Gizle (Sade Görünüm)' : 'Hide Stats')}
+              >
+                {hideGameStats ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                <span className="hidden xl:inline">{hideGameStats ? (settings.language === 'tr' ? 'İstatistikler Gizli' : 'Stats Hidden') : (settings.language === 'tr' ? 'İstatistikleri Gizle' : 'Hide Stats')}</span>
+              </button>
+
+              <div className="h-4 w-px bg-[var(--border-color)] mx-0.5"></div>
+
               <button
                 onClick={toggleZenMode}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
@@ -605,8 +647,8 @@ export default function App() {
         </header>
 
         {/* Game Container (Responsive, Uniform, Clean Scroll) */}
-        <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col items-center justify-start w-full pb-3 sm:pb-4">
-          <div className={`w-full ${isZenMode ? 'max-w-[1720px]' : 'max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px]'} flex flex-col items-center py-0.5 transition-all duration-300`}>
+        <div className={`flex-1 overflow-y-auto ${isZenMode ? 'p-0 sm:p-2' : 'px-2 sm:px-4 py-1.5 sm:py-2'} flex flex-col items-center justify-start w-full pb-3 sm:pb-4`}>
+          <div className={`w-full ${isZenMode ? 'max-w-none w-full px-1 sm:px-6' : 'max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px]'} flex flex-col items-center py-0.5 transition-all duration-300`}>
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
                 language={settings.language}
@@ -667,6 +709,8 @@ export default function App() {
                 multiplayerSession={multiplayerSession}
                 onSendMultiplayerAction={(msg) => multiplayerService.sendMessage(msg)}
                 incomingMultiplayerMessage={incomingMultiplayerMessage}
+                isZenMode={isZenMode}
+                hideStats={hideGameStats}
               />
             )}
             {activeGame === 'sudoku' && (

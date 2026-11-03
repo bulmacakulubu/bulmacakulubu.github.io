@@ -12,6 +12,8 @@ import {
   Lightbulb,
   Award,
   BookOpen,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { MultiplayerSession } from '../types';
 import { MultiplayerMessage } from '../utils/multiplayer';
@@ -25,6 +27,8 @@ interface SatrancProps {
   onSendMultiplayerAction?: (msg: MultiplayerMessage) => void;
   incomingMultiplayerMessage?: MultiplayerMessage | null;
   language?: 'tr' | 'en';
+  isZenMode?: boolean;
+  hideStats?: boolean;
 }
 
 const INITIAL_BOARD = [
@@ -52,6 +56,8 @@ export const Satranc: React.FC<SatrancProps> = ({
   onSendMultiplayerAction,
   incomingMultiplayerMessage,
   language = 'tr',
+  isZenMode = false,
+  hideStats = false,
 }) => {
   const isEn = language === 'en';
   const isOnline = !!multiplayerSession && multiplayerSession.connected;
@@ -64,6 +70,9 @@ export const Satranc: React.FC<SatrancProps> = ({
   const [validMoves, setValidMoves] = useState<Square[]>([]);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [opponentReaction, setOpponentReaction] = useState<string | null>(null);
+  const [showSidePanel, setShowSidePanel] = useState(true);
+
+  const isPanelVisible = showSidePanel && !hideStats;
 
   // ==========================================
   // ACADEMY STATE (Interactive Lessons)
@@ -462,6 +471,20 @@ export const Satranc: React.FC<SatrancProps> = ({
 
         {/* RIGHT: Restart or Academy Hint Button */}
         <div className="flex items-center gap-1.5">
+          {/* Side Panel / History Toggle Button */}
+          <button
+            onClick={() => setShowSidePanel((p) => !p)}
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] shadow-2xs cursor-pointer ${
+              !isPanelVisible
+                ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)]'
+                : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200'
+            }`}
+            title={isPanelVisible ? (isEn ? 'Hide Side Panel (Pure Board Focus)' : 'Paneli Gizle (Yalnızca Tahta)') : (isEn ? 'Show Side Panel' : 'Paneli Göster')}
+          >
+            {!isPanelVisible ? <EyeOff size={12} /> : <Eye size={12} />}
+            <span>{!isPanelVisible ? (isEn ? 'Board Focus' : 'Odaklanıldı') : (isEn ? 'Panel' : 'Panel')}</span>
+          </button>
+
           {mode === 'academy' && (
             <button
               onClick={() => setShowHint((h) => !h)}
@@ -609,7 +632,11 @@ export const Satranc: React.FC<SatrancProps> = ({
                     <div
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
-                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 2xl:w-18 2xl:h-18 flex items-center justify-center cursor-pointer transition relative select-none ${
+                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 ${
+                        !isPanelVisible
+                          ? 'lg:w-16 lg:h-16 xl:w-20 xl:h-20 2xl:w-22 2xl:h-22'
+                          : 'lg:w-14 lg:h-14 xl:w-16 xl:h-16 2xl:w-18 2xl:h-18'
+                      } flex items-center justify-center cursor-pointer transition-all duration-200 relative select-none ${
                         isDark ? 'text-white' : 'text-gray-900'
                       } ${isSelected ? 'ring-3 ring-amber-500 z-10 scale-102 shadow-md' : 'hover:opacity-90'}`}
                       style={{
@@ -637,7 +664,11 @@ export const Satranc: React.FC<SatrancProps> = ({
                       )}
 
                       {/* Chess Piece Symbol */}
-                      <span className="text-2xl sm:text-3xl md:text-3.5xl lg:text-4xl xl:text-4.5xl 2xl:text-5xl leading-none inline-block transform scale-110 z-5 select-none font-chess">
+                      <span className={`text-2xl sm:text-3xl md:text-3.5xl ${
+                        !isPanelVisible
+                          ? 'lg:text-4.5xl xl:text-5.5xl 2xl:text-6xl'
+                          : 'lg:text-4xl xl:text-4.5xl 2xl:text-5xl'
+                      } leading-none inline-block transform scale-110 z-5 select-none font-chess`}>
                         {piece ? PIECE_SYMBOLS[piece] : ''}
                       </span>
                     </div>
@@ -648,76 +679,78 @@ export const Satranc: React.FC<SatrancProps> = ({
           </div>
         </div>
 
-        {/* SIDEBAR: ACADEMY LESSONS LIST OR MOVE HISTORY */}
-        <div
-          className="w-full md:w-64 lg:w-72 xl:w-80 2xl:w-96 border rounded-2xl p-2.5 sm:p-3 flex flex-col shadow-xs max-h-[380px] lg:max-h-[460px] xl:max-h-[540px] 2xl:max-h-[600px] overflow-hidden"
-          style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
-        >
-          {mode === 'academy' ? (
-            <>
-              <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[var(--border-color)]">
-                <h4 className="font-bold text-xs tracking-wider uppercase flex items-center gap-1.5" style={{ color: 'var(--accent-color)' }}>
-                  <Award size={13} className="text-amber-500" />
-                  <span>{isEn ? 'CURRICULUM' : 'DERS LİSTESİ'}</span>
-                </h4>
-                <span className="text-[10px] font-extrabold" style={{ color: 'var(--accent-color)' }}>
-                  {completedLessonIds.length}/{CHESS_LESSONS.length} {isEn ? 'Done' : 'Bitti'}
-                </span>
-              </div>
-
-              <div className="space-y-1 overflow-y-auto flex-1 pr-1">
-                {filteredLessons.map((l) => {
-                  const idx = CHESS_LESSONS.findIndex((item) => item.id === l.id);
-                  const isCurrent = idx === activeLessonIndex;
-                  const isDone = completedLessonIds.includes(l.id);
-
-                  return (
-                    <button
-                      key={l.id}
-                      onClick={() => loadLesson(idx)}
-                      className={`w-full p-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition cursor-pointer border ${
-                        isCurrent
-                          ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                          : isDone
-                          ? 'bg-[var(--bg-card)] text-gray-700 dark:text-gray-300 border-emerald-500/30 hover:border-emerald-500'
-                          : 'bg-[var(--bg-card)] text-gray-600 dark:text-gray-400 border-[var(--border-color)] hover:border-amber-400'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-sm shrink-0">{l.pieceSymbol}</span>
-                        <span className="truncate">{l.title[isEn ? 'en' : 'tr']}</span>
-                      </div>
-                      {isDone && (
-                        <CheckCircle2
-                          size={13}
-                          className={isCurrent ? 'text-white' : 'text-emerald-500 shrink-0'}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <>
-              <h4 className="font-bold text-xs mb-2 border-b border-[var(--border-color)] pb-1.5 flex items-center justify-between" style={{ color: 'var(--accent-color)' }}>
-                <span>{isEn ? 'MOVE HISTORY' : 'HAMLE GEÇMİŞİ'}</span>
-                {isOnline && <span className="text-[10px] text-emerald-500 font-mono">{isEn ? 'P2P Live' : 'P2P Canlı'}</span>}
-              </h4>
-              {moveHistory.length === 0 ? (
-                <p className="text-xs text-gray-400 py-4 text-center">{isEn ? 'No moves yet.' : 'Henüz hamle yapılmadı.'}</p>
-              ) : (
-                <div className="space-y-1 overflow-y-auto flex-1 text-xs font-semibold pr-1">
-                  {moveHistory.map((m, i) => (
-                    <div key={i} className="p-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
-                      {m}
-                    </div>
-                  ))}
+        {/* SIDEBAR: ACADEMY LESSONS LIST OR MOVE HISTORY (Togglable) */}
+        {isPanelVisible && (
+          <div
+            className="w-full md:w-64 lg:w-72 xl:w-80 2xl:w-96 border rounded-2xl p-2.5 sm:p-3 flex flex-col shadow-xs max-h-[380px] lg:max-h-[460px] xl:max-h-[540px] 2xl:max-h-[600px] overflow-hidden animate-fadeIn"
+            style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+          >
+            {mode === 'academy' ? (
+              <>
+                <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[var(--border-color)]">
+                  <h4 className="font-bold text-xs tracking-wider uppercase flex items-center gap-1.5" style={{ color: 'var(--accent-color)' }}>
+                    <Award size={13} className="text-amber-500" />
+                    <span>{isEn ? 'CURRICULUM' : 'DERS LİSTESİ'}</span>
+                  </h4>
+                  <span className="text-[10px] font-extrabold" style={{ color: 'var(--accent-color)' }}>
+                    {completedLessonIds.length}/{CHESS_LESSONS.length} {isEn ? 'Done' : 'Bitti'}
+                  </span>
                 </div>
-              )}
-            </>
-          )}
-        </div>
+
+                <div className="space-y-1 overflow-y-auto flex-1 pr-1">
+                  {filteredLessons.map((l) => {
+                    const idx = CHESS_LESSONS.findIndex((item) => item.id === l.id);
+                    const isCurrent = idx === activeLessonIndex;
+                    const isDone = completedLessonIds.includes(l.id);
+
+                    return (
+                      <button
+                        key={l.id}
+                        onClick={() => loadLesson(idx)}
+                        className={`w-full p-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition cursor-pointer border ${
+                          isCurrent
+                            ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                            : isDone
+                            ? 'bg-[var(--bg-card)] text-gray-700 dark:text-gray-300 border-emerald-500/30 hover:border-emerald-500'
+                            : 'bg-[var(--bg-card)] text-gray-600 dark:text-gray-400 border-[var(--border-color)] hover:border-amber-400'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="text-sm shrink-0">{l.pieceSymbol}</span>
+                          <span className="truncate">{l.title[isEn ? 'en' : 'tr']}</span>
+                        </div>
+                        {isDone && (
+                          <CheckCircle2
+                            size={13}
+                            className={isCurrent ? 'text-white' : 'text-emerald-500 shrink-0'}
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
+                <h4 className="font-bold text-xs mb-2 border-b border-[var(--border-color)] pb-1.5 flex items-center justify-between" style={{ color: 'var(--accent-color)' }}>
+                  <span>{isEn ? 'MOVE HISTORY' : 'HAMLE GEÇMİŞİ'}</span>
+                  {isOnline && <span className="text-[10px] text-emerald-500 font-mono">{isEn ? 'P2P Live' : 'P2P Canlı'}</span>}
+                </h4>
+                {moveHistory.length === 0 ? (
+                  <p className="text-xs text-gray-400 py-4 text-center">{isEn ? 'No moves yet.' : 'Henüz hamle yapılmadı.'}</p>
+                ) : (
+                  <div className="space-y-1 overflow-y-auto flex-1 text-xs font-semibold pr-1">
+                    {moveHistory.map((m, i) => (
+                      <div key={i} className="p-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
+                        {m}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ======================================================== */}
