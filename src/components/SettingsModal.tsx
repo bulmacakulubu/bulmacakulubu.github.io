@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText } from 'lucide-react';
+import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText, Mail } from 'lucide-react';
 import { Settings, AllStats } from '../types';
 import { defaultAllStats } from '../utils/storage';
 import { getAchievements } from '../utils/achievements';
@@ -347,6 +347,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           )}
+
+          {/* Geliştirici ve İletişim Bilgisi */}
+          <div className="pt-3 border-t border-[var(--border-color)] text-center text-xs space-y-1">
+            <p className="text-gray-600 dark:text-gray-300 font-medium">
+              Bu site <span className="font-bold text-[var(--accent-color)]">Hakan Ulu</span> tarafından geliştirilmiştir.
+            </p>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+              <Mail size={13} className="text-blue-500" />
+              <span>İletişim için:</span>
+              <a
+                href="mailto:hknlaauu1@gmail.com"
+                className="font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                hknlaauu1@gmail.com
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
