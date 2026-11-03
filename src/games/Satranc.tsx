@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { RotateCcw, Users, Wifi, Send, Flag } from 'lucide-react';
+import {
+  RotateCcw,
+  Users,
+  Flag,
+  GraduationCap,
+  Sparkles,
+  CheckCircle2,
+  ChevronRight,
+  Lightbulb,
+  Award,
+  BookOpen,
+} from 'lucide-react';
 import { MultiplayerSession } from '../types';
 import { MultiplayerMessage } from '../utils/multiplayer';
+import { CHESS_LESSONS, ChessLesson } from '../data/chessLessons';
+import { getLegalMoves, Square } from '../utils/chessRules';
 
 interface SatrancProps {
   onGameEnd: (won: boolean) => void;
@@ -29,6 +43,8 @@ const PIECE_SYMBOLS: Record<string, string> = {
   R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔', P: '♙',
 };
 
+const COLS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
 export const Satranc: React.FC<SatrancProps> = ({
   onGameEnd,
   soundEnabled,
@@ -41,12 +57,46 @@ export const Satranc: React.FC<SatrancProps> = ({
   const isOnline = !!multiplayerSession && multiplayerSession.connected;
   const myColor: 'white' | 'black' = multiplayerSession?.playerColor || 'white';
 
+  const [mode, setMode] = useState<'ai' | '2p' | 'online' | 'academy'>(isOnline ? 'online' : 'ai');
   const [board, setBoard] = useState<(string | null)[][]>(INITIAL_BOARD);
   const [turn, setTurn] = useState<'white' | 'black'>('white');
-  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
-  const [mode, setMode] = useState<'ai' | '2p' | 'online'>(isOnline ? 'online' : 'ai');
+  const [selectedCell, setSelectedCell] = useState<Square | null>(null);
+  const [validMoves, setValidMoves] = useState<Square[]>([]);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [opponentReaction, setOpponentReaction] = useState<string | null>(null);
+
+  // ==========================================
+  // ACADEMY STATE (Interactive Lessons)
+  // ==========================================
+  const [activeLessonIndex, setActiveLessonIndex] = useState(0);
+  const [completedLessonIds, setCompletedLessonIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('bk_chess_completed_lessons');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [remainingStars, setRemainingStars] = useState<Square[]>([]);
+  const [lessonFinished, setLessonFinished] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [academyCategory, setAcademyCategory] = useState<'all' | 'basics' | 'rules' | 'tactics'>('all');
+
+  const currentLesson: ChessLesson = CHESS_LESSONS[activeLessonIndex] || CHESS_LESSONS[0];
+
+  // Load lesson board when switching lesson or academy mode
+  const loadLesson = (idx: number) => {
+    const lesson = CHESS_LESSONS[idx];
+    if (!lesson) return;
+    setActiveLessonIndex(idx);
+    setBoard(lesson.board.map((row) => [...row]));
+    setRemainingStars(lesson.stars ? [...lesson.stars] : []);
+    setSelectedCell(null);
+    setValidMoves([]);
+    setLessonFinished(false);
+    setShowHint(false);
+    setTurn('white');
+  };
 
   // Sync mode with session
   useEffect(() => {
@@ -54,6 +104,19 @@ export const Satranc: React.FC<SatrancProps> = ({
       setMode('online');
     }
   }, [isOnline]);
+
+  // When switching to academy mode, load the active lesson
+  useEffect(() => {
+    if (mode === 'academy') {
+      loadLesson(activeLessonIndex);
+    } else if (mode !== 'online') {
+      setBoard(INITIAL_BOARD);
+      setSelectedCell(null);
+      setValidMoves([]);
+      setTurn('white');
+      setRemainingStars([]);
+    }
+  }, [mode]);
 
   // Handle incoming remote moves & chats from WebRTC
   useEffect(() => {
@@ -63,7 +126,8 @@ export const Satranc: React.FC<SatrancProps> = ({
       const { from, to, nextTurn, newBoard } = incomingMultiplayerMessage.payload;
       setBoard(newBoard);
       setTurn(nextTurn);
-      setMoveHistory((prev) => [`Rakip: ${from[0]},${from[1]} -> ${to[0]},${to[1]}`, ...prev]);
+      const moveNotation = `${COLS[from[1]]}${8 - from[0]} ➔ ${COLS[to[1]]}${8 - to[0]}`;
+      setMoveHistory((prev) => [`Rakip: ${moveNotation}`, ...prev]);
       if (soundEnabled) playSound('tile');
     } else if (incomingMultiplayerMessage.type === 'CHAT') {
       setOpponentReaction(incomingMultiplayerMessage.payload?.text || '👏');
@@ -74,31 +138,127 @@ export const Satranc: React.FC<SatrancProps> = ({
     }
   }, [incomingMultiplayerMessage, soundEnabled, multiplayerSession, onGameEnd]);
 
+  // Save completed lessons to localStorage
+  const markLessonComplete = (lessonId: string) => {
+    setLessonFinished(true);
+    if (!completedLessonIds.includes(lessonId)) {
+      const next = [...completedLessonIds, lessonId];
+      setCompletedLessonIds(next);
+      try {
+        localStorage.setItem('bk_chess_completed_lessons', JSON.stringify(next));
+      } catch {}
+    }
+    if (soundEnabled) playSound('win');
+    confetti({ particleCount: 90, spread: 70 });
+  };
+
+  // Move handling
   const handleCellClick = (r: number, c: number) => {
-    // If online mode, verify it's my turn
+    // In online mode, verify it's my turn
     if (isOnline && turn !== myColor) {
       return;
     }
 
     const piece = board[r][c];
 
+    // If a cell was already selected
     if (selectedCell) {
       const [sr, sc] = selectedCell;
+
+      // Clicked on the same cell -> deselect
       if (sr === r && sc === c) {
         setSelectedCell(null);
+        setValidMoves([]);
         return;
       }
 
+      // Check if clicked cell is among valid moves
+      const isValid = validMoves.some(([vr, vc]) => vr === r && vc === c);
+
+      // In academy mode, only valid moves are allowed
+      if (mode === 'academy' && !isValid) {
+        // If clicked on another of user's own white pieces, switch selection
+        if (piece && piece === piece.toUpperCase()) {
+          setSelectedCell([r, c]);
+          setValidMoves(getLegalMoves(board, r, c));
+          if (soundEnabled) playSound('click');
+        } else {
+          if (soundEnabled) playSound('error');
+        }
+        return;
+      }
+
+      // Execute move
+      const movingPiece = board[sr][sc];
       const newBoard = board.map((row) => [...row]);
-      newBoard[r][c] = newBoard[sr][sc];
+      newBoard[r][c] = movingPiece;
       newBoard[sr][sc] = null;
+
+      // Special Move: White pawn promotion (rank 0)
+      if (movingPiece === 'P' && r === 0) {
+        newBoard[r][c] = 'Q';
+      }
+      // Special Move: Black pawn promotion (rank 7)
+      if (movingPiece === 'p' && r === 7) {
+        newBoard[r][c] = 'q';
+      }
+
+      // Special Move: Castling king move from e1 to g1 (short castle)
+      if (movingPiece === 'K' && sr === 7 && sc === 4 && r === 7 && c === 6) {
+        newBoard[7][5] = 'R';
+        newBoard[7][7] = null;
+      }
 
       if (soundEnabled) playSound('tile');
       setBoard(newBoard);
       setSelectedCell(null);
+      setValidMoves([]);
+
+      // ==========================================
+      // ACADEMY GOAL CHECKING
+      // ==========================================
+      if (mode === 'academy') {
+        let starsLeft = remainingStars;
+
+        // Check star collection
+        const hitStar = remainingStars.some(([strR, strC]) => strR === r && strC === c);
+        if (hitStar) {
+          starsLeft = remainingStars.filter(([strR, strC]) => !(strR === r && strC === c));
+          setRemainingStars(starsLeft);
+          if (soundEnabled) playSound('success');
+        }
+
+        // Check if lesson requires target move
+        if (currentLesson.targetMove) {
+          const matchTarget =
+            sr === currentLesson.targetMove.from[0] &&
+            sc === currentLesson.targetMove.from[1] &&
+            r === currentLesson.targetMove.to[0] &&
+            c === currentLesson.targetMove.to[1];
+
+          if (matchTarget) {
+            markLessonComplete(currentLesson.id);
+            return;
+          }
+        }
+
+        // Check if all stars are collected
+        if (currentLesson.stars && currentLesson.stars.length > 0 && starsLeft.length === 0) {
+          markLessonComplete(currentLesson.id);
+          return;
+        }
+
+        return;
+      }
+
+      // ==========================================
+      // STANDARD / ONLINE MODE
+      // ==========================================
       const nextTurn = turn === 'white' ? 'black' : 'white';
       setTurn(nextTurn);
-      setMoveHistory([`Sen: ${sr},${sc} -> ${r},${c}`, ...moveHistory]);
+      const pieceName = PIECE_SYMBOLS[movingPiece || ''] || '';
+      const moveStr = `${turn === 'white' ? 'Beyaz' : 'Siyah'}: ${pieceName} ${COLS[sc]}${8 - sr} ➔ ${COLS[c]}${8 - r}`;
+      setMoveHistory([moveStr, ...moveHistory]);
 
       // If online, broadcast move to opponent
       if (isOnline && onSendMultiplayerAction) {
@@ -113,12 +273,26 @@ export const Satranc: React.FC<SatrancProps> = ({
         });
       }
 
+      // If AI mode and it's AI turn (black)
       if (mode === 'ai' && nextTurn === 'black') {
         setTimeout(() => makeAIMove(newBoard), 600);
       }
     } else {
+      // Cell selection
       if (piece) {
         const isWhitePiece = piece === piece.toUpperCase();
+
+        if (mode === 'academy') {
+          // In academy, user plays white pieces
+          if (isWhitePiece) {
+            if (soundEnabled) playSound('click');
+            setSelectedCell([r, c]);
+            const moves = getLegalMoves(board, r, c);
+            setValidMoves(moves);
+          }
+          return;
+        }
+
         // In online mode, you can only pick pieces of your color
         if (isOnline) {
           if ((myColor === 'white' && !isWhitePiece) || (myColor === 'black' && isWhitePiece)) {
@@ -129,6 +303,8 @@ export const Satranc: React.FC<SatrancProps> = ({
         if ((turn === 'white' && isWhitePiece) || (turn === 'black' && !isWhitePiece)) {
           if (soundEnabled) playSound('click');
           setSelectedCell([r, c]);
+          const moves = getLegalMoves(board, r, c);
+          setValidMoves(moves);
         }
       }
     }
@@ -136,31 +312,47 @@ export const Satranc: React.FC<SatrancProps> = ({
 
   const makeAIMove = (currentBoard: (string | null)[][]) => {
     const newBoard = currentBoard.map((row) => [...row]);
-    const blackPieces: [number, number][] = [];
+    const blackPieces: Square[] = [];
     newBoard.forEach((row, r) => {
       row.forEach((p, c) => {
         if (p && p === p.toLowerCase()) blackPieces.push([r, c]);
       });
     });
 
-    if (blackPieces.length > 0) {
-      const [fr, fc] = blackPieces[Math.floor(Math.random() * blackPieces.length)];
-      const tr = fr + 1 <= 7 ? fr + 1 : fr - 1;
-      const tc = fc;
-      newBoard[tr][tc] = newBoard[fr][fc];
-      newBoard[fr][fc] = null;
-      if (soundEnabled) playSound('tile');
-      setBoard(newBoard);
-      setTurn('white');
-      setMoveHistory((prev) => [`AI: ${fr},${fc} -> ${tr},${tc}`, ...prev]);
+    if (blackPieces.length === 0) return;
+
+    // Pick a black piece that has legal moves
+    const shuffled = [...blackPieces].sort(() => Math.random() - 0.5);
+    for (const [fr, fc] of shuffled) {
+      const legal = getLegalMoves(newBoard, fr, fc);
+      if (legal.length > 0) {
+        const [tr, tc] = legal[Math.floor(Math.random() * legal.length)];
+        const moving = newBoard[fr][fc];
+        newBoard[tr][tc] = moving;
+        newBoard[fr][fc] = null;
+        if (moving === 'p' && tr === 7) {
+          newBoard[tr][tc] = 'q'; // Promotion
+        }
+        if (soundEnabled) playSound('tile');
+        setBoard(newBoard);
+        setTurn('white');
+        const notation = `AI: ${PIECE_SYMBOLS[moving || '']} ${COLS[fc]}${8 - fr} ➔ ${COLS[tc]}${8 - tr}`;
+        setMoveHistory((prev) => [notation, ...prev]);
+        return;
+      }
     }
   };
 
   const resetGame = () => {
-    setBoard(INITIAL_BOARD);
-    setTurn('white');
-    setSelectedCell(null);
-    setMoveHistory([]);
+    if (mode === 'academy') {
+      loadLesson(activeLessonIndex);
+    } else {
+      setBoard(INITIAL_BOARD);
+      setTurn('white');
+      setSelectedCell(null);
+      setValidMoves([]);
+      setMoveHistory([]);
+    }
   };
 
   const sendReaction = (emoji: string) => {
@@ -181,17 +373,21 @@ export const Satranc: React.FC<SatrancProps> = ({
     }
   };
 
+  const filteredLessons = CHESS_LESSONS.filter((l) =>
+    academyCategory === 'all' ? true : l.category === academyCategory
+  );
+
   return (
-    <div className="w-full max-w-3xl sm:max-w-4xl flex flex-col items-center justify-start select-none space-y-3 pt-1">
+    <div className="w-full max-w-4xl flex flex-col items-center justify-start select-none space-y-2.5 pt-0.5">
       {/* UNIFORM CONTROL BAR */}
-      <div className="w-full flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+      <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 pb-1.5 border-b border-[var(--border-color)]">
         {/* LEFT: Game Mode Selector */}
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
+        <div className="flex flex-wrap items-center bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {!isOnline ? (
             <>
               <button
-                onClick={() => { setMode('ai'); resetGame(); }}
-                className={`px-3 py-1.5 rounded-lg transition font-extrabold ${
+                onClick={() => setMode('ai')}
+                className={`px-2.5 py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
                   mode === 'ai'
                     ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -200,8 +396,8 @@ export const Satranc: React.FC<SatrancProps> = ({
                 {isEn ? 'Computer' : 'Bilgisayar'}
               </button>
               <button
-                onClick={() => { setMode('2p'); resetGame(); }}
-                className={`px-3 py-1.5 rounded-lg transition font-extrabold ${
+                onClick={() => setMode('2p')}
+                className={`px-2.5 py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
                   mode === '2p'
                     ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -209,54 +405,98 @@ export const Satranc: React.FC<SatrancProps> = ({
               >
                 {isEn ? '2 Players' : '2 Kişi'}
               </button>
+              <button
+                onClick={() => setMode('academy')}
+                className={`px-3 py-1 rounded-lg transition font-extrabold text-[11px] flex items-center gap-1 cursor-pointer ${
+                  mode === 'academy'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'text-amber-600 dark:text-amber-400 hover:bg-amber-500/10'
+                }`}
+              >
+                <GraduationCap size={13} />
+                <span>{isEn ? 'Academy' : 'Akademi'}</span>
+                <span className="text-[9px] bg-amber-500/30 px-1 rounded-full font-black">
+                  {completedLessonIds.length}/{CHESS_LESSONS.length}
+                </span>
+              </button>
             </>
           ) : (
-            <div className="flex items-center gap-2 px-3 py-1.5 text-purple-600 dark:text-purple-400 font-bold">
+            <div className="flex items-center gap-2 px-3 py-1 text-purple-600 dark:text-purple-400 font-bold text-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>{isEn ? '1v1 Live Room:' : '1v1 Canlı Oda:'} {multiplayerSession?.roomCode}</span>
             </div>
           )}
         </div>
 
-        {/* CENTER: Live Turn Status */}
-        <div className="flex items-center gap-2 text-xs font-semibold">
-          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
-            {isEn ? 'TURN' : 'SIRA'}{' '}
-            <span className="font-extrabold text-[var(--accent-color)] ml-1">
-              {turn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah')}
-              {isOnline && (turn === myColor ? (isEn ? ' (Your Turn!)' : ' (Senin Sıran!)') : (isEn ? ' (Opponent...)' : ' (Rakip...)'))}
-            </span>
-          </div>
-          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
-            {isEn ? 'MOVES' : 'HAMLE'} <span className="font-extrabold text-[var(--accent-color)]">{moveHistory.length}</span>
-          </div>
+        {/* CENTER: Live Turn Status / Academy Metric */}
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
+          {mode === 'academy' ? (
+            <>
+              <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px] flex items-center gap-1">
+                <BookOpen size={12} className="text-amber-500" />
+                <span>{isEn ? 'LESSON' : 'DERS'}</span>
+                <span className="font-extrabold text-[var(--accent-color)]">{activeLessonIndex + 1}/{CHESS_LESSONS.length}</span>
+              </div>
+              {remainingStars.length > 0 && (
+                <div className="px-2.5 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/30 shadow-2xs text-[11px] flex items-center gap-1 font-bold animate-pulse">
+                  <span>⭐</span>
+                  <span>{remainingStars.length} {isEn ? 'Left' : 'Kaldı'}</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px]">
+                {isEn ? 'TURN' : 'SIRA'}{' '}
+                <span className="font-extrabold text-[var(--accent-color)] ml-1">
+                  {turn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah')}
+                  {isOnline && (turn === myColor ? (isEn ? ' (Your Turn!)' : ' (Senin Sıran!)') : (isEn ? ' (Opponent...)' : ' (Rakip...)'))}
+                </span>
+              </div>
+              <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px]">
+                {isEn ? 'MOVES' : 'HAMLE'} <span className="font-extrabold text-[var(--accent-color)]">{moveHistory.length}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* RIGHT: Restart or Surrender Button */}
-        {!isOnline ? (
-          <button
-            onClick={resetGame}
-            className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs"
-          >
-            <RotateCcw size={13} />
-            <span>{isEn ? 'New Game' : 'Yeni Oyun'}</span>
-          </button>
-        ) : (
-          <button
-            onClick={handleSurrender}
-            className="px-3.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-red-500/20 shadow-2xs"
-          >
-            <Flag size={13} />
-            <span>{isEn ? 'Resign' : 'Terk Et'}</span>
-          </button>
-        )}
+        {/* RIGHT: Restart or Academy Hint Button */}
+        <div className="flex items-center gap-1.5">
+          {mode === 'academy' && (
+            <button
+              onClick={() => setShowHint((h) => !h)}
+              className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+            >
+              <Lightbulb size={12} />
+              <span>{isEn ? 'Hint' : 'İpucu'}</span>
+            </button>
+          )}
+
+          {!isOnline ? (
+            <button
+              onClick={resetGame}
+              className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+            >
+              <RotateCcw size={12} />
+              <span>{isEn ? 'Reset' : 'Sıfırla'}</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleSurrender}
+              className="px-2.5 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-red-500/20 shadow-2xs cursor-pointer"
+            >
+              <Flag size={12} />
+              <span>{isEn ? 'Resign' : 'Terk Et'}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Online Opponent Banner */}
       {isOnline && (
-        <div className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs">
+        <div className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs">
           <div className="flex items-center gap-2">
-            <Users size={16} className="text-purple-600 dark:text-purple-400" />
+            <Users size={15} className="text-purple-600 dark:text-purple-400" />
             <span className="font-bold">{isEn ? 'Opponent:' : 'Rakip:'} {multiplayerSession?.opponentName}</span>
             <span className="text-[10px] text-gray-500">
               ({myColor === 'white'
@@ -267,12 +507,11 @@ export const Satranc: React.FC<SatrancProps> = ({
 
           {/* Quick Reaction Emojis */}
           <div className="flex items-center gap-1">
-            <span className="text-[10px] text-gray-400 mr-1">{isEn ? 'Reaction:' : 'Tepki:'}</span>
             {['🔥', '👏', '😱', '😎'].map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => sendReaction(emoji)}
-                className="w-6 h-6 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 flex items-center justify-center transition text-xs"
+                className="w-6 h-6 rounded-lg hover:bg-white/50 dark:hover:bg-gray-700 flex items-center justify-center transition text-xs cursor-pointer"
               >
                 {emoji}
               </button>
@@ -289,24 +528,111 @@ export const Satranc: React.FC<SatrancProps> = ({
         </div>
       )}
 
-      <div className="w-full flex flex-col sm:flex-row gap-4 items-center sm:items-start justify-center">
-        <div className="flex-1 flex justify-center items-center">
-          {/* Expanded Chessboard */}
-          <div className="border-4 sm:border-6 border-amber-900/40 rounded-3xl overflow-hidden shadow-lg bg-amber-100 inline-block">
+      {/* ======================================================== */}
+      {/* ACADEMY INTERACTIVE LESSON CARD HEADER                   */}
+      {/* ======================================================== */}
+      {mode === 'academy' && (
+        <div className="w-full bg-[var(--bg-card)] border border-[var(--border-color)] rounded-2xl p-3 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[var(--border-color)] pb-2 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl leading-none">{currentLesson.pieceSymbol}</span>
+              <div>
+                <h3 className="text-sm font-extrabold flex items-center gap-1.5">
+                  <span>{currentLesson.title[isEn ? 'en' : 'tr']}</span>
+                  {completedLessonIds.includes(currentLesson.id) && (
+                    <CheckCircle2 size={14} className="text-emerald-500" />
+                  )}
+                </h3>
+                <p className="text-[11px] text-gray-500">
+                  {currentLesson.categoryTitle[isEn ? 'en' : 'tr']}
+                </p>
+              </div>
+            </div>
+
+            {/* Category Filter Pills */}
+            <div className="flex items-center gap-1 text-[10px] font-bold">
+              {[
+                { id: 'all', label: isEn ? 'All' : 'Tümü' },
+                { id: 'basics', label: isEn ? 'Moves' : '1. Taşlar' },
+                { id: 'rules', label: isEn ? 'Rules' : '2. Kurallar' },
+                { id: 'tactics', label: isEn ? 'Tactics' : '3. Matlar' },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setAcademyCategory(cat.id as any)}
+                  className={`px-2 py-0.5 rounded-lg border transition cursor-pointer ${
+                    academyCategory === cat.id
+                      ? 'bg-amber-600 text-white border-amber-600'
+                      : 'border-[var(--border-color)] text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="text-xs text-gray-700 dark:text-gray-300 mb-1 leading-relaxed">
+            {currentLesson.description[isEn ? 'en' : 'tr']}
+          </div>
+
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-2 text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2">
+            <Sparkles size={14} className="text-amber-500 shrink-0" />
+            <span>🎯 {currentLesson.instruction[isEn ? 'en' : 'tr']}</span>
+          </div>
+
+          {showHint && (
+            <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/30 rounded-xl text-[11px] text-blue-600 dark:text-blue-300 flex items-start gap-1.5 animate-fadeIn">
+              <Lightbulb size={13} className="shrink-0 mt-0.5" />
+              <span>{currentLesson.hint[isEn ? 'en' : 'tr']}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* MAIN PLAYING AREA & SIDEBAR                              */}
+      {/* ======================================================== */}
+      <div className="w-full flex flex-col md:flex-row gap-3 items-center md:items-start justify-center">
+        {/* CHESSBOARD */}
+        <div className="flex flex-col items-center justify-center">
+          <div className="border-4 sm:border-5 border-amber-950/40 rounded-3xl overflow-hidden shadow-xl bg-amber-100 inline-block relative">
             <div className="grid grid-cols-8">
               {board.map((row, r) =>
                 row.map((piece, c) => {
                   const isDark = (r + c) % 2 === 1;
                   const isSelected = selectedCell && selectedCell[0] === r && selectedCell[1] === c;
+                  const isValidTarget = validMoves.some(([vr, vc]) => vr === r && vc === c);
+                  const hasStar = remainingStars.some(([sr, sc]) => sr === r && sc === c);
+
                   return (
                     <div
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
-                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 lg:w-14 lg:h-14 flex items-center justify-center cursor-pointer transition select-none ${
+                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-13.5 lg:h-13.5 flex items-center justify-center cursor-pointer transition relative select-none ${
                         isDark ? 'bg-[#b58863] text-white' : 'bg-[#f0d9b5] text-gray-900'
-                      } ${isSelected ? 'ring-4 ring-[var(--accent-color)] z-10 scale-105 shadow-md' : 'hover:opacity-90'}`}
+                      } ${isSelected ? 'ring-3 ring-amber-500 z-10 scale-102 shadow-md' : 'hover:opacity-90'}`}
                     >
-                      <span className="text-2xl sm:text-3xl md:text-4xl leading-none inline-block transform scale-110">
+                      {/* Legal Move Glow Dot */}
+                      {isValidTarget && (
+                        <div
+                          className={`absolute z-10 rounded-full transition-all ${
+                            piece
+                              ? 'w-7 h-7 sm:w-9 sm:h-9 border-3 border-emerald-500 bg-emerald-500/20'
+                              : 'w-3 h-3 sm:w-3.5 sm:h-3.5 bg-emerald-600/75 dark:bg-emerald-400/80 shadow-xs'
+                          }`}
+                        />
+                      )}
+
+                      {/* Golden Star for Academy Target */}
+                      {hasStar && (
+                        <span className="absolute z-10 text-base sm:text-xl md:text-2xl animate-bounce drop-shadow-md">
+                          ⭐
+                        </span>
+                      )}
+
+                      {/* Chess Piece Symbol */}
+                      <span className="text-2xl sm:text-3xl md:text-3.5xl leading-none inline-block transform scale-110 z-5">
                         {piece ? PIECE_SYMBOLS[piece] : ''}
                       </span>
                     </div>
@@ -317,25 +643,108 @@ export const Satranc: React.FC<SatrancProps> = ({
           </div>
         </div>
 
-        {/* Move History sidebar */}
-        <div className="w-full sm:w-64 md:w-72 h-56 sm:h-[350px] md:h-[400px] border border-gray-200 dark:border-gray-800 rounded-3xl p-3 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col shadow-xs">
-          <h4 className="font-bold text-xs mb-2 border-b border-gray-200 dark:border-gray-800 pb-1.5 flex items-center justify-between">
-            <span>{isEn ? 'MOVE HISTORY' : 'HAMLE GEÇMİŞİ'}</span>
-            {isOnline && <span className="text-[10px] text-emerald-500 font-mono">{isEn ? 'P2P Live' : 'P2P Canlı'}</span>}
-          </h4>
-          {moveHistory.length === 0 ? (
-            <p className="text-xs text-gray-400 py-4 text-center">{isEn ? 'No moves yet.' : 'Henüz hamle yapılmadı.'}</p>
+        {/* SIDEBAR: ACADEMY LESSONS LIST OR MOVE HISTORY */}
+        <div className="w-full md:w-64 lg:w-72 border border-[var(--border-color)] rounded-2xl p-2.5 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col shadow-xs max-h-[380px] overflow-hidden">
+          {mode === 'academy' ? (
+            <>
+              <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[var(--border-color)]">
+                <h4 className="font-bold text-xs tracking-wider uppercase text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
+                  <Award size={13} className="text-amber-500" />
+                  <span>{isEn ? 'CURRICULUM' : 'DERS LİSTESİ'}</span>
+                </h4>
+                <span className="text-[10px] font-extrabold text-amber-600 dark:text-amber-400">
+                  {completedLessonIds.length}/{CHESS_LESSONS.length} {isEn ? 'Done' : 'Bitti'}
+                </span>
+              </div>
+
+              <div className="space-y-1 overflow-y-auto flex-1 pr-1">
+                {filteredLessons.map((l) => {
+                  const idx = CHESS_LESSONS.findIndex((item) => item.id === l.id);
+                  const isCurrent = idx === activeLessonIndex;
+                  const isDone = completedLessonIds.includes(l.id);
+
+                  return (
+                    <button
+                      key={l.id}
+                      onClick={() => loadLesson(idx)}
+                      className={`w-full p-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition cursor-pointer border ${
+                        isCurrent
+                          ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
+                          : isDone
+                          ? 'bg-[var(--bg-card)] text-gray-700 dark:text-gray-300 border-emerald-500/30 hover:border-emerald-500'
+                          : 'bg-[var(--bg-card)] text-gray-600 dark:text-gray-400 border-[var(--border-color)] hover:border-amber-400'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="text-sm shrink-0">{l.pieceSymbol}</span>
+                        <span className="truncate">{l.title[isEn ? 'en' : 'tr']}</span>
+                      </div>
+                      {isDone && (
+                        <CheckCircle2
+                          size={13}
+                          className={isCurrent ? 'text-white' : 'text-emerald-500 shrink-0'}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           ) : (
-            <div className="space-y-1.5 overflow-y-auto flex-1 text-xs font-semibold pr-1">
-              {moveHistory.map((m, i) => (
-                <div key={i} className="p-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-100 dark:border-gray-800 shadow-2xs">
-                  {m}
+            <>
+              <h4 className="font-bold text-xs mb-2 border-b border-[var(--border-color)] pb-1.5 flex items-center justify-between">
+                <span>{isEn ? 'MOVE HISTORY' : 'HAMLE GEÇMİŞİ'}</span>
+                {isOnline && <span className="text-[10px] text-emerald-500 font-mono">{isEn ? 'P2P Live' : 'P2P Canlı'}</span>}
+              </h4>
+              {moveHistory.length === 0 ? (
+                <p className="text-xs text-gray-400 py-4 text-center">{isEn ? 'No moves yet.' : 'Henüz hamle yapılmadı.'}</p>
+              ) : (
+                <div className="space-y-1 overflow-y-auto flex-1 text-xs font-semibold pr-1">
+                  {moveHistory.map((m, i) => (
+                    <div key={i} className="p-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
+                      {m}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>
+
+      {/* ======================================================== */}
+      {/* ACADEMY VICTORY / LESSON COMPLETE MODAL CARD             */}
+      {/* ======================================================== */}
+      {mode === 'academy' && lessonFinished && (
+        <div className="w-full max-w-md p-3.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-center shadow-lg animate-fadeIn mt-1">
+          <div className="text-sm font-black text-emerald-700 dark:text-emerald-300 mb-1 flex items-center justify-center gap-1.5">
+            <CheckCircle2 size={16} className="text-emerald-500" />
+            <span>{isEn ? 'Lesson Completed! 🎉' : 'Ders Başarıyla Tamamlandı! 🎉'}</span>
+          </div>
+          <div className="text-xs text-gray-700 dark:text-gray-300 mb-2 leading-relaxed">
+            {currentLesson.explanation[isEn ? 'en' : 'tr']}
+          </div>
+
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => resetGame()}
+              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition border border-[var(--border-color)] cursor-pointer"
+            >
+              {isEn ? 'Try Again' : 'Tekrar Oyna'}
+            </button>
+
+            {activeLessonIndex < CHESS_LESSONS.length - 1 && (
+              <button
+                onClick={() => loadLesson(activeLessonIndex + 1)}
+                className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1 cursor-pointer"
+              >
+                <span>{isEn ? 'Next Lesson' : 'Sıradaki Ders'}</span>
+                <ChevronRight size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
