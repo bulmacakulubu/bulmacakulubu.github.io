@@ -585,7 +585,7 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
   };
 
   return (
-    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 relative max-w-2xl sm:max-w-3xl">
+    <div className="w-full flex flex-col items-center justify-start select-none pt-1 sm:pt-2 pb-2 relative max-w-2xl sm:max-w-3xl space-y-2.5 sm:space-y-3.5">
       {/* Toast feedback */}
       {toastMessage && (
         <div className="absolute -top-3 z-30 px-4 py-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">

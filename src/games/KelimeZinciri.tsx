@@ -197,7 +197,7 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
   };
 
   return (
-    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 max-w-xl sm:max-w-2xl">
+    <div className="w-full flex flex-col items-center justify-start select-none pt-1 sm:pt-2 pb-2 max-w-xl sm:max-w-2xl space-y-2 sm:space-y-3">
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
         {/* LEFT: Mode */}
