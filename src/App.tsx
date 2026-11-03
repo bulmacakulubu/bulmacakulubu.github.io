@@ -10,12 +10,13 @@ import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
 import { BUILT_IN_TRACKS, startAmbientMusic, stopAmbientMusic, setAmbientVolume } from './utils/audio';
-import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown } from 'lucide-react';
+import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
 import confetti from 'canvas-confetti';
 import { AdSenseBanner } from './components/AdSenseBanner';
 import { RemoveAdsModal } from './components/RemoveAdsModal';
+import { LegalModal } from './components/LegalModal';
 
 import { KelimeBulmaca } from './games/KelimeBulmaca';
 import { KelimeTuretme } from './games/KelimeTuretme';
@@ -94,6 +95,7 @@ export default function App() {
   });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isRemoveAdsOpen, setIsRemoveAdsOpen] = useState(false);
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
 
   // Multiplayer state
   const [isMultiplayerOpen, setIsMultiplayerOpen] = useState(false);
@@ -429,6 +431,27 @@ export default function App() {
               <div className="text-[9px] text-gray-400 uppercase tracking-wider">{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
               <div className="font-bold text-xs">{bestRecord}</div>
             </div>
+
+            <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+
+            {/* Direct Settings Button */}
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] text-gray-600 dark:text-gray-300 transition text-xs shadow-2xs cursor-pointer flex items-center justify-center shrink-0"
+              title={settings.language === 'tr' ? 'Oyun Ayarları' : 'Settings'}
+            >
+              <SettingsIcon size={15} />
+            </button>
+
+            {/* Legal / KVKK Policy Button */}
+            <button
+              onClick={() => setIsLegalModalOpen(true)}
+              className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] text-gray-500 dark:text-gray-400 transition text-[11px] font-medium shadow-2xs cursor-pointer shrink-0"
+              title={settings.language === 'tr' ? 'Gizlilik & KVKK Politikası' : 'Privacy & Terms'}
+            >
+              <FileText size={13} />
+              <span className="hidden xl:inline">{settings.language === 'tr' ? 'KVKK / Gizlilik' : 'Legal'}</span>
+            </button>
           </div>
         </header>
 
@@ -538,6 +561,7 @@ export default function App() {
           localStorage.removeItem('bulmaca_kulubu_stats_v1');
           setStats(loadStats());
         }}
+        onOpenLegal={() => setIsLegalModalOpen(true)}
       />
 
       {/* Google Auth & User Profile Modal */}
@@ -598,6 +622,13 @@ export default function App() {
           setCurrentUser(updated);
           saveUserProfile(updated);
         }}
+        language={settings.language}
+      />
+
+      {/* KVKK / GDPR & Legal Privacy Modal */}
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        onClose={() => setIsLegalModalOpen(false)}
         language={settings.language}
       />
     </div>

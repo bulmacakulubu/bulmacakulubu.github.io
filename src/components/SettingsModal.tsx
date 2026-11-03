@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX } from 'lucide-react';
+import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText } from 'lucide-react';
 import { Settings, AllStats } from '../types';
 import { defaultAllStats } from '../utils/storage';
 import { getAchievements } from '../utils/achievements';
@@ -11,6 +11,7 @@ interface SettingsModalProps {
   onUpdateSettings: (newSettings: Settings) => void;
   stats: AllStats;
   onResetStats: () => void;
+  onOpenLegal?: () => void;
 }
 
 const GAME_NAMES: Record<string, string> = {
@@ -35,6 +36,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateSettings,
   stats,
   onResetStats,
+  onOpenLegal,
 }) => {
   if (!isOpen) return null;
 
@@ -323,6 +325,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Yasal Bilgilendirme ve KVKK */}
+          {onOpenLegal && (
+            <div className="pt-2 border-t border-gray-100 dark:border-gray-800">
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenLegal();
+                }}
+                className="w-full py-2.5 rounded-xl border border-[var(--border-color)] hover:bg-gray-50 dark:hover:bg-gray-800 text-xs font-bold text-gray-600 dark:text-gray-300 transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs"
+              >
+                <FileText size={14} className="text-blue-500" />
+                <span>Kullanıcı Sözleşmesi, KVKK ve Gizlilik Politikası</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
