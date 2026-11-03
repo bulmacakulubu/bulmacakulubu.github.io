@@ -1,0 +1,6 @@
+{
+  "name": "Bulmaca Kulübü",
+  "description": "Popüler bulmaca ve masa oyunları kulübü: Kelime Bulmaca, Sudoku, Satranç, Mayın Tarlası ve daha fazlası.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
