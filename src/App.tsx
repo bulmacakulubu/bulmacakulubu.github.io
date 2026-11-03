@@ -395,25 +395,6 @@ export default function App() {
               )}
             </button>
 
-            {/* Google Account Profile Button */}
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="flex items-center gap-2 px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] transition text-xs shadow-2xs group"
-              title={currentUser.provider === 'google' ? 'Google Oyuncu Profili' : 'Google ile Giriş Yap'}
-            >
-              <img
-                src={currentUser.avatar}
-                alt={currentUser.name}
-                className="w-5 h-5 rounded-full object-cover border border-blue-500/40"
-              />
-              <span className="font-bold max-w-[85px] truncate hidden lg:inline">
-                {currentUser.provider === 'google' ? currentUser.name : (settings.language === 'tr' ? 'Giriş Yap' : 'Sign In')}
-              </span>
-              {currentUser.provider === 'google' && (
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
-              )}
-            </button>
-
             <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
 
             <div className="text-center">
@@ -432,6 +413,27 @@ export default function App() {
               <div className="text-[9px] text-gray-400 uppercase tracking-wider">{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
               <div className="font-bold text-xs">{bestRecord}</div>
             </div>
+
+            <div className="h-6 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block"></div>
+
+            {/* Google Account Profile Button - En Sağda */}
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)] transition text-xs shadow-2xs group cursor-pointer"
+              title={currentUser.provider === 'google' ? 'Google Oyuncu Profili' : 'Google ile Giriş Yap'}
+            >
+              <img
+                src={currentUser.avatar}
+                alt={currentUser.name}
+                className="w-5 h-5 rounded-full object-cover border border-blue-500/40 shrink-0"
+              />
+              <span className="font-bold max-w-[90px] truncate hidden sm:inline">
+                {currentUser.provider === 'google' ? currentUser.name : (settings.language === 'tr' ? 'Giriş Yap' : 'Sign In')}
+              </span>
+              {currentUser.provider === 'google' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></span>
+              )}
+            </button>
           </div>
         </header>
 
