@@ -10,13 +10,14 @@ import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
 import { BUILT_IN_TRACKS, startAmbientMusic, stopAmbientMusic, setAmbientVolume } from './utils/audio';
-import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff } from 'lucide-react';
+import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
 import confetti from 'canvas-confetti';
 import { AdSenseBanner } from './components/AdSenseBanner';
 import { RemoveAdsModal } from './components/RemoveAdsModal';
 import { LegalModal } from './components/LegalModal';
+import { LeaderboardModal } from './components/LeaderboardModal';
 
 import { KelimeBulmaca } from './games/KelimeBulmaca';
 import { KareBulmaca } from './games/KareBulmaca';
@@ -106,6 +107,7 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isRemoveAdsOpen, setIsRemoveAdsOpen] = useState(false);
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
   // Multiplayer state
   const [isMultiplayerOpen, setIsMultiplayerOpen] = useState(false);
@@ -346,15 +348,11 @@ export default function App() {
           </div>
           <div className="h-4 w-px border-r border-[var(--border-color)]"></div>
           <button
-            onClick={toggleHideStats}
-            className={`p-1.5 rounded-lg text-xs transition cursor-pointer ${
-              hideGameStats
-                ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
-                : 'hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-            }`}
-            title={hideGameStats ? (settings.language === 'tr' ? 'Detayları ve İstatistikleri Göster' : 'Show Details') : (settings.language === 'tr' ? 'Detayları Gizle (Tam Odaklanma)' : 'Hide Details')}
+            onClick={() => setIsLeaderboardOpen(true)}
+            className="p-1.5 rounded-lg text-xs transition cursor-pointer hover:bg-[var(--bg-secondary)] text-amber-500 hover:opacity-90"
+            title={settings.language === 'tr' ? 'Liderlik Sıralaması & Skor Tablosu' : 'Leaderboard & Rankings'}
           >
-            {hideGameStats ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            <Trophy className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={toggleNativeFullscreen}
@@ -582,19 +580,15 @@ export default function App() {
 
             <div className="h-6 w-px border-r hidden sm:block" style={{ borderColor: 'var(--border-color)' }}></div>
 
-            {/* Hibrit Odaklanma Modu (Tiyatro + Tam Ekran + İstatistikleri Gizle) */}
+            {/* Hibrit Odaklanma Modu (Liderlik Sıralaması + Tiyatro + Tam Ekran) */}
             <div className="flex items-center bg-[var(--bg-secondary)] p-0.5 rounded-xl border border-[var(--border-color)]">
               <button
-                onClick={toggleHideStats}
-                className={`p-1.5 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 ${
-                  hideGameStats
-                    ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
-                    : 'hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-                title={hideGameStats ? (settings.language === 'tr' ? 'İstatistikleri Göster' : 'Show Stats') : (settings.language === 'tr' ? 'İstatistikleri Gizle (Sade Görünüm)' : 'Hide Stats')}
+                onClick={() => setIsLeaderboardOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer hover:bg-[var(--bg-card)] text-[var(--accent-color)] hover:opacity-90 shadow-2xs"
+                title={settings.language === 'tr' ? 'Liderlik Sıralaması & Skor Tablosu' : 'Leaderboard & Rankings'}
               >
-                {hideGameStats ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                <span className="hidden xl:inline">{hideGameStats ? (settings.language === 'tr' ? 'İstatistikler Gizli' : 'Stats Hidden') : (settings.language === 'tr' ? 'İstatistikleri Gizle' : 'Hide Stats')}</span>
+                <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                <span className="hidden sm:inline">{settings.language === 'tr' ? 'Liderlik Sıralaması' : 'Leaderboard'}</span>
               </button>
 
               <div className="h-4 w-px bg-[var(--border-color)] mx-0.5"></div>
@@ -647,8 +641,8 @@ export default function App() {
         </header>
 
         {/* Game Container (Responsive, Uniform, Clean Scroll) */}
-        <div className={`flex-1 overflow-y-auto ${isZenMode ? 'p-0 sm:p-2' : 'px-2 sm:px-4 py-1.5 sm:py-2'} flex flex-col items-center justify-start w-full pb-3 sm:pb-4`}>
-          <div className={`w-full ${isZenMode ? 'max-w-none w-full px-1 sm:px-6' : 'max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px]'} flex flex-col items-center py-0.5 transition-all duration-300`}>
+        <div className={`flex-1 overflow-y-auto lg:overflow-hidden ${isZenMode ? 'p-0 sm:p-1' : 'px-2 sm:px-4 py-0.5 sm:py-1'} flex flex-col items-center justify-center w-full`}>
+          <div className={`w-full h-full ${isZenMode ? 'max-w-none w-full px-1 sm:px-4' : 'max-w-4xl xl:max-w-5xl'} flex flex-col items-center justify-center py-0.5 transition-all duration-300`}>
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
                 language={settings.language}
@@ -853,6 +847,15 @@ export default function App() {
       <LegalModal
         isOpen={isLegalModalOpen}
         onClose={() => setIsLegalModalOpen(false)}
+        language={settings.language}
+      />
+
+      {/* Leaderboard & Rankings Modal */}
+      <LeaderboardModal
+        isOpen={isLeaderboardOpen}
+        onClose={() => setIsLeaderboardOpen(false)}
+        currentUser={currentUser}
+        stats={stats[activeGame]}
         language={settings.language}
       />
     </div>
