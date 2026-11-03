@@ -169,7 +169,7 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
       </div>
 
       {/* COMPACT & RESPONSIVE 9x9 SUDOKU BOARD */}
-      <div className="p-1.5 sm:p-2 rounded-2xl border-2 border-gray-900 dark:border-gray-100 bg-[var(--bg-card)] shadow-md">
+      <div className="p-1 sm:p-1.5 rounded-2xl border-2 border-gray-900 dark:border-gray-100 bg-[var(--bg-card)] shadow-md">
         <div className="grid grid-cols-9 gap-0 border border-gray-300 dark:border-gray-700">
           {board.map((row, r) =>
             row.map((val, c) => {
@@ -187,7 +187,7 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
                 <button
                   key={`${r}-${c}`}
                   onClick={() => setSelectedCell([r, c])}
-                  className={`w-8.5 h-8.5 sm:w-10 sm:h-10 md:w-11 md:h-11 flex items-center justify-center font-extrabold text-base sm:text-lg md:text-xl transition-colors ${borderRight} ${borderBottom} ${
+                  className={`w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 md:w-9.5 md:h-9.5 flex items-center justify-center font-extrabold text-sm sm:text-base md:text-lg transition-colors ${borderRight} ${borderBottom} ${
                     isSelected
                       ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] font-black'
                       : isSameValue
@@ -218,7 +218,7 @@ export const Sudoku: React.FC<SudokuProps> = ({ onGameEnd, soundEnabled, languag
             <button
               key={num}
               onClick={() => handleNumberInput(num)}
-              className="py-2 sm:py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-color)] hover:text-[var(--accent-contrast)] font-extrabold text-sm sm:text-base text-gray-900 dark:text-gray-100 transition shadow-2xs active:scale-95"
+              className="py-1.5 sm:py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-color)] hover:text-[var(--accent-contrast)] font-extrabold text-xs sm:text-sm text-gray-900 dark:text-gray-100 transition shadow-2xs active:scale-95"
             >
               {num}
             </button>

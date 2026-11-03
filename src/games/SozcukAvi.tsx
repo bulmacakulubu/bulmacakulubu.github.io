@@ -338,7 +338,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
                   data-c={cIdx}
                   onPointerDown={(e) => handlePointerDown(rIdx, cIdx, e)}
                   onPointerEnter={() => handlePointerEnter(rIdx, cIdx)}
-                  className={`w-6.5 h-6.5 sm:w-7.5 sm:h-7.5 md:w-8.5 md:h-8.5 lg:w-9.5 lg:h-9.5 flex items-center justify-center font-black text-xs sm:text-sm md:text-base rounded-lg transition-all duration-150 cursor-pointer select-none ${getCellClassName(
+                  className={`w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 md:w-7.5 md:h-7.5 lg:w-8 lg:h-8 flex items-center justify-center font-black text-[10px] sm:text-xs md:text-sm rounded-lg transition-all duration-150 cursor-pointer select-none ${getCellClassName(
                     rIdx,
                     cIdx
                   )}`}
@@ -351,9 +351,9 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
         </div>
 
         {/* WORDS SIDEBAR (2-Column Balanced Grid, zero scroll) */}
-        <div className="w-full md:w-72 lg:w-80 border border-gray-200 dark:border-gray-800 rounded-2xl p-3 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col select-none">
-          <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-gray-200 dark:border-gray-800">
-            <h4 className="font-bold text-xs tracking-wider text-gray-500 uppercase">
+        <div className="w-full md:w-64 lg:w-72 border border-gray-200 dark:border-gray-800 rounded-2xl p-2.5 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col select-none">
+          <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-gray-200 dark:border-gray-800">
+            <h4 className="font-bold text-[11px] tracking-wider text-gray-500 uppercase">
               {isTr ? 'GİZLİ KELİMELER' : 'HIDDEN WORDS'}
             </h4>
             <span className="text-xs font-extrabold text-[var(--accent-color)]">
@@ -361,7 +361,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 gap-1">
             {words.map((w) => {
               const isFound = foundWords.includes(w);
               const colorClass = foundColors[w];
@@ -369,7 +369,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
                 <div
                   key={w}
                   onClick={() => handleWordListClick(w)}
-                  className={`p-2 rounded-xl text-xs font-semibold flex justify-between items-center cursor-pointer transition select-none ${
+                  className={`p-1.5 rounded-lg text-[11px] font-semibold flex justify-between items-center cursor-pointer transition select-none ${
                     isFound
                       ? `${colorClass || 'bg-emerald-600 text-white'} line-through opacity-90`
                       : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-gray-100 dark:border-gray-800 hover:border-gray-400'
@@ -377,7 +377,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
                   title={isTr ? 'Doğrudan açmak için tıklayın' : 'Click to reveal'}
                 >
                   <span className="truncate">{w}</span>
-                  <span className="text-[10px] font-bold">
+                  <span className="text-[9px] font-bold">
                     {isFound ? '✓' : isTr ? 'Bul' : 'Find'}
                   </span>
                 </div>

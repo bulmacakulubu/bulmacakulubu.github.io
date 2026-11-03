@@ -302,11 +302,11 @@ export const Satranc: React.FC<SatrancProps> = ({
                     <div
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
-                      className={`w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-17 lg:h-17 flex items-center justify-center cursor-pointer transition select-none ${
+                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-13 md:h-13 lg:w-14 lg:h-14 flex items-center justify-center cursor-pointer transition select-none ${
                         isDark ? 'bg-[#b58863] text-white' : 'bg-[#f0d9b5] text-gray-900'
                       } ${isSelected ? 'ring-4 ring-[var(--accent-color)] z-10 scale-105 shadow-md' : 'hover:opacity-90'}`}
                     >
-                      <span className="text-3xl sm:text-4xl md:text-5xl leading-none inline-block transform scale-110">
+                      <span className="text-2xl sm:text-3xl md:text-4xl leading-none inline-block transform scale-110">
                         {piece ? PIECE_SYMBOLS[piece] : ''}
                       </span>
                     </div>
@@ -318,7 +318,7 @@ export const Satranc: React.FC<SatrancProps> = ({
         </div>
 
         {/* Move History sidebar */}
-        <div className="w-full sm:w-64 md:w-72 h-80 sm:h-[460px] md:h-[530px] border border-gray-200 dark:border-gray-800 rounded-3xl p-3.5 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col shadow-xs">
+        <div className="w-full sm:w-64 md:w-72 h-56 sm:h-[350px] md:h-[400px] border border-gray-200 dark:border-gray-800 rounded-3xl p-3 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col shadow-xs">
           <h4 className="font-bold text-xs mb-2 border-b border-gray-200 dark:border-gray-800 pb-1.5 flex items-center justify-between">
             <span>{isEn ? 'MOVE HISTORY' : 'HAMLE GEÇMİŞİ'}</span>
             {isOnline && <span className="text-[10px] text-emerald-500 font-mono">{isEn ? 'P2P Live' : 'P2P Canlı'}</span>}

@@ -567,7 +567,7 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({ onGameEnd, soundEnable
               <button
                 key={word}
                 onClick={() => handleWordClick(word)}
-                className={`h-15 sm:h-16 p-2 rounded-2xl border-2 font-black text-xs sm:text-sm tracking-wide transition-all duration-150 flex items-center justify-center text-center cursor-pointer shadow-xs active:scale-95 ${
+                className={`h-11 sm:h-12 p-1.5 rounded-xl border-2 font-black text-[11px] sm:text-xs tracking-wide transition-all duration-150 flex items-center justify-center text-center cursor-pointer shadow-xs active:scale-95 ${
                   isSelected
                     ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] border-[var(--accent-color)] scale-102 shadow-md'
                     : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:border-gray-400 dark:hover:border-gray-600'

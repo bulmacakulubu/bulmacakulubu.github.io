@@ -393,7 +393,7 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
             {colClues.map((clues, c) => (
               <div
                 key={c}
-                className={`${is5x5 ? 'w-11 sm:w-13 md:w-15 text-xs sm:text-sm' : 'w-7.5 sm:w-9.5 md:w-10.5 text-[11px] sm:text-xs'} flex flex-col justify-end items-center pb-1 font-extrabold text-gray-600 dark:text-gray-300 leading-tight ${
+                className={`${is5x5 ? 'w-9 sm:w-11 md:w-12 text-xs sm:text-sm' : 'w-6 sm:w-7.5 md:w-8.5 text-[10px] sm:text-[11px]'} flex flex-col justify-end items-center pb-1 font-extrabold text-gray-600 dark:text-gray-300 leading-tight ${
                   c % 5 === 4 && c !== size - 1 ? 'border-r-2 border-r-gray-900 dark:border-r-gray-100' : 'border-r border-r-gray-200 dark:border-r-gray-800'
                 }`}
               >
@@ -413,7 +413,7 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
             <div key={r} className="flex">
               {/* Row Clue */}
               <div
-                className={`${is5x5 ? 'w-18 sm:w-24 text-xs sm:text-sm' : 'w-14 sm:w-18 text-[11px] sm:text-xs'} shrink-0 flex items-center justify-end pr-2.5 gap-2 font-extrabold text-gray-600 dark:text-gray-300 border-r-2 border-[var(--border-color)] ${
+                className={`${is5x5 ? 'w-14 sm:w-18 text-xs sm:text-sm' : 'w-11 sm:w-14 text-[10px] sm:text-[11px]'} shrink-0 flex items-center justify-end pr-2 gap-1.5 font-extrabold text-gray-600 dark:text-gray-300 border-r-2 border-[var(--border-color)] ${
                   r % 5 === 4 && r !== size - 1 ? 'border-b-2 border-b-gray-900 dark:border-b-gray-100' : 'border-b border-b-gray-200 dark:border-b-gray-800'
                 }`}
               >
@@ -435,7 +435,7 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
                       key={c}
                       onClick={() => handleCellClick(r, c)}
                       onContextMenu={(e) => handleCellContextMenu(e, r, c)}
-                      className={`${is5x5 ? 'w-11 h-11 sm:w-13 sm:h-13 md:w-15 md:h-15' : 'w-7.5 h-7.5 sm:w-9.5 sm:h-9.5 md:w-10.5 md:h-10.5'} flex items-center justify-center transition-all ${borderRight} ${borderBottom} ${
+                      className={`${is5x5 ? 'w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12' : 'w-6 h-6 sm:w-7.5 sm:h-7.5 md:w-8.5 md:h-8.5'} flex items-center justify-center transition-all ${borderRight} ${borderBottom} ${
                         state === 1
                           ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-inner'
                           : state === 2
@@ -443,7 +443,7 @@ export const Nonogram: React.FC<NonogramProps> = ({ onGameEnd, soundEnabled, lan
                           : 'bg-[var(--bg-card)] hover:bg-gray-100 dark:hover:bg-gray-800/50'
                       }`}
                     >
-                      {state === 2 && <X size={is5x5 ? 18 : 14} className="text-gray-400" />}
+                      {state === 2 && <X size={is5x5 ? 16 : 12} className="text-gray-400" />}
                     </button>
                   );
                 })}

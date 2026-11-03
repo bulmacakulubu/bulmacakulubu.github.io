@@ -236,8 +236,8 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
       </div>
 
       {/* Hangman Visual (Gallows Canvas SVG) */}
-      <div className="w-full flex justify-center py-2">
-        <svg width="180" height="150" viewBox="0 0 180 150" className="stroke-current text-gray-700 dark:text-gray-300">
+      <div className="w-full flex justify-center py-1">
+        <svg width="140" height="110" viewBox="0 0 180 150" className="stroke-current text-gray-700 dark:text-gray-300">
           {/* Base */}
           <line x1="20" y1="140" x2="160" y2="140" strokeWidth="4" strokeLinecap="round" />
           <line x1="50" y1="140" x2="50" y2="20" strokeWidth="4" strokeLinecap="round" />
@@ -256,17 +256,17 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
       </div>
 
       {/* Secret Word Letters Tiles */}
-      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 max-w-lg my-1">
+      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-lg my-0.5">
         {wordLetters.map((l, i) => {
           const revealed = guessedLetters.includes(l) || isLost;
           const isSpace = l === ' ';
           if (isSpace) {
-            return <div key={i} className="w-5 sm:w-6" />;
+            return <div key={i} className="w-4 sm:w-5" />;
           }
           return (
             <div
               key={i}
-              className={`w-10 h-12 sm:w-11 sm:h-13 border-b-4 rounded-xl flex items-center justify-center font-black text-xl sm:text-2xl transition-all shadow-xs ${
+              className={`w-8 h-10 sm:w-9 sm:h-11 border-b-4 rounded-xl flex items-center justify-center font-black text-lg sm:text-xl transition-all shadow-xs ${
                 revealed
                   ? isLost && !guessedLetters.includes(l)
                     ? 'border-rose-500 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400'
@@ -319,7 +319,7 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
                   key={char}
                   onClick={() => handleGuess(char)}
                   disabled={isUsed || isWon || isLost}
-                  className={`min-w-[30px] sm:min-w-[40px] px-2 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm border transition active:scale-95 shadow-2xs ${style}`}
+                  className={`min-w-[28px] sm:min-w-[36px] px-1.5 py-1.5 sm:py-2 rounded-xl font-bold text-xs sm:text-sm border transition active:scale-95 shadow-2xs ${style}`}
                 >
                   {char}
                 </button>

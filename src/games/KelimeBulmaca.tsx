@@ -243,7 +243,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 return (
                   <div
                     key={colIndex}
-                    className={`w-11 h-11 sm:w-12 sm:h-12 md:w-13 md:h-13 border-2 rounded-xl flex items-center justify-center font-black text-xl sm:text-2xl transition-all duration-200 ${style}`}
+                    className={`w-9 h-9 sm:w-10.5 sm:h-10.5 md:w-11.5 md:h-11.5 border-2 rounded-xl flex items-center justify-center font-black text-lg sm:text-xl transition-all duration-200 ${style}`}
                   >
                     {letter}
                   </div>
@@ -294,11 +294,11 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 <button
                   key={key}
                   onClick={() => handleKey(key === '⌫' ? 'BACKSPACE' : key)}
-                  className={`py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm border transition active:scale-95 shadow-2xs ${
+                  className={`py-1.5 sm:py-2 rounded-xl font-bold text-xs sm:text-sm border transition active:scale-95 shadow-2xs ${
                     customStatus
                       ? customStatus
                       : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800'
-                  } ${isSpecial ? 'px-4 sm:px-6 font-extrabold text-[11px] sm:text-xs' : 'min-w-[28px] sm:min-w-[38px] px-2'}`}
+                  } ${isSpecial ? 'px-3 sm:px-5 font-extrabold text-[10px] sm:text-xs' : 'min-w-[26px] sm:min-w-[34px] px-1.5'}`}
                 >
                   {key}
                 </button>

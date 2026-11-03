@@ -436,8 +436,8 @@ export default function App() {
         </header>
 
         {/* Game Container (Responsive, Uniform, Clean Scroll) */}
-        <div className={`flex-1 overflow-y-auto px-3 py-2 sm:px-6 sm:py-3 flex flex-col items-center justify-start w-full ${currentUser.isPremium ? 'pb-4' : 'pb-20'}`}>
-          <div className="w-full max-w-5xl xl:max-w-6xl flex flex-col items-center my-auto py-1">
+        <div className={`flex-1 overflow-y-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col items-center justify-start w-full ${currentUser.isPremium ? 'pb-6' : 'pb-32 sm:pb-36'}`}>
+          <div className="w-full max-w-5xl xl:max-w-6xl flex flex-col items-center py-0.5">
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
                 language={settings.language}
