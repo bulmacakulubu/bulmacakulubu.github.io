@@ -97,3 +97,4 @@ export const ANAGRAM_PUZZLES_TR: AnagramPuzzle[] = [
     bonusWords: ['ZAR', 'GAR'],
   },
 ];
+

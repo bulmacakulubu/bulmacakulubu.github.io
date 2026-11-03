@@ -73,3 +73,4 @@ export function openWhatsAppShare(text: string, url = 'https://bulmacakulubu.git
   const encoded = encodeURIComponent(full);
   window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
 }
+

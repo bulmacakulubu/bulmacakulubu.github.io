@@ -452,3 +452,4 @@ export const Anagram: React.FC<AnagramProps> = ({
     </div>
   );
 };
+

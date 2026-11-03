@@ -7,8 +7,12 @@ import {
   CheckCircle2,
   Share2,
   AlertCircle,
-  HelpCircle,
   Trophy,
+  ArrowRight,
+  ArrowDown,
+  Repeat,
+  Check,
+  Sparkles,
 } from 'lucide-react';
 import { CROSSWORD_PUZZLES_TR, CrosswordPuzzle, CrosswordClue } from '../data/crosswordBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
@@ -21,6 +25,12 @@ interface KareBulmacaProps {
   language?: 'tr' | 'en';
   isPremium?: boolean;
 }
+
+const KEYBOARD_ROWS = [
+  ['E', 'R', 'T', 'Y', 'U', 'I', 'İ', 'O', 'P', 'Ğ', 'Ü'],
+  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ş'],
+  ['⇄ YÖN', 'Z', 'C', 'Ç', 'V', 'B', 'N', 'M', 'Ö', '⌫'],
+];
 
 export const KareBulmaca: React.FC<KareBulmacaProps> = ({
   onGameEnd,
@@ -39,6 +49,9 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
   const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorCells, setErrorCells] = useState<string[]>([]); // "row-col"
+  const [solvedWordKeys, setSolvedWordKeys] = useState<string[]>([]); // "direction-number"
+  const [pulseWordKey, setPulseWordKey] = useState<string | null>(null);
+  const [shakeWordKey, setShakeWordKey] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -72,6 +85,9 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
     setDirection('across');
     setIsCompleted(false);
     setErrorCells([]);
+    setSolvedWordKeys([]);
+    setPulseWordKey(null);
+    setShakeWordKey(null);
     setStartTime(Date.now());
 
     const progress = getPoolProgress(poolKey, CROSSWORD_PUZZLES_TR.length);
@@ -112,6 +128,20 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
     }
   });
 
+  const activeClueKey = activeClue ? `${activeClue.direction}-${activeClue.number}` : '';
+
+  // Get word preview string for the active clue e.g. "K I T _ P"
+  const getActiveWordPreview = () => {
+    if (!activeClue) return '';
+    const letters: string[] = [];
+    for (let i = 0; i < activeClue.length; i++) {
+      const r = activeClue.direction === 'across' ? activeClue.row : activeClue.row + i;
+      const c = activeClue.direction === 'across' ? activeClue.col + i : activeClue.col;
+      letters.push(userGrid[r]?.[c] || '_');
+    }
+    return letters.join(' ');
+  };
+
   const isCellInActiveWord = (r: number, c: number) => {
     if (!activeClue) return false;
     if (activeClue.direction === 'across') {
@@ -121,12 +151,16 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
     }
   };
 
+  const toggleDirection = () => {
+    setDirection((prev) => (prev === 'across' ? 'down' : 'across'));
+    if (soundEnabled) playSound('click');
+  };
+
   const handleCellClick = (r: number, c: number) => {
     if (puzzle.grid[r][c] === '#') return;
 
     if (selectedCell.row === r && selectedCell.col === c) {
-      // Toggle direction
-      setDirection((prev) => (prev === 'across' ? 'down' : 'across'));
+      toggleDirection();
     } else {
       setSelectedCell({ row: r, col: c });
     }
@@ -135,6 +169,7 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
   const handleClueClick = (clue: CrosswordClue) => {
     setSelectedCell({ row: clue.row, col: clue.col });
     setDirection(clue.direction);
+    if (soundEnabled) playSound('click');
   };
 
   const moveNext = (r: number, c: number) => {
@@ -177,6 +212,19 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
     }
   };
 
+  // Check if an individual clue is solved
+  const checkClueSolved = (clue: CrosswordClue, currentGrid: string[][]) => {
+    for (let i = 0; i < clue.length; i++) {
+      const r = clue.direction === 'across' ? clue.row : clue.row + i;
+      const c = clue.direction === 'across' ? clue.col + i : clue.col;
+      if (currentGrid[r]?.[c] !== clue.answer[i]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // Full puzzle verification
   const checkSolution = (currentGrid = userGrid) => {
     let allFilled = true;
     let allCorrect = true;
@@ -198,18 +246,40 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
 
     setErrorCells(errors);
 
+    // Update solved clue keys
+    const solved = puzzle.clues
+      .filter((c) => checkClueSolved(c, currentGrid))
+      .map((c) => `${c.direction}-${c.number}`);
+    setSolvedWordKeys(solved);
+
     if (allFilled && allCorrect) {
       setIsCompleted(true);
       if (soundEnabled) playSound('win');
-      confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      confetti({ particleCount: 130, spread: 85, origin: { y: 0.6 } });
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       onGameEnd(true, elapsed);
     } else if (errors.length > 0) {
       if (soundEnabled) playSound('error');
       showToast(isTr ? `${errors.length} harf hatalı!` : `${errors.length} letters incorrect!`);
-    } else if (!allFilled) {
-      if (soundEnabled) playSound('click');
-      showToast(isTr ? 'Doğru gidiyorsunuz, kalan kutucukları doldurun!' : 'Looking good, fill the remaining boxes!');
+    }
+  };
+
+  // Smart jump to next unfinished clue
+  const jumpToNextUnfinishedClue = (currentGrid: string[][]) => {
+    const unfinishedClue = puzzle.clues.find((c) => !checkClueSolved(c, currentGrid));
+    if (unfinishedClue) {
+      // Find first empty or unverified cell in this clue
+      for (let i = 0; i < unfinishedClue.length; i++) {
+        const r = unfinishedClue.direction === 'across' ? unfinishedClue.row : unfinishedClue.row + i;
+        const c = unfinishedClue.direction === 'across' ? unfinishedClue.col + i : unfinishedClue.col;
+        if (!currentGrid[r]?.[c] || currentGrid[r][c] !== unfinishedClue.answer[i]) {
+          setSelectedCell({ row: r, col: c });
+          setDirection(unfinishedClue.direction);
+          return;
+        }
+      }
+      setSelectedCell({ row: unfinishedClue.row, col: unfinishedClue.col });
+      setDirection(unfinishedClue.direction);
     }
   };
 
@@ -219,18 +289,63 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
     if (puzzle.grid[row][col] === '#') return;
 
     if (soundEnabled) playSound('tile');
+
     const newGrid = userGrid.map((rArr, rIdx) =>
       rIdx === row ? rArr.map((cellVal, cIdx) => (cIdx === col ? char : cellVal)) : rArr
     );
     setUserGrid(newGrid);
 
-    // Clear error for this cell if any
+    // Clear error for this cell
     setErrorCells((prev) => prev.filter((k) => k !== `${row}-${col}`));
 
-    // Auto advance
+    // Wordle-Style Instant Word Validation:
+    if (activeClue) {
+      // Build word formed in active clue
+      let isFull = true;
+      let matches = true;
+      for (let i = 0; i < activeClue.length; i++) {
+        const r = activeClue.direction === 'across' ? activeClue.row : activeClue.row + i;
+        const c = activeClue.direction === 'across' ? activeClue.col + i : activeClue.col;
+        const letter = newGrid[r]?.[c] || '';
+        if (!letter) isFull = false;
+        if (letter !== activeClue.answer[i]) matches = false;
+      }
+
+      if (isFull && matches) {
+        // Correct word! Trigger Wordle green pulse & auto-jump
+        const key = `${activeClue.direction}-${activeClue.number}`;
+        setPulseWordKey(key);
+        setTimeout(() => setPulseWordKey(null), 1200);
+
+        if (!solvedWordKeys.includes(key)) {
+          setSolvedWordKeys((prev) => [...prev, key]);
+        }
+        if (soundEnabled) playSound('win');
+        showToast(`✨ "${activeClue.answer}" Doğru!`);
+
+        // Check if full puzzle is now complete
+        const allDone = puzzle.clues.every((c) => checkClueSolved(c, newGrid));
+        if (allDone) {
+          checkSolution(newGrid);
+          return;
+        }
+
+        // Smart Jump to next clue
+        setTimeout(() => jumpToNextUnfinishedClue(newGrid), 300);
+        return;
+      } else if (isFull && !matches) {
+        // Full but wrong: Shake effect
+        const key = `${activeClue.direction}-${activeClue.number}`;
+        setShakeWordKey(key);
+        setTimeout(() => setShakeWordKey(null), 600);
+        if (soundEnabled) playSound('error');
+      }
+    }
+
+    // Default: advance to next cell in current word
     moveNext(row, col);
 
-    // Auto check if fully filled
+    // Check if whole puzzle is filled
     const stillEmpty = newGrid.some((rArr, r) =>
       rArr.some((val, c) => puzzle.grid[r][c] !== '#' && !val)
     );
@@ -242,6 +357,7 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
   const handleBackspace = () => {
     if (isCompleted) return;
     const { row, col } = selectedCell;
+
     if (userGrid[row][col]) {
       const newGrid = userGrid.map((rArr, rIdx) =>
         rIdx === row ? rArr.map((cellVal, cIdx) => (cIdx === col ? '' : cellVal)) : rArr
@@ -278,9 +394,9 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
       } else if (e.key === 'Backspace') {
         e.preventDefault();
         handleBackspace();
-      } else if (e.key === ' ') {
+      } else if (e.key === ' ' || e.key === 'Tab') {
         e.preventDefault();
-        setDirection((prev) => (prev === 'across' ? 'down' : 'across'));
+        toggleDirection();
       } else {
         const trChar = e.key.toLocaleUpperCase('tr-TR');
         if (/^[A-ZÇĞİÖŞÜ]$/.test(trChar)) {
@@ -292,18 +408,16 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedCell, direction, userGrid, isCompleted]);
+  }, [selectedCell, direction, userGrid, isCompleted, activeClue, solvedWordKeys]);
 
   // Rewarded Hint
   const handleRevealCellHint = () => {
     if (isCompleted) return;
 
-    // Reveal selected cell, or first empty cell
     let targetR = selectedCell.row;
     let targetC = selectedCell.col;
 
     if (puzzle.grid[targetR][targetC] === '#' || userGrid[targetR][targetC] === puzzle.grid[targetR][targetC]) {
-      // Find another unrevealed cell
       outer: for (let r = 0; r < puzzle.rows; r++) {
         for (let c = 0; c < puzzle.cols; c++) {
           if (puzzle.grid[r][c] !== '#' && userGrid[r][c] !== puzzle.grid[r][c]) {
@@ -325,6 +439,12 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
       setErrorCells((prev) => prev.filter((k) => k !== `${targetR}-${targetC}`));
       if (soundEnabled) playSound('tile');
       showToast(isTr ? `İpucu: "${correctChar}" harfi açıldı! 💡` : `Hint: Letter "${correctChar}" revealed! 💡`);
+
+      // Check if clue completed with this hint
+      const allDone = puzzle.clues.every((c) => checkClueSolved(c, newGrid));
+      if (allDone) {
+        checkSolution(newGrid);
+      }
     };
 
     if (isPremium) {
@@ -356,9 +476,11 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
 
   const acrossClues = puzzle.clues.filter((c) => c.direction === 'across');
   const downClues = puzzle.clues.filter((c) => c.direction === 'down');
+  const solvedCount = solvedWordKeys.length;
+  const totalClues = puzzle.clues.length;
 
   return (
-    <div className="w-full flex flex-col items-center select-none space-y-2 pt-0.5 relative max-w-4xl">
+    <div className="w-full flex flex-col items-center select-none space-y-1.5 pt-0.5 relative max-w-4xl">
       {/* Toast */}
       {toastMessage && (
         <div className="absolute -top-3 z-30 px-3.5 py-1.5 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
@@ -367,17 +489,24 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
         </div>
       )}
 
-      {/* Control Bar */}
-      <div className="w-full flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
+      {/* Top Control Bar */}
+      <div className="w-full flex items-center justify-between pb-1 border-b border-[var(--border-color)]">
         <div className="flex items-center gap-2">
-          <span className="font-extrabold text-sm">{puzzle.title}</span>
+          <span className="font-extrabold text-xs sm:text-sm">{puzzle.title}</span>
           <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20">
             {puzzle.difficulty}
           </span>
         </div>
 
+        {/* Live Progress Indicator */}
         <div className="flex items-center gap-1.5 text-xs font-semibold">
-          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px] text-gray-500">
+          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
+            {isTr ? 'İPUÇLARI' : 'CLUES'}{' '}
+            <span className="font-extrabold text-emerald-500">
+              {solvedCount}/{totalClues}
+            </span>
+          </div>
+          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
             {isTr ? 'HAVUZ' : 'POOL'}{' '}
             <span className="font-bold text-[var(--accent-color)]">
               {poolStats.seenCount}/{poolStats.totalCount}
@@ -385,6 +514,7 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
           </div>
         </div>
 
+        {/* Action Buttons */}
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleRevealCellHint}
@@ -414,121 +544,206 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
         </div>
       </div>
 
-      {/* Active Clue Ribbon */}
-      <div className="w-full p-2 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between text-xs text-blue-700 dark:text-blue-300">
-        <div className="flex items-center gap-2 truncate">
-          <span className="px-1.5 py-0.5 rounded-md bg-blue-600 text-white font-black text-[10px]">
-            {activeClue?.number} {activeClue?.direction === 'across' ? 'Yatay' : 'Dikey'}
+      {/* Prominent Wordle-Style Active Clue Ribbon (Directly Above Grid) */}
+      <div
+        onClick={toggleDirection}
+        className="w-full p-2.5 rounded-xl border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/15 transition flex items-center justify-between text-xs text-blue-900 dark:text-blue-100 shadow-xs cursor-pointer group"
+        title="Yönü değiştirmek için tıklayın"
+      >
+        <div className="flex items-center gap-2.5 truncate">
+          <div className="px-2 py-0.5 rounded-lg bg-blue-600 text-white font-black text-[11px] flex items-center gap-1 shrink-0 group-hover:scale-105 transition-transform">
+            <span>{activeClue?.number}</span>
+            {direction === 'across' ? <ArrowRight size={12} /> : <ArrowDown size={12} />}
+            <span className="uppercase text-[9px]">{direction === 'across' ? 'Yatay' : 'Dikey'}</span>
+          </div>
+          <span className="font-bold text-xs sm:text-sm truncate">
+            {activeClue?.clue || 'Izgaradan bir kare seçin'}
           </span>
-          <span className="font-semibold truncate">{activeClue?.clue || 'Kare seçiniz'}</span>
         </div>
-        <span className="text-[10px] text-gray-400 shrink-0 ml-2">
-          {activeClue ? `${activeClue.length} Harf` : ''}
-        </span>
+
+        {/* Word preview progress letters e.g. K I T _ P */}
+        <div className="flex items-center gap-2 shrink-0 ml-2">
+          <span className="font-mono tracking-widest text-xs font-black text-blue-600 dark:text-blue-300 bg-white/70 dark:bg-gray-800/80 px-2 py-0.5 rounded-md border border-blue-200 dark:border-blue-900">
+            {getActiveWordPreview()}
+          </span>
+          <span className="text-[10px] text-gray-500 font-semibold hidden sm:inline">
+            ({activeClue?.length} Harf)
+          </span>
+          <Repeat size={13} className="text-blue-500 opacity-60 group-hover:rotate-180 transition-transform" />
+        </div>
       </div>
 
-      {/* Board & Clues Side-by-Side on Desktop */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-3 items-start pt-1">
-        {/* Left: Crossword Grid (Compact & Centered) */}
-        <div className="md:col-span-7 flex flex-col items-center justify-center p-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs">
+      {/* Main Playing Area: Grid + Clue Panels */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-3 items-start pt-0.5">
+        {/* Left Column: Grid + Integrated Virtual Keyboard */}
+        <div className="md:col-span-7 flex flex-col items-center">
+          {/* Crossword Grid */}
           <div
-            className="grid gap-1 select-none"
-            style={{ gridTemplateColumns: `repeat(${puzzle.cols}, minmax(0, 1fr))` }}
+            className={`p-2.5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs flex justify-center items-center transition-all ${
+              shakeWordKey === activeClueKey ? 'animate-shake border-rose-500' : ''
+            }`}
           >
-            {userGrid.map((rowArr, rIdx) =>
-              rowArr.map((cellVal, cIdx) => {
-                const isBlack = puzzle.grid[rIdx][cIdx] === '#';
-                const isSelected = selectedCell.row === rIdx && selectedCell.col === cIdx;
-                const inActiveWord = isCellInActiveWord(rIdx, cIdx);
-                const hasError = errorCells.includes(`${rIdx}-${cIdx}`);
-                const cellNum = cellNumberMap[`${rIdx}-${cIdx}`];
+            <div
+              className="grid gap-1 select-none"
+              style={{ gridTemplateColumns: `repeat(${puzzle.cols}, minmax(0, 1fr))` }}
+            >
+              {userGrid.map((rowArr, rIdx) =>
+                rowArr.map((cellVal, cIdx) => {
+                  const isBlack = puzzle.grid[rIdx][cIdx] === '#';
+                  const isSelected = selectedCell.row === rIdx && selectedCell.col === cIdx;
+                  const inActiveWord = isCellInActiveWord(rIdx, cIdx);
+                  const hasError = errorCells.includes(`${rIdx}-${cIdx}`);
+                  const cellNum = cellNumberMap[`${rIdx}-${cIdx}`];
+                  const isPulsing = pulseWordKey === activeClueKey && inActiveWord;
 
-                if (isBlack) {
+                  if (isBlack) {
+                    return (
+                      <div
+                        key={`${rIdx}-${cIdx}`}
+                        className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-900 dark:bg-black rounded-lg shadow-inner"
+                      />
+                    );
+                  }
+
                   return (
                     <div
                       key={`${rIdx}-${cIdx}`}
-                      className="w-9 h-9 sm:w-11 sm:h-11 bg-gray-900 dark:bg-black rounded-lg"
-                    />
-                  );
-                }
+                      onClick={() => handleCellClick(rIdx, cIdx)}
+                      className={`w-8 h-8 sm:w-10 sm:h-10 border-2 rounded-lg relative flex items-center justify-center font-black text-sm sm:text-base cursor-pointer transition-all ${
+                        isPulsing
+                          ? 'border-emerald-500 bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 scale-105 ring-2 ring-emerald-400'
+                          : isSelected
+                          ? 'border-blue-500 bg-blue-500/20 text-blue-900 dark:text-blue-100 shadow-md scale-105 z-10 ring-2 ring-blue-400'
+                          : inActiveWord
+                          ? 'border-blue-400/50 bg-blue-500/10 text-gray-900 dark:text-white'
+                          : hasError
+                          ? 'border-rose-500 bg-rose-500/20 text-rose-600'
+                          : 'border-[var(--border-color)] bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                      }`}
+                    >
+                      {/* Cell starting number */}
+                      {cellNum && (
+                        <span className="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-extrabold text-gray-400 leading-none">
+                          {cellNum}
+                        </span>
+                      )}
 
-                return (
-                  <div
-                    key={`${rIdx}-${cIdx}`}
-                    onClick={() => handleCellClick(rIdx, cIdx)}
-                    className={`w-9 h-9 sm:w-11 sm:h-11 border-2 rounded-lg relative flex items-center justify-center font-black text-sm sm:text-base cursor-pointer transition-all ${
-                      isSelected
-                        ? 'border-blue-500 bg-blue-500/20 text-blue-900 dark:text-blue-100 shadow-sm scale-105 z-10 ring-2 ring-blue-400'
-                        : inActiveWord
-                        ? 'border-blue-400/50 bg-blue-500/10 text-gray-900 dark:text-white'
-                        : hasError
-                        ? 'border-rose-500 bg-rose-500/20 text-rose-600'
-                        : 'border-[var(--border-color)] bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50'
-                    }`}
-                  >
-                    {cellNum && (
-                      <span className="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-extrabold text-gray-400 leading-none">
-                        {cellNum}
-                      </span>
-                    )}
-                    <span>{cellVal}</span>
-                  </div>
-                );
-              })
-            )}
+                      {/* Direction Arrow Indicator on active cell */}
+                      {isSelected && !cellVal && (
+                        <span className="absolute bottom-0.5 right-1 text-[9px] text-blue-500 font-bold opacity-80 animate-pulse">
+                          {direction === 'across' ? '➔' : '⬇'}
+                        </span>
+                      )}
+
+                      <span>{cellVal}</span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Integrated On-Screen Keyboard (Wordle Style) */}
+          <div className="w-full max-w-md space-y-1 pt-2">
+            {KEYBOARD_ROWS.map((row, rIdx) => (
+              <div key={rIdx} className="flex justify-center gap-1">
+                {row.map((key) => {
+                  const isSpecial = key === '⇄ YÖN' || key === '⌫';
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => {
+                        if (key === '⇄ YÖN') toggleDirection();
+                        else if (key === '⌫') handleBackspace();
+                        else handleInputChar(key);
+                      }}
+                      className={`h-8 sm:h-9 rounded-lg font-bold text-xs border transition active:scale-95 shadow-2xs cursor-pointer ${
+                        key === '⇄ YÖN'
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white border-blue-500 px-2 font-extrabold'
+                          : key === '⌫'
+                          ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 px-3'
+                          : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800 min-w-[24px] sm:min-w-[30px] px-1'
+                      }`}
+                    >
+                      {key}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Right: Clues Accordion / Panels */}
+        {/* Right Column: Clues List with Live Checkmarks */}
         <div className="md:col-span-5 flex flex-col gap-2 max-h-[380px] overflow-y-auto pr-1">
-          {/* Soldan Sağa */}
-          <div className="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]">
+          {/* Soldan Sağa Clues */}
+          <div className="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs">
             <h4 className="text-[11px] font-black uppercase text-gray-400 mb-1.5 flex items-center justify-between">
-              <span>Soldan Sağa</span>
+              <span className="flex items-center gap-1">
+                <ArrowRight size={13} className="text-blue-500" />
+                <span>Soldan Sağa</span>
+              </span>
               <span className="text-[10px] text-blue-500 font-semibold">{acrossClues.length} İpucu</span>
             </h4>
             <div className="space-y-1">
               {acrossClues.map((c) => {
                 const isSelected = activeClue === c;
+                const isSolved = solvedWordKeys.includes(`across-${c.number}`);
+
                 return (
                   <div
                     key={`a-${c.number}`}
                     onClick={() => handleClueClick(c)}
-                    className={`p-1.5 rounded-lg text-xs cursor-pointer transition flex items-start gap-1.5 ${
+                    className={`p-1.5 rounded-lg text-xs cursor-pointer transition flex items-start justify-between gap-1.5 ${
                       isSelected
                         ? 'bg-blue-500/20 border border-blue-500/40 text-blue-800 dark:text-blue-200 font-bold'
+                        : isSolved
+                        ? 'bg-emerald-500/10 text-gray-500 dark:text-gray-400 line-through opacity-80'
                         : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                     }`}
                   >
-                    <span className="font-black text-blue-500 shrink-0">{c.number}.</span>
-                    <span className="text-[11px] leading-tight">{c.clue}</span>
+                    <div className="flex items-start gap-1.5 truncate">
+                      <span className="font-black text-blue-500 shrink-0">{c.number}.</span>
+                      <span className="text-[11px] leading-tight truncate">{c.clue}</span>
+                    </div>
+                    {isSolved && <Check size={14} className="text-emerald-500 shrink-0" />}
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Yukarıdan Aşağıya */}
-          <div className="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]">
+          {/* Yukarıdan Aşağıya Clues */}
+          <div className="p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs">
             <h4 className="text-[11px] font-black uppercase text-gray-400 mb-1.5 flex items-center justify-between">
-              <span>Yukarıdan Aşağıya</span>
+              <span className="flex items-center gap-1">
+                <ArrowDown size={13} className="text-purple-500" />
+                <span>Yukarıdan Aşağıya</span>
+              </span>
               <span className="text-[10px] text-purple-500 font-semibold">{downClues.length} İpucu</span>
             </h4>
             <div className="space-y-1">
               {downClues.map((c) => {
                 const isSelected = activeClue === c;
+                const isSolved = solvedWordKeys.includes(`down-${c.number}`);
+
                 return (
                   <div
                     key={`d-${c.number}`}
                     onClick={() => handleClueClick(c)}
-                    className={`p-1.5 rounded-lg text-xs cursor-pointer transition flex items-start gap-1.5 ${
+                    className={`p-1.5 rounded-lg text-xs cursor-pointer transition flex items-start justify-between gap-1.5 ${
                       isSelected
                         ? 'bg-purple-500/20 border border-purple-500/40 text-purple-800 dark:text-purple-200 font-bold'
+                        : isSolved
+                        ? 'bg-emerald-500/10 text-gray-500 dark:text-gray-400 line-through opacity-80'
                         : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                     }`}
                   >
-                    <span className="font-black text-purple-500 shrink-0">{c.number}.</span>
-                    <span className="text-[11px] leading-tight">{c.clue}</span>
+                    <div className="flex items-start gap-1.5 truncate">
+                      <span className="font-black text-purple-500 shrink-0">{c.number}.</span>
+                      <span className="text-[11px] leading-tight truncate">{c.clue}</span>
+                    </div>
+                    {isSolved && <Check size={14} className="text-emerald-500 shrink-0" />}
                   </div>
                 );
               })}
