@@ -609,7 +609,7 @@ export const Satranc: React.FC<SatrancProps> = ({
                     <div
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
-                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-13.5 lg:h-13.5 flex items-center justify-center cursor-pointer transition relative select-none ${
+                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 xl:w-16 xl:h-16 2xl:w-18 2xl:h-18 flex items-center justify-center cursor-pointer transition relative select-none ${
                         isDark ? 'text-white' : 'text-gray-900'
                       } ${isSelected ? 'ring-3 ring-amber-500 z-10 scale-102 shadow-md' : 'hover:opacity-90'}`}
                       style={{
@@ -623,8 +623,8 @@ export const Satranc: React.FC<SatrancProps> = ({
                         <div
                           className={`absolute z-10 rounded-full transition-all ${
                             piece
-                              ? 'w-7 h-7 sm:w-9 sm:h-9 border-3 border-emerald-500 bg-emerald-500/20'
-                              : 'w-3 h-3 sm:w-3.5 sm:h-3.5 bg-emerald-600/75 dark:bg-emerald-400/80 shadow-xs'
+                              ? 'w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12 border-3 xl:border-4 border-emerald-500 bg-emerald-500/20'
+                              : 'w-3 h-3 sm:w-3.5 sm:h-3.5 xl:w-4 xl:h-4 bg-emerald-600/75 dark:bg-emerald-400/80 shadow-xs'
                           }`}
                         />
                       )}
@@ -637,7 +637,7 @@ export const Satranc: React.FC<SatrancProps> = ({
                       )}
 
                       {/* Chess Piece Symbol */}
-                      <span className="text-2xl sm:text-3xl md:text-3.5xl leading-none inline-block transform scale-110 z-5">
+                      <span className="text-2xl sm:text-3xl md:text-3.5xl lg:text-4xl xl:text-4.5xl 2xl:text-5xl leading-none inline-block transform scale-110 z-5 select-none font-chess">
                         {piece ? PIECE_SYMBOLS[piece] : ''}
                       </span>
                     </div>
@@ -650,7 +650,7 @@ export const Satranc: React.FC<SatrancProps> = ({
 
         {/* SIDEBAR: ACADEMY LESSONS LIST OR MOVE HISTORY */}
         <div
-          className="w-full md:w-64 lg:w-72 border rounded-2xl p-2.5 flex flex-col shadow-xs max-h-[380px] overflow-hidden"
+          className="w-full md:w-64 lg:w-72 xl:w-80 2xl:w-96 border rounded-2xl p-2.5 sm:p-3 flex flex-col shadow-xs max-h-[380px] lg:max-h-[460px] xl:max-h-[540px] 2xl:max-h-[600px] overflow-hidden"
           style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
         >
           {mode === 'academy' ? (

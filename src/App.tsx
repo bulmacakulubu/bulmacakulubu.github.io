@@ -10,7 +10,7 @@ import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
 import { BUILT_IN_TRACKS, startAmbientMusic, stopAmbientMusic, setAmbientVolume } from './utils/audio';
-import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText } from 'lucide-react';
+import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
 import confetti from 'canvas-confetti';
@@ -135,6 +135,47 @@ export default function App() {
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [isFloatingMusicOpen, setIsFloatingMusicOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Hybrid Focus Mode (Zen Theater + Hardware Fullscreen)
+  const [isZenMode, setIsZenMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isSidebarPeeking, setIsSidebarPeeking] = useState(false);
+
+  const toggleZenMode = () => {
+    setIsZenMode((prev) => !prev);
+    setIsSidebarPeeking(false);
+  };
+
+  const toggleNativeFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => console.error(err));
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch((err) => console.error(err));
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isZenMode) {
+          setIsZenMode(false);
+          setIsSidebarPeeking(false);
+        }
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isZenMode]);
 
   useEffect(() => {
     saveSettings(settings);
@@ -280,36 +321,90 @@ export default function App() {
       : '—';
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden font-sans" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <div className="flex h-screen w-screen overflow-hidden font-sans relative" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       <FlyingBird />
-      {/* Sidebar */}
-      <Sidebar
-        activeGame={activeGame}
-        onSelectGame={(g) => setActiveGame(g)}
-        language={settings.language}
-        onToggleLanguage={toggleLanguage}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        volume={settings.volume}
-        soundEnabled={settings.soundEnabled}
-        tracks={tracks}
-        onAddTracks={handleAddTracks}
-        currentTrackId={currentTrackId}
-        onSelectTrack={(id) => {
-          setCurrentTrackId(id);
-          setIsPlayingMusic(true);
+
+      {/* Floating HUD Capsule in Zen / Focus Mode */}
+      {isZenMode && (
+        <aside aria-label="Odak Modu Kontrolleri" className="fixed top-3 right-4 z-50 flex items-center gap-2 bg-[var(--bg-card)]/95 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-[var(--border-color)] shadow-xl animate-fadeIn">
+          <div className="flex items-center gap-1.5 text-xs font-bold" style={{ color: 'var(--accent-color)' }}>
+            <Scan className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">
+              {GAME_HEADER_INFO[activeGame]?.[settings.language === 'en' ? 'en' : 'tr']?.title || activeGame}
+            </span>
+          </div>
+          <div className="h-4 w-px border-r border-[var(--border-color)]"></div>
+          <button
+            onClick={toggleNativeFullscreen}
+            className={`p-1.5 rounded-lg text-xs transition cursor-pointer ${
+              isFullscreen
+                ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
+                : 'hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+            title={isFullscreen ? (settings.language === 'tr' ? 'Tam Ekrandan Çık (F11)' : 'Exit Fullscreen (F11)') : (settings.language === 'tr' ? 'Tam Ekran (F11)' : 'Fullscreen (F11)')}
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={toggleZenMode}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs hover:opacity-90"
+            style={{ backgroundColor: 'var(--accent-color)', color: 'var(--accent-contrast)' }}
+            title={settings.language === 'tr' ? 'Normal Görünüme Dön (ESC)' : 'Exit Focus (ESC)'}
+          >
+            <Minimize2 className="w-3.5 h-3.5" />
+            <span>ESC</span>
+          </button>
+        </aside>
+      )}
+
+      {/* Zen Mode Hover Peek Trigger Zone on Left Screen Edge */}
+      {isZenMode && (
+        <div
+          onMouseEnter={() => setIsSidebarPeeking(true)}
+          className="fixed left-0 top-0 bottom-0 w-3 z-40 cursor-e-resize hover:bg-[var(--accent-color)]/20 transition-colors"
+          title={settings.language === 'tr' ? 'Menüyü açmak için buraya gelin' : 'Hover to reveal sidebar'}
+        />
+      )}
+
+      {/* Sidebar with slide drawer transition in Zen mode */}
+      <div
+        className={`transition-all duration-300 ease-in-out shrink-0 ${
+          isZenMode
+            ? `fixed inset-y-0 left-0 z-50 ${isSidebarPeeking ? 'translate-x-0 shadow-2xl' : '-translate-x-full pointer-events-none'}`
+            : 'relative z-20'
+        }`}
+        onMouseLeave={() => {
+          if (isZenMode) setIsSidebarPeeking(false);
         }}
-        isPlaying={isPlayingMusic}
-        onTogglePlay={handleTogglePlayMusic}
-        onNextTrack={handleNextTrack}
-        onPrevTrack={handlePrevTrack}
-        onOpenFloatingMusic={() => setIsFloatingMusicOpen((prev) => !prev)}
-        isPremium={currentUser.isPremium}
-      />
+      >
+        <Sidebar
+          activeGame={activeGame}
+          onSelectGame={(g) => setActiveGame(g)}
+          language={settings.language}
+          onToggleLanguage={toggleLanguage}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          volume={settings.volume}
+          soundEnabled={settings.soundEnabled}
+          tracks={tracks}
+          onAddTracks={handleAddTracks}
+          currentTrackId={currentTrackId}
+          onSelectTrack={(id) => {
+            setCurrentTrackId(id);
+            setIsPlayingMusic(true);
+          }}
+          isPlaying={isPlayingMusic}
+          onTogglePlay={handleTogglePlayMusic}
+          onNextTrack={handleNextTrack}
+          onPrevTrack={handlePrevTrack}
+          onOpenFloatingMusic={() => setIsFloatingMusicOpen((prev) => !prev)}
+          isPremium={currentUser.isPremium}
+        />
+      </div>
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Ticker Stats Bar */}
-        <header className="px-6 py-3 border-b flex items-center justify-between shrink-0" style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+        <header className={`${isZenMode ? 'hidden' : 'px-6 py-3 border-b flex items-center justify-between shrink-0'} transition-all`} style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <div className="flex items-center gap-3 truncate">
             <div
               className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs"
@@ -460,6 +555,34 @@ export default function App() {
 
             <div className="h-6 w-px border-r hidden sm:block" style={{ borderColor: 'var(--border-color)' }}></div>
 
+            {/* Hibrit Odaklanma Modu (Tiyatro + Tam Ekran) */}
+            <div className="flex items-center bg-[var(--bg-secondary)] p-0.5 rounded-xl border border-[var(--border-color)]">
+              <button
+                onClick={toggleZenMode}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
+                  isZenMode
+                    ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
+                    : 'hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+                title={isZenMode ? (settings.language === 'tr' ? 'Normal Görünüm (ESC)' : 'Standard View (ESC)') : (settings.language === 'tr' ? 'Odaklan / Tiyatro Modu (Yan Menüyü Gizle)' : 'Focus / Theater Mode')}
+              >
+                {isZenMode ? <Minimize2 className="w-3.5 h-3.5" /> : <Scan className="w-3.5 h-3.5" />}
+                <span className="hidden lg:inline">{isZenMode ? (settings.language === 'tr' ? 'Odak Açık' : 'Focused') : (settings.language === 'tr' ? 'Odaklan' : 'Focus')}</span>
+              </button>
+
+              <button
+                onClick={toggleNativeFullscreen}
+                className={`p-1 rounded-lg text-xs transition cursor-pointer ${
+                  isFullscreen
+                    ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
+                    : 'hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+                title={isFullscreen ? (settings.language === 'tr' ? 'Pencereye Dön (F11)' : 'Exit Fullscreen (F11)') : (settings.language === 'tr' ? 'Donanımsal Tam Ekran (F11)' : 'Fullscreen (F11)')}
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             {/* Google Account Profile Button - En Sağda */}
             <button
               onClick={() => setIsAuthModalOpen(true)}
@@ -483,7 +606,7 @@ export default function App() {
 
         {/* Game Container (Responsive, Uniform, Clean Scroll) */}
         <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-1.5 sm:py-2 flex flex-col items-center justify-start w-full pb-3 sm:pb-4">
-          <div className="w-full max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px] flex flex-col items-center py-0.5">
+          <div className={`w-full ${isZenMode ? 'max-w-[1720px]' : 'max-w-6xl xl:max-w-7xl 2xl:max-w-[1440px]'} flex flex-col items-center py-0.5 transition-all duration-300`}>
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
                 language={settings.language}
