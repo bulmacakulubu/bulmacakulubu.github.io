@@ -16,6 +16,8 @@ interface SettingsModalProps {
 
 const GAME_NAMES: Record<string, string> = {
   'kelime-bulmaca': 'Kelime Bulmaca',
+  'kare-bulmaca': 'Çengel / Kare Bulmaca',
+  'anagram': 'Anagram Çözücü',
   'kelime-turetme': 'Kelime Türetme',
   'sozcuk-avi': 'Sözcük Avı',
   'adam-asmaca': 'Adam Asmaca',

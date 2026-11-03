@@ -1,5 +1,7 @@
 export type GameId =
   | 'kelime-bulmaca'
+  | 'kare-bulmaca'
+  | 'anagram'
   | 'kelime-turetme'
   | 'sozcuk-avi'
   | 'adam-asmaca'

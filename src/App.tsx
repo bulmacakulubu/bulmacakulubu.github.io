@@ -19,6 +19,8 @@ import { RemoveAdsModal } from './components/RemoveAdsModal';
 import { LegalModal } from './components/LegalModal';
 
 import { KelimeBulmaca } from './games/KelimeBulmaca';
+import { KareBulmaca } from './games/KareBulmaca';
+import { Anagram } from './games/Anagram';
 import { KelimeTuretme } from './games/KelimeTuretme';
 import { SozcukAvi } from './games/SozcukAvi';
 import { AdamAsmaca } from './games/AdamAsmaca';
@@ -35,6 +37,14 @@ const GAME_HEADER_INFO: Record<GameId, { tr: { title: string; desc: string }; en
   'kelime-bulmaca': {
     tr: { title: 'Kelime Bulmaca', desc: '5, 7 veya 9 harfli gizli kelimeyi 6 denemede bul.' },
     en: { title: 'Word Puzzle', desc: 'Guess the hidden 5, 7, or 9 letter secret word in 6 attempts.' },
+  },
+  'kare-bulmaca': {
+    tr: { title: 'Kare / Çengel Bulmaca', desc: 'Numaralı ızgarayı yatay ve dikey ipuçlarıyla kelime kelime çöz.' },
+    en: { title: 'Crossword Puzzle', desc: 'Solve the numbered crossword grid with across and down clues.' },
+  },
+  'anagram': {
+    tr: { title: 'Anagram Çözücü', desc: 'Karışık harf tekerleğinden tüm hedef kelimeleri türet ve seviyeyi tamamla.' },
+    en: { title: 'Anagram Solver', desc: 'Form target words from scrambled letters to complete the board.' },
   },
   'kelime-turetme': {
     tr: { title: 'Kelime Türetme', desc: '7 harften Scrabble puan kurallarına göre kelimeler türet.' },
@@ -468,7 +478,27 @@ export default function App() {
               <KelimeBulmaca
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
+                multiplayerSession={multiplayerSession}
+                onSendMultiplayerAction={(msg) => multiplayerService.sendMessage(msg)}
+                incomingMultiplayerMessage={incomingMultiplayerMessage}
                 onGameEnd={(won, time) => handleGameEnd('kelime-bulmaca', won, time)}
+              />
+            )}
+            {activeGame === 'kare-bulmaca' && (
+              <KareBulmaca
+                language={settings.language}
+                soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
+                onGameEnd={(won, time) => handleGameEnd('kare-bulmaca', won, time)}
+              />
+            )}
+            {activeGame === 'anagram' && (
+              <Anagram
+                language={settings.language}
+                soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
+                onGameEnd={(won, score) => handleGameEnd('anagram', won, score)}
               />
             )}
             {activeGame === 'kelime-turetme' && (
@@ -489,6 +519,7 @@ export default function App() {
               <AdamAsmaca
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
+                isPremium={currentUser.isPremium}
                 onGameEnd={(won) => handleGameEnd('adam-asmaca', won)}
               />
             )}

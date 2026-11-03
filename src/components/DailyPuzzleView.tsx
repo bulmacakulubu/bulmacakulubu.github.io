@@ -12,6 +12,8 @@ interface DailyPuzzleViewProps {
 
 const GAME_NAMES_MAP: Record<GameId, { tr: string; en: string }> = {
   'kelime-bulmaca': { tr: 'Kelime Bulmaca', en: 'Word Puzzle' },
+  'kare-bulmaca': { tr: 'Kare / Çengel Bulmaca', en: 'Crossword' },
+  'anagram': { tr: 'Anagram Çözücü', en: 'Anagram Solver' },
   'kelime-turetme': { tr: 'Kelime Türetme', en: 'Word Builder' },
   'sozcuk-avi': { tr: 'Sözcük Avı', en: 'Word Search' },
   'adam-asmaca': { tr: 'Adam Asmaca', en: 'Hangman' },

@@ -1,23 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { AlertCircle, RotateCcw, BookOpen } from 'lucide-react';
+import { AlertCircle, RotateCcw, BookOpen, Share2, Lightbulb, Users, MessageSquare } from 'lucide-react';
 import { WORDLE_WORDS_TR, WORDLE_WORDS_EN } from '../data/wordBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
 import { fetchWordList, getWordMeaning } from '../utils/dictionaryService';
+import { shareScore, generateWordleEmojiGrid, openWhatsAppShare } from '../utils/shareService';
+import { triggerAdBreak } from '../utils/adSenseService';
+import { MultiplayerSession } from '../types';
+import { MultiplayerMessage } from '../utils/multiplayer';
 
 interface KelimeBulmacaProps {
   onGameEnd: (won: boolean, timeOrScore?: number) => void;
   soundEnabled: boolean;
   language?: 'tr' | 'en';
+  isPremium?: boolean;
+  multiplayerSession?: MultiplayerSession | null;
+  onSendMultiplayerAction?: (msg: MultiplayerMessage) => void;
+  incomingMultiplayerMessage?: MultiplayerMessage | null;
 }
 
 export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   onGameEnd,
   soundEnabled,
   language = 'tr',
+  isPremium = false,
+  multiplayerSession,
+  onSendMultiplayerAction,
+  incomingMultiplayerMessage,
 }) => {
   const isTr = language === 'tr';
+  const isMultiplayer = !!multiplayerSession && multiplayerSession.connected;
+
   const [wordLength, setWordLength] = useState<5 | 7 | 9>(5);
   const [solution, setSolution] = useState(isTr ? 'KİTAP' : 'APPLE');
   const [guesses, setGuesses] = useState<string[]>([]);
@@ -28,6 +42,14 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   const [shakeRow, setShakeRow] = useState(false);
   const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
   const [meaning, setMeaning] = useState<string | null>(null);
+  const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
+
+  // Opponent state for 1v1 multiplayer
+  const [opponentProgress, setOpponentProgress] = useState<{
+    attempt: number;
+    won: boolean;
+    emojis?: string;
+  } | null>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -45,6 +67,16 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
     setGameStatus('playing');
     setStartTime(Date.now());
     setMeaning(null);
+    setRevealedIndices([]);
+    setOpponentProgress(null);
+
+    // In multiplayer, host dictates the word to the guest
+    if (isMultiplayer && multiplayerSession.isHost) {
+      onSendMultiplayerAction?.({
+        type: 'HANDSHAKE',
+        payload: { solution: result.item, length },
+      });
+    }
 
     const progress = getPoolProgress(poolKey, pool.length);
     setPoolStats({ seenCount: progress.seenCount, totalCount: progress.totalCount });
@@ -62,6 +94,34 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
     startNewRound(wordLength);
   }, [wordLength, language]);
 
+  // Handle incoming multiplayer messages
+  useEffect(() => {
+    if (!incomingMultiplayerMessage) return;
+
+    if (incomingMultiplayerMessage.type === 'HANDSHAKE' && incomingMultiplayerMessage.payload?.solution) {
+      const incomingSol = incomingMultiplayerMessage.payload.solution;
+      const incomingLen = incomingMultiplayerMessage.payload.length || incomingSol.length;
+      setWordLength(incomingLen);
+      setSolution(incomingSol);
+      setGuesses([]);
+      setCurrentGuess('');
+      setGameStatus('playing');
+      setRevealedIndices([]);
+      setOpponentProgress(null);
+      showToast(isTr ? 'Rakiple aynı kelime yüklendi! Başarılar ⚔️' : 'Synced same word with opponent! Good luck ⚔️');
+    } else if (incomingMultiplayerMessage.type === 'WORD' && incomingMultiplayerMessage.payload) {
+      const { attempt, won, emojis } = incomingMultiplayerMessage.payload;
+      setOpponentProgress({ attempt, won, emojis });
+      if (won) {
+        showToast(
+          isTr
+            ? `🏁 ${multiplayerSession?.opponentName || 'Rakip'} kelimeyi ${attempt}. denemede bildi!`
+            : `🏁 ${multiplayerSession?.opponentName || 'Opponent'} solved it in attempt ${attempt}!`
+        );
+      }
+    }
+  }, [incomingMultiplayerMessage]);
+
   // Load definition when game concludes
   useEffect(() => {
     if (gameStatus !== 'playing') {
@@ -70,6 +130,71 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       });
     }
   }, [gameStatus, solution, language]);
+
+  // Rewarded Hint
+  const handleRequestHint = () => {
+    if (gameStatus !== 'playing') return;
+
+    const unrevealedIndices: number[] = [];
+    for (let i = 0; i < solution.length; i++) {
+      const alreadyGuessedGreen = guesses.some((g) => g[i] === solution[i]);
+      if (!revealedIndices.includes(i) && !alreadyGuessedGreen) {
+        unrevealedIndices.push(i);
+      }
+    }
+
+    if (unrevealedIndices.length === 0) {
+      showToast(isTr ? 'Bütün harfler zaten açıldı veya biliniyor!' : 'All letters are already revealed or known!');
+      return;
+    }
+
+    const grantHint = () => {
+      const randomIdx = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
+      setRevealedIndices((prev) => [...prev, randomIdx]);
+      if (soundEnabled) playSound('click');
+      showToast(
+        isTr
+          ? `💡 İpucu: ${randomIdx + 1}. harf "${solution[randomIdx]}"`
+          : `💡 Hint: Letter #${randomIdx + 1} is "${solution[randomIdx]}"`
+      );
+    };
+
+    if (isPremium) {
+      grantHint();
+    } else {
+      showToast(isTr ? 'Ödüllü reklam hazırlanıyor...' : 'Loading rewarded ad...');
+      triggerAdBreak({
+        type: 'reward',
+        name: 'wordle_hint',
+        adBreakDone: () => {
+          grantHint();
+        },
+      });
+    }
+  };
+
+  // Social Share
+  const handleShare = async () => {
+    const grid = generateWordleEmojiGrid(guesses, solution);
+    const scoreStr = gameStatus === 'won' ? `${guesses.length}/6` : 'X/6';
+    const res = await shareScore({
+      title: 'Bulmaca Kulübü - Kelime Bulmaca',
+      gameName: isTr ? 'Kelime Bulmaca' : 'Word Puzzle',
+      scoreOrAttempts: scoreStr,
+      emojiGrid: grid,
+    });
+
+    if (res === 'copied') {
+      showToast(isTr ? 'Sonuç panoya kopyalandı! 📋' : 'Result copied to clipboard! 📋');
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    const grid = generateWordleEmojiGrid(guesses, solution);
+    const scoreStr = gameStatus === 'won' ? `${guesses.length}/6` : 'X/6';
+    const text = `🧩 Bulmaca Kulübü: ${isTr ? 'Kelime Bulmaca' : 'Word Puzzle'}\n🏆 Sonuç: ${scoreStr}\n\n${grid}`;
+    openWhatsAppShare(text);
+  };
 
   const handleKey = (key: string) => {
     if (gameStatus !== 'playing') return;
@@ -92,7 +217,22 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       setGuesses(newGuesses);
       setCurrentGuess('');
 
-      if (currentGuess === solution) {
+      const didWin = currentGuess === solution;
+
+      // Send guess to multiplayer opponent
+      if (isMultiplayer) {
+        onSendMultiplayerAction?.({
+          type: 'WORD',
+          payload: {
+            guess: currentGuess,
+            attempt: newGuesses.length,
+            won: didWin,
+            emojis: generateWordleEmojiGrid(newGuesses, solution),
+          },
+        });
+      }
+
+      if (didWin) {
         setGameStatus('won');
         if (soundEnabled) playSound('win');
         confetti({ particleCount: 110, spread: 75, origin: { y: 0.6 } });
@@ -166,27 +306,47 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   const keyboardRows = isTr ? keyboardRowsTR : keyboardRowsEN;
 
   return (
-    <div className="w-full flex flex-col items-center justify-center select-none space-y-3 pt-1 relative">
+    <div className="w-full flex flex-col items-center justify-center select-none space-y-2 pt-0.5 relative">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="absolute -top-3 z-30 px-4 py-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
+        <div className="absolute -top-3 z-30 px-3.5 py-1.5 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
           <AlertCircle size={14} className="text-amber-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
+      {/* 1v1 Multiplayer Opponent Live Bar */}
+      {isMultiplayer && (
+        <div className="w-full max-w-xl p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-300 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <Users size={16} />
+            <span>1v1 Düello: {multiplayerSession?.opponentName || 'Rakip'}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] px-2 py-0.5 rounded-lg bg-purple-600/20">
+              {opponentProgress ? `${opponentProgress.attempt}/6 Deneme` : 'Başlamadı'}
+            </span>
+            {opponentProgress?.won && (
+              <span className="text-emerald-500 font-black animate-pulse">KAZANDI! 🏆</span>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* UNIFORM CONTROL BAR */}
-      <div className="w-full max-w-xl flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+      <div className="w-full max-w-xl flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
         {/* LEFT: Length selector */}
-        <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
+        <div className="flex bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {[5, 7, 9].map((len) => (
             <button
               key={len}
               onClick={() => {
+                if (isMultiplayer) return;
                 setWordLength(len as any);
                 startNewRound(len as any);
               }}
-              className={`px-3 py-1.5 rounded-lg transition font-extrabold ${
+              disabled={isMultiplayer}
+              className={`px-2.5 py-1 rounded-lg transition font-extrabold text-[11px] ${
                 wordLength === len
                   ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -198,27 +358,39 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         </div>
 
         {/* CENTER: Live Metric + Memory Progress */}
-        <div className="flex items-center gap-2 text-xs font-semibold">
-          <div className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold">
+          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
             {isTr ? 'DENEME' : 'ATTEMPT'} <span className="font-extrabold text-[var(--accent-color)]">{guesses.length}/6</span>
           </div>
-          <div className="px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px] text-gray-500">
+          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
             {isTr ? 'HAVUZ' : 'POOL'} <span className="font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
           </div>
         </div>
 
-        {/* RIGHT: Restart Button (Always in the same top-right spot) */}
-        <button
-          onClick={() => startNewRound()}
-          className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs"
-        >
-          <RotateCcw size={13} />
-          <span>{isTr ? 'Yeni Oyun' : 'New Game'}</span>
-        </button>
+        {/* RIGHT: Hint (Rewarded Ad) & Restart Button */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={handleRequestHint}
+            disabled={gameStatus !== 'playing'}
+            className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
+          >
+            <Lightbulb size={13} />
+            <span>{isTr ? 'İpucu' : 'Hint'}</span>
+          </button>
+
+          <button
+            onClick={() => startNewRound()}
+            className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+          >
+            <RotateCcw size={12} />
+            <span>{isTr ? 'Yeni Oyun' : 'New'}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Grid */}
-      <div className="flex flex-col items-center justify-center gap-1.5 my-1">
+      {/* Grid (Compact & Responsive to prevent cutting off keyboard) */}
+      <div className="flex flex-col items-center justify-center gap-1 my-0.5">
         {Array.from({ length: 6 }).map((_, rowIndex) => {
           const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');
           const isCompleted = rowIndex < guesses.length;
@@ -227,25 +399,28 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           return (
             <div
               key={rowIndex}
-              className={`grid gap-1.5 transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
+              className={`grid gap-1 transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
               style={{ gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))` }}
             >
               {Array.from({ length: wordLength }).map((_, colIndex) => {
                 const letter = guess[colIndex] || '';
+                const isHintLetter = isCurrent && !letter && revealedIndices.includes(colIndex);
                 let style = 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)]';
 
                 if (isCompleted) {
                   style = getLetterStatus(letter, colIndex);
                 } else if (letter) {
                   style = 'bg-[var(--bg-card)] border-[var(--accent-color)] text-[var(--text-primary)] scale-105 shadow-sm';
+                } else if (isHintLetter) {
+                  style = 'bg-amber-500/10 border-amber-400 text-amber-500 font-normal border-dashed';
                 }
 
                 return (
                   <div
                     key={colIndex}
-                    className={`w-9 h-9 sm:w-10.5 sm:h-10.5 md:w-11.5 md:h-11.5 border-2 rounded-xl flex items-center justify-center font-black text-lg sm:text-xl transition-all duration-200 ${style}`}
+                    className={`w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-2 rounded-xl flex items-center justify-center font-black text-base sm:text-lg transition-all duration-150 ${style}`}
                   >
-                    {letter}
+                    {letter || (isHintLetter ? solution[colIndex] : '')}
                   </div>
                 );
               })}
@@ -254,10 +429,10 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         })}
       </div>
 
-      {/* Game End Banner with Dictionary Definition */}
+      {/* Game End Banner with Dictionary Definition & Viral Share */}
       {gameStatus !== 'playing' && (
-        <div className="text-center py-2.5 px-6 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg animate-fadeIn max-w-md w-full">
-          <div className={`text-sm font-bold mb-1 ${gameStatus === 'won' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+        <div className="text-center py-2 px-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg animate-fadeIn max-w-md w-full my-0.5">
+          <div className={`text-xs sm:text-sm font-bold mb-1 ${gameStatus === 'won' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
             {gameStatus === 'won'
               ? (isTr ? 'Muhteşem! Kelimeyi Başarıyla Buldunuz! 🎉' : 'Awesome! You guessed the word correctly! 🎉')
               : (isTr ? `Oyun Bitti! Doğru Kelime: ${solution}` : `Game Over! The word was: ${solution}`)}
@@ -265,8 +440,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
           {/* Dictionary meaning */}
           {meaning && (
-            <div className="my-2 p-2 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-left text-xs text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
-              <BookOpen size={14} className="text-[var(--accent-color)] shrink-0 mt-0.5" />
+            <div className="my-1.5 p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-left text-[11px] text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
+              <BookOpen size={13} className="text-[var(--accent-color)] shrink-0 mt-0.5" />
               <div>
                 <span className="font-extrabold text-[var(--accent-color)] mr-1">{solution}:</span>
                 <span className="italic">{meaning}</span>
@@ -274,19 +449,38 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
             </div>
           )}
 
-          <button
-            onClick={() => startNewRound()}
-            className="mt-1 px-5 py-2 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-extrabold text-xs transition shadow-sm"
-          >
-            {isTr ? 'Sıradaki Kelimeye Geç ➔' : 'Next Word ➔'}
-          </button>
+          {/* Share Buttons */}
+          <div className="flex items-center justify-center gap-2 mt-2">
+            <button
+              onClick={handleShare}
+              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <Share2 size={13} />
+              <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
+            </button>
+
+            <button
+              onClick={handleShareWhatsApp}
+              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+            >
+              <MessageSquare size={13} />
+              <span>WhatsApp</span>
+            </button>
+
+            <button
+              onClick={() => startNewRound()}
+              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+            >
+              {isTr ? 'Sıradaki Kelime ➔' : 'Next Word ➔'}
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Virtual Keyboard */}
-      <div className="w-full max-w-xl space-y-1.5 pt-1">
+      {/* Virtual Keyboard (Compact, perfectly fitting viewport) */}
+      <div className="w-full max-w-lg space-y-1 pt-0.5">
         {keyboardRows.map((row, rIdx) => (
-          <div key={rIdx} className="flex justify-center gap-1 sm:gap-1.5">
+          <div key={rIdx} className="flex justify-center gap-1">
             {row.map((key) => {
               const customStatus = getKeyStatus(key);
               const isSpecial = key === 'GİR' || key === 'ENTER' || key === '⌫';
@@ -294,11 +488,11 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 <button
                   key={key}
                   onClick={() => handleKey(key === '⌫' ? 'BACKSPACE' : key)}
-                  className={`py-1.5 sm:py-2 rounded-xl font-bold text-xs sm:text-sm border transition active:scale-95 shadow-2xs ${
+                  className={`h-8 sm:h-9 rounded-lg font-bold text-xs border transition active:scale-95 shadow-2xs cursor-pointer ${
                     customStatus
                       ? customStatus
                       : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800'
-                  } ${isSpecial ? 'px-3 sm:px-5 font-extrabold text-[10px] sm:text-xs' : 'min-w-[26px] sm:min-w-[34px] px-1.5'}`}
+                  } ${isSpecial ? 'px-2.5 sm:px-3.5 font-extrabold text-[10px] sm:text-xs' : 'min-w-[24px] sm:min-w-[32px] px-1'}`}
                 >
                   {key}
                 </button>

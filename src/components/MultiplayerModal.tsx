@@ -11,6 +11,7 @@ import {
   ArrowRight,
   MessageCircle,
   AlertCircle,
+  Type,
 } from 'lucide-react';
 import { GameId, UserProfile, MultiplayerSession } from '../types';
 import { multiplayerService, MultiplayerService, MultiplayerMessage } from '../utils/multiplayer';
@@ -121,7 +122,12 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
   };
 
   const handleShareWhatsApp = () => {
-    const gameName = selectedGame === 'satranc' ? 'Satranç' : 'Kelime Zinciri';
+    const gameName =
+      selectedGame === 'kelime-bulmaca'
+        ? 'Kelime Bulmaca'
+        : selectedGame === 'satranc'
+        ? 'Satranç'
+        : 'Kelime Zinciri';
     const text = `🎮 Bulmaca Kulübü'nde benimle 1v1 ${gameName} maçına var mısın?\nOda Kodu: ${roomCode}\n\nDoğrudan odaya girmek için tıkla:\n${shareUrl}`;
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -192,40 +198,58 @@ export const MultiplayerModal: React.FC<MultiplayerModalProps> = ({
                 <>
                   <div>
                     <label className="text-xs font-bold text-gray-500 block mb-2">Oyun Seçin</label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <button
+                        onClick={() => setSelectedGame('kelime-bulmaca')}
+                        className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 transition ${
+                          selectedGame === 'kelime-bulmaca'
+                            ? 'border-purple-500 bg-purple-500/10'
+                            : 'border-[var(--border-color)] hover:bg-[var(--bg-secondary)]/50'
+                        }`}
+                      >
+                        <Type
+                          size={20}
+                          className={selectedGame === 'kelime-bulmaca' ? 'text-purple-600' : 'text-gray-400'}
+                        />
+                        <div>
+                          <div className="text-xs font-bold">Kelime Bulmaca</div>
+                          <div className="text-[9px] text-gray-400">Canlı Wordle Düellosu</div>
+                        </div>
+                      </button>
+
                       <button
                         onClick={() => setSelectedGame('satranc')}
-                        className={`p-3.5 rounded-xl border flex items-center gap-3 transition text-left ${
+                        className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 transition ${
                           selectedGame === 'satranc'
                             ? 'border-purple-500 bg-purple-500/10'
                             : 'border-[var(--border-color)] hover:bg-[var(--bg-secondary)]/50'
                         }`}
                       >
                         <Crown
-                          size={22}
+                          size={20}
                           className={selectedGame === 'satranc' ? 'text-purple-600' : 'text-gray-400'}
                         />
                         <div>
                           <div className="text-xs font-bold">Satranç 1v1</div>
-                          <div className="text-[10px] text-gray-400">Canlı hamle senkronizasyonu</div>
+                          <div className="text-[9px] text-gray-400">Hamle senkronizasyonu</div>
                         </div>
                       </button>
 
                       <button
                         onClick={() => setSelectedGame('kelime-zinciri')}
-                        className={`p-3.5 rounded-xl border flex items-center gap-3 transition text-left ${
+                        className={`p-3 rounded-xl border flex flex-col items-center text-center gap-1.5 transition ${
                           selectedGame === 'kelime-zinciri'
                             ? 'border-purple-500 bg-purple-500/10'
                             : 'border-[var(--border-color)] hover:bg-[var(--bg-secondary)]/50'
                         }`}
                       >
                         <Sparkles
-                          size={22}
+                          size={20}
                           className={selectedGame === 'kelime-zinciri' ? 'text-purple-600' : 'text-gray-400'}
                         />
                         <div>
-                          <div className="text-xs font-bold">Kelime Zinciri 1v1</div>
-                          <div className="text-[10px] text-gray-400">Sırayla kelime kapışması</div>
+                          <div className="text-xs font-bold">Kelime Zinciri</div>
+                          <div className="text-[9px] text-gray-400">Sırayla kelime kapışması</div>
                         </div>
                       </button>
                     </div>

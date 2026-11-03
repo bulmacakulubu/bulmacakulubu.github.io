@@ -12,6 +12,8 @@ export const defaultGameStats: GameStats = {
 
 export const defaultAllStats: AllStats = {
   'kelime-bulmaca': { ...defaultGameStats },
+  'kare-bulmaca': { ...defaultGameStats, bestTime: 0 },
+  'anagram': { ...defaultGameStats, bestScore: 0 },
   'kelime-turetme': { ...defaultGameStats, bestScore: 0 },
   'sozcuk-avi': { ...defaultGameStats, bestTime: 0 },
   'adam-asmaca': { ...defaultGameStats },
@@ -28,6 +30,8 @@ export const defaultAllStats: AllStats = {
 export function getDailyPuzzleInfo(): { gameId: GameId; dateKey: string; nextResetTime: number } {
   const games: GameId[] = [
     'kelime-bulmaca',
+    'kare-bulmaca',
+    'anagram',
     'kelime-turetme',
     'sozcuk-avi',
     'adam-asmaca',

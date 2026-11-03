@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { Heart, RotateCcw, Lightbulb } from 'lucide-react';
+import { Heart, RotateCcw, Lightbulb, Sparkles } from 'lucide-react';
 import { HANGMAN_PUZZLES_TR, HANGMAN_PUZZLES_EN, HangmanPuzzle } from '../data/wordBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
+import { triggerAdBreak } from '../utils/adSenseService';
 
 interface AdamAsmacaProps {
   onGameEnd: (won: boolean) => void;
   soundEnabled: boolean;
   language?: 'tr' | 'en';
+  isPremium?: boolean;
 }
 
 const LOCAL_PUZZLES_TR: HangmanPuzzle[] = [
@@ -78,7 +80,7 @@ const ALL_PUZZLES_EN = [...LOCAL_PUZZLES_EN, ...HANGMAN_PUZZLES_EN].filter(
   (v, i, a) => a.findIndex((t) => t.word === v.word) === i
 );
 
-export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled, language = 'tr' }) => {
+export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled, language = 'tr', isPremium = false }) => {
   const isEn = language === 'en';
   const puzzlePool = isEn ? ALL_PUZZLES_EN : ALL_PUZZLES_TR;
 
@@ -88,6 +90,45 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
   const [isHintRevealed, setIsHintRevealed] = useState(false);
   const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
   const maxErrors = 6;
+
+  const handleRevealHintWithAd = () => {
+    if (isHintRevealed) return;
+    if (isPremium) {
+      setIsHintRevealed(true);
+      if (soundEnabled) playSound('click');
+    } else {
+      triggerAdBreak({
+        type: 'reward',
+        name: 'hangman_hint',
+        adBreakDone: () => {
+          setIsHintRevealed(true);
+          if (soundEnabled) playSound('click');
+        },
+      });
+    }
+  };
+
+  const handleRevealLetterWithAd = () => {
+    const unrevealed = wordLetters.filter((l) => !guessedLetters.includes(l));
+    if (unrevealed.length === 0) return;
+
+    const doReveal = () => {
+      const chosen = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+      handleGuess(chosen);
+    };
+
+    if (isPremium) {
+      doReveal();
+    } else {
+      triggerAdBreak({
+        type: 'reward',
+        name: 'hangman_letter',
+        adBreakDone: () => {
+          doReveal();
+        },
+      });
+    }
+  };
 
   const startNewGame = () => {
     const poolKey = `hangman_${language}`;
@@ -174,10 +215,7 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
           {/* Interactive Hint */}
           {!isHintRevealed ? (
             <button
-              onClick={() => {
-                setIsHintRevealed(true);
-                if (soundEnabled) playSound('click');
-              }}
+              onClick={handleRevealHintWithAd}
               className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer group ${
                 errors >= 3
                   ? 'border-amber-500 bg-amber-500/20 text-amber-700 dark:text-amber-300 animate-pulse'
@@ -198,6 +236,18 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
                 {puzzle.hint}
               </span>
             </div>
+          )}
+
+          {/* Letter reveal reward button */}
+          {!isWon && !isLost && (
+            <button
+              onClick={handleRevealLetterWithAd}
+              className="px-2.5 py-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+              title={isEn ? 'Reveal 1 Letter' : '1 Harf Aç'}
+            >
+              <Sparkles size={13} />
+              <span>{isEn ? 'Letter' : 'Harf Aç'}</span>
+            </button>
           )}
         </div>
 

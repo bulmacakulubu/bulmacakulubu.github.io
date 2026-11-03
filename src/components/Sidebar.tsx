@@ -13,6 +13,9 @@ import {
   Trophy,
   Boxes,
   Grid3X3,
+  LayoutGrid,
+  Shuffle,
+  Download,
 } from 'lucide-react';
 import { GameId, Track } from '../types';
 
@@ -130,6 +133,50 @@ const GAME_GUIDES: Record<GameId, { tr: GameGuide; en: GameGuide }> = {
         'Gray: Letter does not exist in the secret word.'
       ],
       controls: 'Type letters and press Enter'
+    }
+  },
+  'kare-bulmaca': {
+    tr: {
+      tag: 'Gazete Tipi Çengel Bulmaca',
+      summary: 'Numaralandırılmış kare ızgarayı yatay ve dikey ipuçlarıyla kelime kelime doldurun.',
+      rules: [
+        'Hücreye tıklayarak yatay ve dikey yönü değiştirin.',
+        'Ok tuşlarıyla ızgarada serbestçe gezinebilirsiniz.',
+        'Tıkandığınızda Harf Aç butonu ile ipucu alabilirsiniz.'
+      ],
+      controls: 'Tıklama / Ok Tuşları / Klavye Harfleri'
+    },
+    en: {
+      tag: 'Classic Crossword',
+      summary: 'Fill the numbered crossword grid using across and down clues.',
+      rules: [
+        'Click a cell to switch between across and down.',
+        'Navigate the grid freely using keyboard arrow keys.',
+        'Use the hint button to reveal tough letters.'
+      ],
+      controls: 'Click / Arrow Keys / Typing'
+    }
+  },
+  'anagram': {
+    tr: {
+      tag: 'Harf Çözücü & Kelime Avı',
+      summary: 'Karışık harf tekerleğinden tüm geçerli hedef kelimeleri türetin ve kutucukları açın.',
+      rules: [
+        'Harflere sırayla dokunun veya klavyeyle doğrudan yazın.',
+        'Bulduğunuz kelimeler ilgili harf sayısına göre listeye yerleşir.',
+        'Hedef dışındaki geçerli kelimeler bonus yıldız puanı kazandırır.'
+      ],
+      controls: 'Harflere Tıklama / Klavye / Boşluk (Karıştır)'
+    },
+    en: {
+      tag: 'Anagram Solver',
+      summary: 'Form valid words from the scrambled letters to fill all target slots.',
+      rules: [
+        'Tap letters in order or type directly on the keyboard.',
+        'Found words automatically populate the word boxes.',
+        'Extra valid words grant bonus star points.'
+      ],
+      controls: 'Click / Typing / Space (Shuffle)'
     }
   },
   'kelime-turetme': {
@@ -315,6 +362,8 @@ const GAME_ITEMS_TR: { id: GameId; label: string; icon: any }[] = [
   { id: 'baglantilar', label: 'Bağlantılar (Connections)', icon: Boxes },
   { id: 'nonogram', label: 'Nonogram (Piksel)', icon: Grid3X3 },
   { id: 'kelime-bulmaca', label: 'Kelime Bulmaca', icon: Type },
+  { id: 'kare-bulmaca', label: 'Kare / Çengel Bulmaca', icon: LayoutGrid },
+  { id: 'anagram', label: 'Anagram Çözücü', icon: Shuffle },
   { id: 'kelime-turetme', label: 'Kelime Türetme', icon: FileText },
   { id: 'sozcuk-avi', label: 'Sözcük Avı', icon: Search },
   { id: 'satranc', label: 'Satranç', icon: Crown },
@@ -330,6 +379,8 @@ const GAME_ITEMS_EN: { id: GameId; label: string; icon: any }[] = [
   { id: 'baglantilar', label: 'Connections', icon: Boxes },
   { id: 'nonogram', label: 'Nonogram (Picross)', icon: Grid3X3 },
   { id: 'kelime-bulmaca', label: 'Word Puzzle', icon: Type },
+  { id: 'kare-bulmaca', label: 'Crossword Puzzle', icon: LayoutGrid },
+  { id: 'anagram', label: 'Anagram Solver', icon: Shuffle },
   { id: 'kelime-turetme', label: 'Word Builder', icon: FileText },
   { id: 'sozcuk-avi', label: 'Word Search', icon: Search },
   { id: 'satranc', label: 'Chess', icon: Crown },
@@ -360,7 +411,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isPremium,
 }) => {
   const [hoveredGame, setHoveredGame] = useState<{ id: GameId; top: number } | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const gameItems = language === 'tr' ? GAME_ITEMS_TR : GAME_ITEMS_EN;
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      alert(
+        language === 'tr'
+          ? 'Bulmaca Kulübü\'nü telefonunuza veya bilgisayarınıza yüklemek için tarayıcınızın menüsünden (⋮ veya Paylaş) "Ana Ekrana Ekle" ya da "Uygulamayı Yükle" seçeneğine dokunun.'
+          : 'To install Puzzle Club on your device, tap "Add to Home Screen" or "Install App" in your browser menu.'
+      );
+    }
+  };
 
   return (
     <aside className="w-72 border-r flex flex-col h-screen overflow-hidden select-none shrink-0 relative" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)' }}>
@@ -375,7 +452,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {language === 'tr' ? 'Bulmaca Kulübü' : 'Puzzle Club'}
             </h1>
             <p className="text-[10px] text-gray-500 dark:text-gray-400">
-              {language === 'tr' ? '10 oyun · sınırsız mod' : '10 games · infinite mode'}
+              {language === 'tr' ? '14 oyun · sınırsız mod' : '14 games · infinite mode'}
             </p>
           </div>
         </div>
@@ -433,12 +510,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
           );
         })}
 
-        {/* Settings button placed directly below Nokta Avı and above the ad banner */}
-        <div className={`pt-2.5 pb-2 px-1 ${!isPremium ? 'mb-20' : 'mb-4'}`}>
-          <div className="border-t border-[var(--border-color)] mb-2.5 opacity-60"></div>
+        {/* Settings & PWA buttons placed directly below Nokta Avı and above the ad banner */}
+        <div className={`pt-2 pb-2 px-1 space-y-1.5 ${!isPremium ? 'mb-20' : 'mb-4'}`}>
+          <div className="border-t border-[var(--border-color)] mb-2 opacity-60"></div>
+
+          {/* PWA Install Button */}
+          <button
+            onClick={handleInstallApp}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold transition shadow-2xs group cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 flex items-center justify-center transition">
+                <Download size={13} />
+              </div>
+              <span className="font-bold">
+                {language === 'tr' ? 'Uygulamayı İndir' : 'Install App'}
+              </span>
+            </div>
+            <span className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wider">
+              PWA ➔
+            </span>
+          </button>
+
           <button
             onClick={onOpenSettings}
-            className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] text-xs font-bold transition shadow-2xs group cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] text-xs font-bold transition shadow-2xs group cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-800 group-hover:bg-[var(--accent-color)] group-hover:text-white flex items-center justify-center transition">
@@ -449,7 +545,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </div>
             <span className="text-[10px] text-gray-400 group-hover:text-[var(--accent-color)] font-medium">
-              {language === 'tr' ? 'Tema · Ses · KVKK' : 'Theme · Sound · Terms'} ➔
+              {language === 'tr' ? 'Tema · Ses' : 'Theme · Sound'} ➔
             </span>
           </button>
         </div>
