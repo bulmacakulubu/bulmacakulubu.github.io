@@ -54,7 +54,7 @@ export function getDailyPuzzleInfo(): { gameId: GameId; dateKey: string; nextRes
 
 export const defaultSettings: Settings = {
   theme: 'dark',
-  palette: 'emerald',
+  palette: 'slate-rose',
   language: 'tr',
   soundEnabled: true,
   volume: 30,
@@ -117,15 +117,15 @@ export function loadSettings(): Settings {
     if (!data) return defaultSettings;
     const parsed = JSON.parse(data);
 
-    // Apply the requested Emerald & Titanium theme as active
-    const themeAppliedKey = 'bk_theme_applied_emerald_v1';
-    const hasAppliedEmerald = localStorage.getItem(themeAppliedKey);
+    // Apply the requested Slate & Rose Gold theme as active
+    const themeAppliedKey = 'bk_theme_applied_slaterose_v1';
+    const hasAppliedSlateRose = localStorage.getItem(themeAppliedKey);
 
     let palette = parsed.palette;
     let theme = parsed.theme || 'dark';
 
-    if (!hasAppliedEmerald) {
-      palette = 'emerald';
+    if (!hasAppliedSlateRose) {
+      palette = 'slate-rose';
       theme = 'dark';
       localStorage.setItem(themeAppliedKey, 'true');
     }

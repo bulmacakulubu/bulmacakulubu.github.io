@@ -201,9 +201,31 @@
     --accent-light: #252e1f;
     --card-shadow: 0 6px 24px -2px rgba(5, 20, 12, 0.6);
   }
+
+  /* 8. GRAFİT & GÜL ALTIN (Slate & Rose Gold) */
+  :root[data-palette="slate-rose"],
+  body.theme-slate-rose {
+    --bg-main: #1a1d21;
+    --panel-bg: #2c3035;
+    --text-color: #f0f0f0;
+    --accent-gold: #e0a96d;
+    --board-dark: #2c3035;
+    --board-light: #b58863;
+    --border-color: #383e46;
+
+    /* App Standard Variables */
+    --bg-primary: #1a1d21;
+    --bg-secondary: #22262b;
+    --bg-card: #2c3035;
+    --text-primary: #f0f0f0;
+    --accent-color: #e0a96d;
+    --accent-contrast: #1a1d21;
+    --accent-light: #3a2e22;
+    --card-shadow: 0 6px 24px -2px rgba(10, 12, 14, 0.65);
+  }
 }
 
-/* Explicit class definitions for body.theme-obsidian and body.theme-emerald */
+/* Explicit class definitions for body.theme-* */
 body.theme-obsidian {
   --bg-main: #121212;
   --panel-bg: #1e1e1e;
@@ -222,6 +244,16 @@ body.theme-emerald {
   --board-dark: #1b4d3e;
   --board-light: #c8d6e5;
   --border-color: #224d36;
+}
+
+body.theme-slate-rose {
+  --bg-main: #1a1d21;
+  --panel-bg: #2c3035;
+  --text-color: #f0f0f0;
+  --accent-gold: #e0a96d;
+  --board-dark: #2c3035;
+  --board-light: #b58863;
+  --border-color: #383e46;
 }
 
 body {
