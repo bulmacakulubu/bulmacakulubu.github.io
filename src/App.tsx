@@ -640,9 +640,9 @@ export default function App() {
           </div>
         </header>
 
-        {/* Game Container (Responsive, Uniform, Clean Scroll) */}
-        <div className={`flex-1 overflow-y-auto lg:overflow-hidden ${isZenMode ? 'p-0 sm:p-1' : 'px-2 sm:px-4 py-0.5 sm:py-1'} flex flex-col items-center justify-center w-full`}>
-          <div className={`w-full h-full ${isZenMode ? 'max-w-none w-full px-1 sm:px-4' : 'max-w-4xl xl:max-w-5xl'} flex flex-col items-center justify-center py-0.5 transition-all duration-300`}>
+        {/* Game Container (Responsive, Uniform, Clean Scroll, 100% Yellow-Box Bounds) */}
+        <div className={`flex-1 overflow-y-auto lg:overflow-hidden ${isZenMode ? 'p-0 sm:p-1' : 'px-2 sm:px-4 py-1 sm:py-2'} flex flex-col items-center justify-center w-full min-h-0`}>
+          <div className="w-full h-full flex flex-col items-center justify-center transition-all duration-300 min-h-0">
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
                 language={settings.language}

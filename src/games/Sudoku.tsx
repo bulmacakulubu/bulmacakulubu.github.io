@@ -232,7 +232,7 @@ export const Sudoku: React.FC<SudokuProps> = ({
   };
 
   return (
-    <div className="w-full max-w-xl flex flex-col items-center justify-start select-none space-y-2 pt-0.5">
+    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 max-w-xl">
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
         {/* LEFT: Difficulty selector */}
@@ -313,7 +313,7 @@ export const Sudoku: React.FC<SudokuProps> = ({
                 <button
                   key={`${r}-${c}`}
                   onClick={() => setSelectedCell([r, c])}
-                  className={`w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 flex items-center justify-center font-bold text-sm sm:text-base relative transition-all cursor-pointer ${borderR} ${borderB} ${
+                  className={`w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11 max-h-[calc((100vh-230px)/9)] max-w-[calc((100vh-230px)/9)] aspect-square flex items-center justify-center font-bold text-xs sm:text-base relative transition-all cursor-pointer ${borderR} ${borderB} ${
                     isSelected
                       ? 'bg-blue-600 text-white z-10 scale-105 shadow-sm'
                       : isSameNumber

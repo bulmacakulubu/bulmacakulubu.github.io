@@ -387,9 +387,9 @@ export const Satranc: React.FC<SatrancProps> = ({
   );
 
   return (
-    <div className="w-full max-w-4xl flex flex-col items-center justify-start select-none space-y-2.5 pt-0.5">
+    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 max-w-5xl">
       {/* UNIFORM CONTROL BAR */}
-      <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 pb-1.5 border-b border-[var(--border-color)]">
+      <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-1.5 pb-1 border-b border-[var(--border-color)] shrink-0">
         {/* LEFT: Game Mode Selector */}
         <div className="flex flex-wrap items-center bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {!isOnline ? (
@@ -632,11 +632,7 @@ export const Satranc: React.FC<SatrancProps> = ({
                     <div
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
-                      className={`w-9 h-9 sm:w-11 sm:h-11 md:w-12 md:h-12 ${
-                        !isPanelVisible
-                          ? 'lg:w-16 lg:h-16 xl:w-20 xl:h-20 2xl:w-22 2xl:h-22'
-                          : 'lg:w-14 lg:h-14 xl:w-16 xl:h-16 2xl:w-18 2xl:h-18'
-                      } flex items-center justify-center cursor-pointer transition-all duration-200 relative select-none ${
+                      className={`w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-15 2xl:h-15 max-h-[calc((100vh-210px)/8)] max-w-[calc((100vh-210px)/8)] aspect-square flex items-center justify-center cursor-pointer transition-all duration-200 relative select-none ${
                         isDark ? 'text-white' : 'text-gray-900'
                       } ${isSelected ? 'ring-3 ring-amber-500 z-10 scale-102 shadow-md' : 'hover:opacity-90'}`}
                       style={{
@@ -650,8 +646,8 @@ export const Satranc: React.FC<SatrancProps> = ({
                         <div
                           className={`absolute z-10 rounded-full transition-all ${
                             piece
-                              ? 'w-7 h-7 sm:w-9 sm:h-9 xl:w-12 xl:h-12 border-3 xl:border-4 border-emerald-500 bg-emerald-500/20'
-                              : 'w-3 h-3 sm:w-3.5 sm:h-3.5 xl:w-4 xl:h-4 bg-emerald-600/75 dark:bg-emerald-400/80 shadow-xs'
+                              ? 'w-6 h-6 sm:w-8 sm:h-8 xl:w-10 xl:h-10 border-3 xl:border-4 border-emerald-500 bg-emerald-500/20'
+                              : 'w-2.5 h-2.5 sm:w-3 sm:h-3 xl:w-3.5 xl:h-3.5 bg-emerald-600/75 dark:bg-emerald-400/80 shadow-xs'
                           }`}
                         />
                       )}
@@ -664,11 +660,7 @@ export const Satranc: React.FC<SatrancProps> = ({
                       )}
 
                       {/* Chess Piece Symbol */}
-                      <span className={`text-2xl sm:text-3xl md:text-3.5xl ${
-                        !isPanelVisible
-                          ? 'lg:text-4.5xl xl:text-5.5xl 2xl:text-6xl'
-                          : 'lg:text-4xl xl:text-4.5xl 2xl:text-5xl'
-                      } leading-none inline-block transform scale-110 z-5 select-none font-chess`}>
+                      <span className="text-xl sm:text-2xl md:text-3xl lg:text-3.5xl xl:text-4xl leading-none inline-block transform scale-110 z-5 select-none font-chess">
                         {piece ? PIECE_SYMBOLS[piece] : ''}
                       </span>
                     </div>
@@ -682,7 +674,7 @@ export const Satranc: React.FC<SatrancProps> = ({
         {/* SIDEBAR: ACADEMY LESSONS LIST OR MOVE HISTORY (Togglable) */}
         {isPanelVisible && (
           <div
-            className="w-full md:w-64 lg:w-72 xl:w-80 2xl:w-96 border rounded-2xl p-2.5 sm:p-3 flex flex-col shadow-xs max-h-[380px] lg:max-h-[460px] xl:max-h-[540px] 2xl:max-h-[600px] overflow-hidden animate-fadeIn"
+            className="w-full md:w-64 lg:w-72 xl:w-80 border rounded-2xl p-2.5 sm:p-3 flex flex-col shadow-xs max-h-[calc(100vh-210px)] overflow-hidden animate-fadeIn"
             style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
           >
             {mode === 'academy' ? (

@@ -309,7 +309,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl flex flex-col items-center justify-start select-none space-y-2 pt-0">
+    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 max-w-5xl xl:max-w-6xl">
       {/* COMPACT & SPACIOUS CONTROL BAR */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-2 pb-2 border-b border-[var(--border-color)]">
         {/* WIDE CATEGORY SELECTOR (No scroll, fitted buttons) */}

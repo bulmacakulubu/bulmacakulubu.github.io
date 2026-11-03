@@ -370,7 +370,7 @@ export const Nonogram: React.FC<NonogramProps> = ({
   const is5x5 = sizeMode === '5x5';
 
   return (
-    <div className="w-full max-w-2xl sm:max-w-3xl flex flex-col items-center justify-start select-none space-y-3 pt-1">
+    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 max-w-3xl sm:max-w-4xl">
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
         {/* LEFT: Grid Size Selector */}

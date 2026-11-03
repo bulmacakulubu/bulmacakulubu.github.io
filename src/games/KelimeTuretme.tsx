@@ -243,7 +243,7 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-start select-none space-y-3 pt-1 relative max-w-4xl">
+    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 relative max-w-4xl xl:max-w-5xl">
       {/* Toast Alert */}
       {toastMessage && (
         <div className="absolute -top-3 z-30 px-4 py-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">

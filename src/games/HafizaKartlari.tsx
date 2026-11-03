@@ -152,7 +152,7 @@ export const HafizaKartlari: React.FC<HafizaKartlariProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center select-none space-y-3 pt-0.5">
+    <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 max-w-xl sm:max-w-2xl">
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full max-w-xl flex items-center justify-between pb-1.5 border-b border-[var(--border-color)] text-xs font-semibold">
         {/* LEFT: Grid Mode */}
