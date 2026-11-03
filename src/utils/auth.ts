@@ -67,9 +67,10 @@ export function loginWithGoogleData(userData: { name: string; email: string; ava
 }
 
 export const GOOGLE_AUTH_CONFIG = {
-  // Google Cloud Console'dan alınan Web Client ID
-  // Örn: 1234567890-abcdef.apps.googleusercontent.com
-  clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
+  // Google Cloud Console Web Client ID
+  clientId:
+    import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+    '892768491664-j9gnqqclp2djh7iimce6sk0ph2lr92et.apps.googleusercontent.com',
 };
 
 export function loginWithGoogleCredential(credential: string): UserProfile | null {

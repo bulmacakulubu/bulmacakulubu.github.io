@@ -37,52 +37,60 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   useEffect(() => {
     if (!isOpen || user.provider === 'google') return;
 
-    if (window.google?.accounts?.id && googleClientId) {
-      try {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: (response: any) => {
-            if (response.credential) {
-              const profile = loginWithGoogleCredential(response.credential);
-              if (profile) {
-                onUserChange(profile);
-                setSyncSuccess(true);
-                setTimeout(() => setSyncSuccess(false), 2000);
+    const renderButton = () => {
+      if (window.google?.accounts?.id && googleClientId) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: googleClientId,
+            callback: (response: any) => {
+              if (response.credential) {
+                const profile = loginWithGoogleCredential(response.credential);
+                if (profile) {
+                  onUserChange(profile);
+                  setSyncSuccess(true);
+                  setTimeout(() => {
+                    setSyncSuccess(false);
+                    onClose();
+                  }, 1200);
+                }
               }
-            }
-          },
-        });
-
-        const btnContainer = document.getElementById('google-btn-container');
-        if (btnContainer) {
-          btnContainer.innerHTML = '';
-          window.google.accounts.id.renderButton(btnContainer, {
-            theme: 'outline',
-            size: 'large',
-            width: 320,
-            text: 'signin_with',
-            shape: 'pill',
+            },
           });
+
+          const btnContainer = document.getElementById('google-btn-container');
+          if (btnContainer) {
+            btnContainer.innerHTML = '';
+            window.google.accounts.id.renderButton(btnContainer, {
+              theme: 'outline',
+              size: 'large',
+              width: 320,
+              text: 'signin_with',
+              shape: 'pill',
+            });
+          }
+          return true;
+        } catch (e) {
+          console.warn('Google Sign In init failed', e);
         }
-      } catch (e) {
-        console.warn('Google Sign In init failed', e);
       }
+      return false;
+    };
+
+    if (!renderButton()) {
+      const interval = setInterval(() => {
+        if (renderButton()) {
+          clearInterval(interval);
+        }
+      }, 300);
+      return () => clearInterval(interval);
     }
-  }, [isOpen, googleClientId, user.provider]);
+  }, [isOpen, googleClientId, user.provider, onClose, onUserChange]);
 
   if (!isOpen) return null;
 
   const totalWon = Object.values(stats).reduce((acc, s) => acc + (s.won || 0), 0);
   const totalPlayed = Object.values(stats).reduce((acc, s) => acc + (s.played || 0), 0);
   const maxStreak = Math.max(...Object.values(stats).map((s) => s.maxStreak || 0), 0);
-
-  const handleQuickGoogleLogin = (name: string, email: string, avatarSeed: string) => {
-    const avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}&backgroundColor=b6e3f4`;
-    const updated = loginWithGoogleData({ name, email, avatar });
-    onUserChange(updated);
-    setSyncSuccess(true);
-    setTimeout(() => setSyncSuccess(false), 3000);
-  };
 
   const handleCustomGoogleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
