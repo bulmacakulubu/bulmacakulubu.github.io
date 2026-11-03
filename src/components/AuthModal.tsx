@@ -104,8 +104,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const handleSignOut = () => {
-    const guest = signOutUser();
+    const guest = signOutUser(user.email);
     onUserChange(guest);
+    setCustomEmail('');
+    setCustomName('');
   };
 
   return (

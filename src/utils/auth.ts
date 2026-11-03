@@ -93,8 +93,27 @@ export function loginWithGoogleCredential(credential: string): UserProfile | nul
   return profile;
 }
 
-export function signOutUser(): UserProfile {
-  localStorage.removeItem(STORAGE_KEY);
+export function signOutUser(email?: string): UserProfile {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+
+  // Google Identity Services oturumunu tamamen kapatma ve otomatik hatırlamayı iptal etme
+  if (typeof window !== 'undefined' && (window as any).google?.accounts?.id) {
+    try {
+      (window as any).google.accounts.id.disableAutoSelect();
+      if (email) {
+        (window as any).google.accounts.id.revoke(email, (done: any) => {
+          console.log('Google hesap yetkisi sıfırlandı:', done);
+        });
+      }
+    } catch (e) {
+      console.warn('Google sign out error:', e);
+    }
+  }
+
   return DEFAULT_GUEST;
 }
 
