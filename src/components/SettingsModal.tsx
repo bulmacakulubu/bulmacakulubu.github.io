@@ -1,6 +1,6 @@
-import React from 'react';
-import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText, Mail } from 'lucide-react';
-import { Settings, AllStats } from '../types';
+import React, { useState } from 'react';
+import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText, Mail, Palette, ChevronDown, Check, Sparkles } from 'lucide-react';
+import { Settings, AllStats, PaletteId } from '../types';
 import { defaultAllStats } from '../utils/storage';
 import { getAchievements } from '../utils/achievements';
 
@@ -13,6 +13,116 @@ interface SettingsModalProps {
   onResetStats: () => void;
   onOpenLegal?: () => void;
 }
+
+export interface PaletteItem {
+  id: PaletteId;
+  name: string;
+  tag: string;
+  category: 'Lüks & Metalik' | 'Doğal & Kristal' | 'Modern & Dijital';
+  bg: string;
+  accent: string;
+  darkOnly?: boolean;
+}
+
+export const PALETTES: PaletteItem[] = [
+  // Lüks & Metalik
+  {
+    id: 'rose-bronze',
+    name: 'Gül Bronzu & Bakır',
+    tag: 'Füme, Bakır & Gül Altın',
+    category: 'Lüks & Metalik',
+    bg: '#17181c',
+    accent: '#b87d65',
+    darkOnly: true,
+  },
+  {
+    id: 'champagne-carbon',
+    name: 'Şampanya & Karbon',
+    tag: 'Karbon & Şampanya Altını',
+    category: 'Lüks & Metalik',
+    bg: '#141518',
+    accent: '#d6b68a',
+    darkOnly: true,
+  },
+  {
+    id: 'royal-amber',
+    name: 'Kraliyet Kehribarı',
+    tag: 'Gece Mavisi & Kehribar',
+    category: 'Lüks & Metalik',
+    bg: '#101216',
+    accent: '#df9858',
+    darkOnly: true,
+  },
+  {
+    id: 'slate-rose',
+    name: 'Grafit & Gül Altın',
+    tag: 'Füme & Rose Gold',
+    category: 'Lüks & Metalik',
+    bg: '#1a1d21',
+    accent: '#e0a96d',
+    darkOnly: true,
+  },
+  {
+    id: 'obsidian',
+    name: 'Obsidiyen & Altın',
+    tag: 'Siyah & 24K Altın',
+    category: 'Lüks & Metalik',
+    bg: '#121212',
+    accent: '#d4af37',
+    darkOnly: true,
+  },
+  // Doğal & Kristal
+  {
+    id: 'emerald',
+    name: 'Zümrüt & Titan',
+    tag: 'Koyu Zümrüt & Titan Altın',
+    category: 'Doğal & Kristal',
+    bg: '#0b1f15',
+    accent: '#c5a059',
+    darkOnly: true,
+  },
+  {
+    id: 'nordic',
+    name: 'Nordic Sage',
+    tag: 'İskandinav Adaçayı & Huş',
+    category: 'Doğal & Kristal',
+    bg: '#2b6146',
+    accent: '#e5ece5',
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora',
+    tag: 'Kristal Zümrüt & Turkuaz',
+    category: 'Doğal & Kristal',
+    bg: '#0d9488',
+    accent: '#2dd4bf',
+  },
+  // Modern & Dijital
+  {
+    id: 'kyoto',
+    name: 'Neo Kyoto',
+    tag: 'Sıcak Terrakotta & Gece',
+    category: 'Modern & Dijital',
+    bg: '#c84b31',
+    accent: '#f2e9dc',
+  },
+  {
+    id: 'cyber',
+    name: 'Cyber Indigo',
+    tag: 'Elektrik Çivit Mavisi',
+    category: 'Modern & Dijital',
+    bg: '#4f46e5',
+    accent: '#e7ebfa',
+  },
+  {
+    id: 'monochrome',
+    name: 'Monochrome OLED',
+    tag: 'Minimal & Saf Karartma',
+    category: 'Modern & Dijital',
+    bg: '#000000',
+    accent: '#fafafa',
+  },
+];
 
 const GAME_NAMES: Record<string, string> = {
   'kelime-bulmaca': 'Kelime Bulmaca',
@@ -42,7 +152,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const [isPaletteDropdownOpen, setIsPaletteDropdownOpen] = useState(false);
   const totalRecordedGames = Object.values(stats || {}).reduce((acc, s) => acc + (s?.played || 0), 0);
+
+  const currentPalette = PALETTES.find((p) => p.id === settings.palette) ||
+    PALETTES.find((p) => (
+      (settings.palette === 'sage' && p.id === 'nordic') ||
+      (settings.palette === 'classic' && p.id === 'kyoto') ||
+      (settings.palette === 'pastel' && p.id === 'aurora') ||
+      (settings.palette === 'oled' && p.id === 'monochrome')
+    )) || PALETTES[0];
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
@@ -63,142 +182,133 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Content */}
         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-          {/* Renk Paleti */}
-          <div className="space-y-2">
+          {/* Renk Paleti Açılır Menü */}
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium text-sm">2026 Tasarım Ödüllü Paletler</div>
-                <div className="text-xs text-gray-500">Awwwards & FWA ödüllü 5 çağdaş renk armonisi</div>
+                <div className="font-semibold text-sm flex items-center gap-2">
+                  <Palette size={16} className="text-amber-400" />
+                  <span>Renk Teması & Palet</span>
+                </div>
+                <div className="text-xs text-gray-500">Açılır menüden 11 özel tasarım renk temasını seçin</div>
               </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] border border-[var(--border-color)]">
+                {currentPalette.name}
+              </span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2 pt-1">
+
+            {/* Açılır Menü Tetikleyici (Dropdown Trigger with Palette Icon) */}
+            <div className="relative">
               <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'slate-rose', theme: 'dark' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'slate-rose'
-                    ? 'border-amber-400 bg-zinc-900 ring-2 ring-amber-400/30'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
+                type="button"
+                onClick={() => setIsPaletteDropdownOpen(!isPaletteDropdownOpen)}
+                className="w-full flex items-center justify-between p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--accent-color)] transition shadow-xs group cursor-pointer"
               >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#1a1d21] border border-[#e0a96d] shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#e0a96d]"></span>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--accent-light)] text-[var(--accent-color)] shadow-xs transition-transform group-hover:scale-105 border border-[var(--accent-color)]/20">
+                    <Palette size={19} />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-bold flex items-center gap-2">
+                      <span>{currentPalette.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/20 text-gray-400 font-normal">
+                        {currentPalette.category}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-gray-400">{currentPalette.tag}</div>
+                  </div>
                 </div>
-                <div className="text-xs font-bold leading-tight">Grafit & Gül Altın</div>
-                <div className="text-[10px] text-amber-300 font-semibold">Füme & Rose Gold</div>
+
+                <div className="flex items-center gap-2.5">
+                  <div className="flex items-center -space-x-1 p-1 rounded-lg bg-black/30 border border-white/5">
+                    <span className="w-4 h-4 rounded-full border border-white/20 shadow-xs" style={{ backgroundColor: currentPalette.bg }} />
+                    <span className="w-4 h-4 rounded-full border border-white/20 shadow-xs" style={{ backgroundColor: currentPalette.accent }} />
+                  </div>
+                  <ChevronDown
+                    size={16}
+                    className={`text-gray-400 transition-transform duration-200 ${isPaletteDropdownOpen ? 'rotate-180 text-[var(--accent-color)]' : ''}`}
+                  />
+                </div>
               </button>
 
-              <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'emerald', theme: 'dark' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'emerald'
-                    ? 'border-emerald-500 bg-emerald-950/40 ring-2 ring-emerald-500/30'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#1b4d3e] border border-emerald-400 shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#c5a059]"></span>
+              {/* Açılır Menü Listesi */}
+              {isPaletteDropdownOpen && (
+                <div className="mt-2 p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl space-y-3 animate-fadeIn max-h-72 overflow-y-auto">
+                  {(['Lüks & Metalik', 'Doğal & Kristal', 'Modern & Dijital'] as const).map((category) => (
+                    <div key={category} className="space-y-1.5">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-2 pt-1 flex items-center gap-1.5">
+                        <Sparkles size={11} className="text-amber-400" />
+                        <span>{category}</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {PALETTES.filter((p) => p.category === category).map((p) => {
+                          const isSelected = currentPalette.id === p.id;
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => {
+                                onUpdateSettings({
+                                  ...settings,
+                                  palette: p.id,
+                                  theme: p.darkOnly ? 'dark' : settings.theme,
+                                });
+                                setIsPaletteDropdownOpen(false);
+                              }}
+                              className={`flex items-center justify-between p-2 rounded-lg border text-left transition cursor-pointer ${
+                                isSelected
+                                  ? 'border-[var(--accent-color)] bg-[var(--accent-light)] ring-1 ring-[var(--accent-color)]/30'
+                                  : 'border-transparent hover:bg-[var(--bg-secondary)]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="flex items-center -space-x-1 shrink-0">
+                                  <span className="w-3.5 h-3.5 rounded-full border border-white/30" style={{ backgroundColor: p.bg }} />
+                                  <span className="w-3.5 h-3.5 rounded-full border border-white/30 shadow-xs" style={{ backgroundColor: p.accent }} />
+                                </div>
+                                <div className="truncate">
+                                  <div className="text-xs font-semibold truncate">{p.name}</div>
+                                  <div className="text-[10px] text-gray-400 truncate">{p.tag}</div>
+                                </div>
+                              </div>
+                              {isSelected && <Check size={14} className="text-[var(--accent-color)] shrink-0 ml-1.5" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="text-xs font-bold leading-tight">Zümrüt & Titan</div>
-                <div className="text-[10px] text-emerald-400 font-semibold">Yeşil & Altın</div>
-              </button>
+              )}
+            </div>
 
-              <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'obsidian', theme: 'dark' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'obsidian'
-                    ? 'border-amber-500 bg-amber-950/40 ring-2 ring-amber-500/30'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#121212] border border-amber-400 shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#d4af37]"></span>
-                </div>
-                <div className="text-xs font-bold leading-tight">Obsidiyen & Altın</div>
-                <div className="text-[10px] text-amber-400 font-semibold">Siyah & Altın</div>
-              </button>
-
-              <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'nordic' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'nordic' || settings.palette === 'sage'
-                    ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 ring-2 ring-emerald-500/20'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#2b6146] shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#e5ece5]"></span>
-                </div>
-                <div className="text-xs font-bold leading-tight">Nordic Sage</div>
-                <div className="text-[10px] text-gray-400">İskandinav Adaçayı</div>
-              </button>
-
-              <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'kyoto' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'kyoto' || settings.palette === 'classic'
-                    ? 'border-orange-600 bg-orange-50/50 dark:bg-orange-950/30 ring-2 ring-orange-500/20'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#c84b31] shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#f2e9dc]"></span>
-                </div>
-                <div className="text-xs font-bold leading-tight">Neo Kyoto</div>
-                <div className="text-[10px] text-gray-400">Sıcak Terrakotta</div>
-              </button>
-
-              <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'cyber' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'cyber'
-                    ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/30 ring-2 ring-indigo-500/20'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#4f46e5] shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#e7ebfa]"></span>
-                </div>
-                <div className="text-xs font-bold leading-tight">Cyber Indigo</div>
-                <div className="text-[10px] text-gray-400">Elektrik Gece</div>
-              </button>
-
-              <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'aurora' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'aurora' || settings.palette === 'pastel'
-                    ? 'border-teal-600 bg-teal-50/50 dark:bg-teal-950/30 ring-2 ring-teal-500/20'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-[#0d9488] shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#def6ee]"></span>
-                </div>
-                <div className="text-xs font-bold leading-tight">Aurora</div>
-                <div className="text-[10px] text-gray-400">Kristal Zümrüt</div>
-              </button>
-
-              <button
-                onClick={() => onUpdateSettings({ ...settings, palette: 'monochrome' })}
-                className={`p-2.5 rounded-xl border text-left transition flex flex-col gap-1.5 ${
-                  settings.palette === 'monochrome' || settings.palette === 'oled'
-                    ? 'border-zinc-800 bg-zinc-100 dark:bg-zinc-900 ring-2 ring-zinc-500/20'
-                    : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3.5 h-3.5 rounded-full bg-black dark:bg-white border border-gray-400 shadow-xs"></span>
-                  <span className="w-2.5 h-2.5 rounded-full bg-zinc-400"></span>
-                </div>
-                <div className="text-xs font-bold leading-tight">Monochrome</div>
-                <div className="text-[10px] text-gray-400">Minimal & OLED</div>
-              </button>
+            {/* Hızlı Seçim Rozetleri (Quick Select Pills) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
+              {PALETTES.map((p) => {
+                const isSelected = currentPalette.id === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    title={`${p.name} (${p.tag})`}
+                    onClick={() => {
+                      onUpdateSettings({
+                        ...settings,
+                        palette: p.id,
+                        theme: p.darkOnly ? 'dark' : settings.theme,
+                      });
+                    }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs shrink-0 border transition cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--accent-color)] bg-[var(--accent-light)] text-[var(--accent-color)] font-bold shadow-2xs'
+                        : 'border-[var(--border-color)] bg-[var(--bg-secondary)]/50 text-gray-400 hover:text-white hover:border-gray-500'
+                    }`}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: p.accent }} />
+                    <span className="truncate max-w-[100px]">{p.name}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

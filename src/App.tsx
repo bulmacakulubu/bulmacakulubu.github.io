@@ -143,7 +143,7 @@ export default function App() {
 
     // Remove old theme-* classes from body and add active theme
     document.body.className = document.body.className
-      .replace(/theme-\w+/g, '')
+      .replace(/theme-[\w-]+/g, '')
       .trim();
     document.body.classList.add(`theme-${settings.palette || 'emerald'}`);
 

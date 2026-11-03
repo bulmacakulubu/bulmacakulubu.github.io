@@ -223,6 +223,72 @@
     --accent-light: #3a2e22;
     --card-shadow: 0 6px 24px -2px rgba(10, 12, 14, 0.65);
   }
+
+  /* 9. ŞAMPANYA & KARBON (Champagne & Carbon - Resim 1) */
+  :root[data-palette="champagne-carbon"],
+  body.theme-champagne-carbon {
+    --bg-main: #141518;
+    --panel-bg: #1c1e24;
+    --text-color: #f3f4f6;
+    --accent-gold: #d6b68a;
+    --board-dark: #2d313a;
+    --board-light: #d5c7b3;
+    --border-color: #363942;
+
+    /* App Standard Variables */
+    --bg-primary: #141518;
+    --bg-secondary: #191b20;
+    --bg-card: #1c1e24;
+    --text-primary: #f3f4f6;
+    --accent-color: #d6b68a;
+    --accent-contrast: #141518;
+    --accent-light: #2d281f;
+    --card-shadow: 0 6px 24px -2px rgba(8, 9, 12, 0.65);
+  }
+
+  /* 10. KRALİYET KEHRİBARI (Royal Amber & Night - Resim 2) */
+  :root[data-palette="royal-amber"],
+  body.theme-royal-amber {
+    --bg-main: #101216;
+    --panel-bg: #171a22;
+    --text-color: #f0f2f5;
+    --accent-gold: #df9858;
+    --board-dark: #232730;
+    --board-light: #bc875b;
+    --border-color: #333742;
+
+    /* App Standard Variables */
+    --bg-primary: #101216;
+    --bg-secondary: #14161d;
+    --bg-card: #171a22;
+    --text-primary: #f0f2f5;
+    --accent-color: #df9858;
+    --accent-contrast: #101216;
+    --accent-light: #2e2217;
+    --card-shadow: 0 6px 24px -2px rgba(6, 7, 10, 0.65);
+  }
+
+  /* 11. GÜL BRONZU & BAKIR (Rose Bronze & Copper - Resim 3) */
+  :root[data-palette="rose-bronze"],
+  body.theme-rose-bronze {
+    --bg-main: #17181c;
+    --panel-bg: #202126;
+    --text-color: #f5f4f2;
+    --accent-gold: #b87d65;
+    --board-dark: #25262c;
+    --board-light: #ba816a;
+    --border-color: #3e3430;
+
+    /* App Standard Variables */
+    --bg-primary: #17181c;
+    --bg-secondary: #1b1c21;
+    --bg-card: #202126;
+    --text-primary: #f5f4f2;
+    --accent-color: #b87d65;
+    --accent-contrast: #ffffff;
+    --accent-light: #33231d;
+    --card-shadow: 0 6px 24px -2px rgba(10, 10, 12, 0.65);
+  }
 }
 
 /* Explicit class definitions for body.theme-* */
@@ -254,6 +320,36 @@ body.theme-slate-rose {
   --board-dark: #2c3035;
   --board-light: #b58863;
   --border-color: #383e46;
+}
+
+body.theme-champagne-carbon {
+  --bg-main: #141518;
+  --panel-bg: #1c1e24;
+  --text-color: #f3f4f6;
+  --accent-gold: #d6b68a;
+  --board-dark: #2d313a;
+  --board-light: #d5c7b3;
+  --border-color: #363942;
+}
+
+body.theme-royal-amber {
+  --bg-main: #101216;
+  --panel-bg: #171a22;
+  --text-color: #f0f2f5;
+  --accent-gold: #df9858;
+  --board-dark: #232730;
+  --board-light: #bc875b;
+  --border-color: #333742;
+}
+
+body.theme-rose-bronze {
+  --bg-main: #17181c;
+  --panel-bg: #202126;
+  --text-color: #f5f4f2;
+  --accent-gold: #b87d65;
+  --board-dark: #25262c;
+  --board-light: #ba816a;
+  --border-color: #3e3430;
 }
 
 body {
