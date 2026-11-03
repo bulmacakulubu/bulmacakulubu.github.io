@@ -16,6 +16,12 @@ import {
   Sparkles,
   History,
   TrendingUp,
+  Trophy,
+  Crown,
+  Zap,
+  Shuffle,
+  Shield,
+  CheckCircle2,
 } from 'lucide-react';
 import { WORDLE_WORDS_TR, WORDLE_WORDS_EN } from '../data/wordBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
@@ -24,6 +30,7 @@ import { shareScore, generateWordleEmojiGrid, openWhatsAppShare } from '../utils
 import { triggerAdBreak } from '../utils/adSenseService';
 import { MultiplayerSession, GameStats } from '../types';
 import { MultiplayerMessage } from '../utils/multiplayer';
+import { loadUserProfile } from '../utils/auth';
 
 interface KelimeBulmacaProps {
   onGameEnd: (won: boolean, timeOrScore?: number) => void;
@@ -331,9 +338,9 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   }, [currentGuess, guesses, gameStatus, wordLength, solution, language]);
 
   const getLetterStatus = (letter: string, i: number) => {
-    if (solution[i] === letter) return 'bg-emerald-600 text-white border-emerald-600 shadow-sm';
-    if (solution.includes(letter)) return 'bg-amber-500 text-white border-amber-500 shadow-sm';
-    return 'bg-gray-400 dark:bg-gray-600 text-white border-gray-400 dark:border-gray-600';
+    if (solution[i] === letter) return 'bg-emerald-700 text-white border-2 border-emerald-400 shadow-md shadow-emerald-950/40';
+    if (solution.includes(letter)) return 'bg-amber-600 text-white border-2 border-amber-300 shadow-md shadow-amber-950/40';
+    return 'bg-zinc-800/90 text-zinc-400 border-2 border-zinc-700/50';
   };
 
   const getKeyStatus = (char: string): string => {
@@ -342,12 +349,12 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       for (let i = 0; i < g.length; i++) {
         if (g[i] === char) {
           if (solution[i] === char) {
-            return 'bg-emerald-600 text-white border-emerald-600';
+            return 'bg-emerald-700 text-white border-emerald-400 shadow-xs';
           }
           if (solution.includes(char)) {
-            status = 'bg-amber-500 text-white border-amber-500';
+            status = 'bg-amber-600 text-white border-amber-400 shadow-xs';
           } else if (!status) {
-            status = 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 opacity-60';
+            status = 'bg-zinc-800/70 text-zinc-500 border-zinc-700/50 opacity-60';
           }
         }
       }
@@ -376,8 +383,42 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   const winRate = played > 0 ? Math.round((won / played) * 100) : 0;
   const maxGuessCount = Math.max(...Object.values(guessDistribution), 1);
 
+  const userProfile = loadUserProfile();
+
+  // Compute used letters with status for the right panel (Option 1 feature)
+  const usedLetters: { char: string; status: 'correct' | 'present' | 'absent' }[] = [];
+  const seenChars = new Set<string>();
+  guesses.forEach((g) => {
+    for (let i = 0; i < g.length; i++) {
+      const c = g[i];
+      if (!seenChars.has(c)) {
+        seenChars.add(c);
+        let s: 'correct' | 'present' | 'absent' = 'absent';
+        if (solution.includes(c)) {
+          s = 'present';
+        }
+        for (const word of guesses) {
+          if (word[i] === c && solution[i] === c) {
+            s = 'correct';
+            break;
+          }
+        }
+        usedLetters.push({ char: c, status: s });
+      }
+    }
+  });
+  usedLetters.sort((a, b) => a.char.localeCompare(b.char, isTr ? 'tr' : 'en'));
+
+  const liveRankings = [
+    { rank: 1, name: 'Eleanor V.', score: 14890, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80' },
+    { rank: 2, name: 'Jurnin V.', score: 14640, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80' },
+    { rank: 3, name: userProfile.name || (isTr ? 'Sen' : 'You'), score: 12000 + (won * 150), avatar: userProfile.avatar, isUser: true },
+    { rank: 4, name: 'Julian F.', score: 11270, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&h=80&q=80' },
+    { rank: 5, name: 'Boran T.', score: 10450, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=80&h=80&q=80' },
+  ];
+
   return (
-    <div className="w-full flex items-start justify-center gap-3 lg:gap-4 xl:gap-5 select-none relative">
+    <div className="w-full flex items-start justify-center gap-3 lg:gap-4 xl:gap-6 select-none relative max-w-7xl">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
@@ -387,45 +428,99 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       )}
 
       {/* ======================================================== */}
-      {/* LEFT DASHBOARD: STATS & GUESS DISTRIBUTION (xl:flex)     */}
+      {/* LEFT DASHBOARD: PROFILE, COMBO & STATS (Option 1 Panel)  */}
       {/* ======================================================== */}
-      <aside className="hidden xl:flex flex-col w-56 lg:w-60 xl:w-64 shrink-0 space-y-2.5 text-xs select-none">
-        {/* Performance Card */}
-        <div className="p-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs">
-          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--border-color)]">
-            <h4 className="font-extrabold text-[11px] tracking-wider uppercase text-gray-500 flex items-center gap-1.5">
-              <BarChart2 size={13} className="text-[var(--accent-color)]" />
-              <span>{isTr ? 'İSTATİSTİKLER' : 'STATISTICS'}</span>
-            </h4>
-            <span className="text-[10px] bg-[var(--accent-color)]/10 text-[var(--accent-color)] px-1.5 py-0.5 rounded-full font-bold">
-              {winRate}% {isTr ? 'Başarı' : 'Win'}
-            </span>
+      <aside className="hidden lg:flex flex-col w-56 lg:w-64 xl:w-72 shrink-0 space-y-2.5 text-xs select-none">
+        {/* Oyuncu Profil Kartı (Arthur Pendelton Style) */}
+        <div className="p-3.5 rounded-2xl border-2 border-amber-500/30 bg-[var(--bg-card)] shadow-md relative overflow-hidden group">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <img
+                src={userProfile.avatar}
+                alt={userProfile.name}
+                className="w-12 h-12 rounded-full object-cover border-2 border-amber-400 p-0.5 shadow-sm"
+              />
+              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 text-black flex items-center justify-center text-[10px] font-black shadow-xs">
+                👑
+              </span>
+            </div>
+            <div className="truncate">
+              <h3 className="font-extrabold text-sm text-[var(--text-primary)] truncate">
+                {userProfile.name || (isTr ? 'Misafir Oyuncu' : 'Guest Player')}
+              </h3>
+              <p className="text-[11px] font-semibold text-amber-500 flex items-center gap-1">
+                <Crown size={12} />
+                <span>{isTr ? 'Usta Çözücü' : 'Grandmaster'}</span>
+              </p>
+            </div>
           </div>
 
-          {/* 4 Metrics Grid */}
-          <div className="grid grid-cols-2 gap-1.5 text-center">
-            <div className="p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-[var(--border-color)]">
-              <div className="text-[9px] text-gray-400 font-bold uppercase">{isTr ? 'Oynanan' : 'Played'}</div>
-              <div className="text-sm font-black text-[var(--text-primary)]">{played}</div>
+          <div className="mt-3 pt-2.5 border-t border-[var(--border-color)] flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-black text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20">
+              <Trophy size={13} />
+              <span>{won} {isTr ? 'Galibiyet' : 'Wins'}</span>
             </div>
-            <div className="p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-[var(--border-color)]">
-              <div className="text-[9px] text-gray-400 font-bold uppercase">{isTr ? 'Kazanılan' : 'Won'}</div>
-              <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">{won}</div>
-            </div>
-            <div className="p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-[var(--border-color)]">
-              <div className="text-[9px] text-gray-400 font-bold uppercase">{isTr ? 'Seri' : 'Streak'}</div>
-              <div className="text-sm font-black text-amber-500 flex items-center justify-center gap-0.5">
-                <Flame size={12} fill="currentColor" /> {streak}
-              </div>
-            </div>
-            <div className="p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-[var(--border-color)]">
-              <div className="text-[9px] text-gray-400 font-bold uppercase">{isTr ? 'En İyi' : 'Best'}</div>
-              <div className="text-sm font-black text-purple-600 dark:text-purple-400">{maxStreak}</div>
-            </div>
+            <span className="text-[10px] font-mono font-bold text-gray-400">
+              {winRate}% {isTr ? 'Başarı' : 'Win Rate'}
+            </span>
           </div>
         </div>
 
-        {/* Guess Distribution Card (Wordle Signature) */}
+        {/* Kombo Seri Kartı (Combo Card with glow) */}
+        <div className="p-3 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-amber-500/25 to-amber-500/15 shadow-md text-center relative overflow-hidden">
+          <div className="text-[10px] font-black uppercase tracking-widest text-amber-400 mb-0.5 flex items-center justify-center gap-1">
+            <Zap size={11} className="animate-bounce" />
+            <span>{isTr ? 'KOMBO SERİSİ' : 'COMBO STREAK'}</span>
+          </div>
+          <div className="text-2xl font-black text-amber-300 drop-shadow-md flex items-center justify-center gap-1">
+            <span>x{streak > 0 ? streak : 1}</span>
+            <Flame size={20} className="text-amber-500 fill-amber-500 animate-pulse" />
+          </div>
+          <p className="text-[10px] text-amber-200/80 mt-0.5">
+            {streak > 2
+              ? (isTr ? '🔥 Alev Alev! Çözmeye Devam!' : '🔥 On Fire! Keep it up!')
+              : (isTr ? 'Seriyi Büyütmek İçin Çöz' : 'Solve to boost streak')}
+          </p>
+        </div>
+
+        {/* Güçlendiriciler ve Yardımcılar */}
+        <div className="p-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs space-y-1.5">
+          <div className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 mb-1 flex items-center gap-1.5">
+            <Sparkles size={12} className="text-amber-400" />
+            <span>{isTr ? 'JOKERLER & GÜÇLER' : 'POWERUPS & HINTS'}</span>
+          </div>
+
+          <button
+            onClick={handleRequestHint}
+            disabled={gameStatus !== 'playing'}
+            className="w-full flex items-center justify-between p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-300 text-xs font-bold transition cursor-pointer disabled:opacity-40"
+          >
+            <div className="flex items-center gap-2">
+              <Lightbulb size={14} className="text-amber-400" />
+              <span>{isTr ? 'Harf Aç (Revealer)' : 'Revealer'}</span>
+            </div>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 font-black">
+              {isPremium ? '∞' : '1'}
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              showToast(isTr ? 'İpucu: Türkçe kelimelerde A, E, İ sıklıkla bulunur!' : 'Hint: Common vowels are E, A, I!');
+            }}
+            className="w-full flex items-center justify-between p-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-300 text-xs font-bold transition cursor-pointer"
+          >
+            <div className="flex items-center gap-2">
+              <Shuffle size={14} className="text-blue-400" />
+              <span>{isTr ? 'Sesli Harf Kontrolü' : 'Vowel Check'}</span>
+            </div>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/20 font-black">
+              {isTr ? 'Aktif' : 'Ready'}
+            </span>
+          </button>
+        </div>
+
+        {/* Guess Distribution Card */}
         <div className="p-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs">
           <h4 className="font-extrabold text-[11px] tracking-wider uppercase text-gray-500 mb-2 flex items-center justify-between">
             <span className="flex items-center gap-1.5">
@@ -442,7 +537,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
               return (
                 <div key={num} className="flex items-center gap-1.5">
                   <span className="w-3 text-right text-gray-400 text-[10px] font-mono">{num}</span>
-                  <div className="flex-1 bg-gray-100 dark:bg-gray-800/80 rounded-md h-4 overflow-hidden flex items-center">
+                  <div className="flex-1 bg-gray-100 dark:bg-gray-800/80 rounded-md h-3.5 overflow-hidden flex items-center">
                     <div
                       style={{ width: `${widthPct}%` }}
                       className={`h-full flex items-center justify-end pr-1 text-[10px] font-black text-white transition-all duration-500 ${
@@ -468,7 +563,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
             <Award size={13} className="text-amber-500" />
             <span>{isTr ? 'KELİME DAĞARCIĞI' : 'WORD MEMORY'}</span>
           </h4>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {[
               { label: isTr ? '5 Harf' : '5 Letters', poolKey: `wordle_${language}_5`, total: WORDLE_WORDS_TR[5].length },
               { label: isTr ? '7 Harf' : '7 Letters', poolKey: `wordle_${language}_7`, total: WORDLE_WORDS_TR[7].length },
@@ -496,9 +591,9 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       </aside>
 
       {/* ======================================================== */}
-      {/* CENTER COLUMN: MAIN GAME & KEYBOARD                      */}
+      {/* CENTER COLUMN: OPTION 1 GOLD-BEVELED GAME BOARD & TRAY   */}
       {/* ======================================================== */}
-      <div className="flex-1 max-w-xl flex flex-col items-center justify-start select-none space-y-1 sm:space-y-1.5 pt-0">
+      <div className="flex-1 max-w-xl flex flex-col items-center justify-start select-none space-y-2 pt-0">
         {/* 1v1 Multiplayer Opponent Live Bar */}
         {isMultiplayer && (
           <div className="w-full max-w-xl p-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-300 animate-fadeIn">
@@ -518,9 +613,9 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         )}
 
         {/* UNIFORM CONTROL BAR */}
-        <div className="w-full max-w-xl flex items-center justify-between pb-1 border-b border-[var(--border-color)]">
-          {/* LEFT: Length selector */}
-          <div className="flex bg-gray-100 dark:bg-gray-800 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
+        <div className="w-full max-w-xl flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
+          {/* Length selector */}
+          <div className="flex bg-gray-100 dark:bg-gray-800/80 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
             {[5, 7, 9].map((len) => (
               <button
                 key={len}
@@ -541,7 +636,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
             ))}
           </div>
 
-          {/* CENTER: Live Metric + Memory Progress */}
+          {/* Metric + Memory Progress */}
           <div className="flex items-center gap-1.5 text-xs font-semibold">
             <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
               {isTr ? 'DENEME' : 'ATTEMPT'} <span className="font-extrabold text-[var(--accent-color)]">{guesses.length}/6</span>
@@ -551,7 +646,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
             </div>
           </div>
 
-          {/* RIGHT: Hint (Rewarded Ad) & Restart Button */}
+          {/* Hint & Restart */}
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleRequestHint}
@@ -573,57 +668,59 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           </div>
         </div>
 
-        {/* Grid (Compact & Perfectly Scaled to Fit Viewport without Scroll) */}
-        <div className="flex flex-col items-center justify-center gap-1 py-0.5">
-          {Array.from({ length: 6 }).map((_, rowIndex) => {
-            const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');
-            const isCompleted = rowIndex < guesses.length;
-            const isCurrent = rowIndex === guesses.length;
+        {/* LÜKS ALTIN ÇERÇEVELİ OYUN ALANI (Option 1 Game Bezel Box) */}
+        <div className="p-3 sm:p-4.5 rounded-3xl border-2 border-amber-500/40 bg-zinc-950/80 shadow-2xl backdrop-blur-md ring-1 ring-amber-400/20 flex flex-col items-center justify-center">
+          <div className="flex flex-col items-center justify-center gap-1.5 sm:gap-2">
+            {Array.from({ length: 6 }).map((_, rowIndex) => {
+              const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');
+              const isCompleted = rowIndex < guesses.length;
+              const isCurrent = rowIndex === guesses.length;
 
-            const cellSize =
-              wordLength === 9
-                ? 'w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-xs sm:text-sm'
-                : wordLength === 7
-                ? 'w-7 h-7 sm:w-8 sm:h-8 md:w-8.5 md:h-8.5 text-xs sm:text-sm'
-                : 'w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 md:w-9 md:h-9 text-sm sm:text-base';
+              const cellSize =
+                wordLength === 9
+                  ? 'w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 md:w-9.5 md:h-9.5 text-xs sm:text-sm'
+                  : wordLength === 7
+                  ? 'w-8.5 h-8.5 sm:w-10 sm:h-10 md:w-11 md:h-11 text-sm sm:text-base'
+                  : 'w-10 h-10 sm:w-12 sm:h-12 md:w-13 md:h-13 text-base sm:text-2xl';
 
-            return (
-              <div
-                key={rowIndex}
-                className={`grid gap-1 transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
-                style={{ gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))` }}
-              >
-                {Array.from({ length: wordLength }).map((_, colIndex) => {
-                  const letter = guess[colIndex] || '';
-                  const isHintLetter = isCurrent && !letter && revealedIndices.includes(colIndex);
-                  let style = 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)]';
+              return (
+                <div
+                  key={rowIndex}
+                  className={`grid gap-1.5 sm:gap-2 transition-transform ${isCurrent && shakeRow ? 'animate-shake' : ''}`}
+                  style={{ gridTemplateColumns: `repeat(${wordLength}, minmax(0, 1fr))` }}
+                >
+                  {Array.from({ length: wordLength }).map((_, colIndex) => {
+                    const letter = guess[colIndex] || '';
+                    const isHintLetter = isCurrent && !letter && revealedIndices.includes(colIndex);
+                    let style = 'bg-zinc-900/90 border-2 border-zinc-700/60 text-white shadow-inner';
 
-                  if (isCompleted) {
-                    style = getLetterStatus(letter, colIndex);
-                  } else if (letter) {
-                    style = 'bg-[var(--bg-card)] border-[var(--accent-color)] text-[var(--text-primary)] scale-105 shadow-sm';
-                  } else if (isHintLetter) {
-                    style = 'bg-amber-500/10 border-amber-400 text-amber-500 font-normal border-dashed';
-                  }
+                    if (isCompleted) {
+                      style = getLetterStatus(letter, colIndex);
+                    } else if (letter) {
+                      style = 'bg-zinc-800/95 border-2 border-amber-400 text-amber-200 scale-105 shadow-lg shadow-amber-500/20';
+                    } else if (isHintLetter) {
+                      style = 'bg-amber-500/10 border-2 border-amber-400 text-amber-400 font-normal border-dashed';
+                    }
 
-                  return (
-                    <div
-                      key={colIndex}
-                      className={`${cellSize} border-2 rounded-xl flex items-center justify-center font-black transition-all duration-150 ${style}`}
-                    >
-                      {letter || (isHintLetter ? solution[colIndex] : '')}
-                    </div>
-                  );
-                })}
-              </div>
-            );
-          })}
+                    return (
+                      <div
+                        key={colIndex}
+                        className={`${cellSize} rounded-xl sm:rounded-2xl flex items-center justify-center font-black transition-all duration-150 select-none ${style}`}
+                      >
+                        {letter || (isHintLetter ? solution[colIndex] : '')}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Game End Banner with Dictionary Definition & Viral Share */}
         {gameStatus !== 'playing' && (
-          <div className="text-center py-1.5 px-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-lg animate-fadeIn max-w-md w-full my-0.5">
-            <div className={`text-xs font-bold mb-1 ${gameStatus === 'won' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+          <div className="text-center py-2 px-3.5 rounded-2xl border-2 border-amber-500/40 bg-[var(--bg-card)] shadow-2xl animate-fadeIn max-w-md w-full my-1">
+            <div className={`text-xs font-bold mb-1 ${gameStatus === 'won' ? 'text-emerald-500' : 'text-rose-500'}`}>
               {gameStatus === 'won'
                 ? (isTr ? 'Muhteşem! Kelimeyi Başarıyla Buldunuz! 🎉' : 'Awesome! You guessed the word correctly! 🎉')
                 : (isTr ? `Oyun Bitti! Doğru Kelime: ${solution}` : `Game Over! The word was: ${solution}`)}
@@ -631,17 +728,17 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
             {/* Dictionary meaning */}
             {meaning && (
-              <div className="my-1 p-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-left text-[11px] text-gray-700 dark:text-gray-300 flex items-start gap-1.5">
-                <BookOpen size={13} className="text-[var(--accent-color)] shrink-0 mt-0.5" />
+              <div className="my-1.5 p-2 rounded-xl bg-zinc-900/80 border border-zinc-700/60 text-left text-[11px] text-gray-200 flex items-start gap-1.5">
+                <BookOpen size={13} className="text-amber-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-[var(--accent-color)] mr-1">{solution}:</span>
+                  <span className="font-extrabold text-amber-400 mr-1">{solution}:</span>
                   <span className="italic">{meaning}</span>
                 </div>
               </div>
             )}
 
             {/* Share Buttons */}
-            <div className="flex items-center justify-center gap-1.5 mt-1.5">
+            <div className="flex items-center justify-center gap-1.5 mt-2">
               <button
                 onClick={handleShare}
                 className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
@@ -668,10 +765,10 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           </div>
         )}
 
-        {/* Virtual Keyboard (Ultra-Fitted, Never Cut Off) */}
-        <div className="w-full max-w-lg space-y-1 pt-0.5">
+        {/* LÜKS KLAVYE TEPSİSİ (Option 1 Tactile Keyboard Tray) */}
+        <div className="w-full max-w-lg p-2 sm:p-2.5 rounded-2xl border border-amber-500/30 bg-zinc-950/80 shadow-xl backdrop-blur-xs space-y-1 sm:space-y-1.5">
           {keyboardRows.map((row, rIdx) => (
-            <div key={rIdx} className="flex justify-center gap-1">
+            <div key={rIdx} className="flex justify-center gap-1 sm:gap-1.5">
               {row.map((key) => {
                 const customStatus = getKeyStatus(key);
                 const isSpecial = key === 'GİR' || key === 'ENTER' || key === '⌫';
@@ -679,11 +776,15 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                   <button
                     key={key}
                     onClick={() => handleKey(key === '⌫' ? 'BACKSPACE' : key)}
-                    className={`h-7 sm:h-8 md:h-8.5 rounded-lg font-bold text-xs border transition active:scale-95 shadow-2xs cursor-pointer ${
+                    className={`h-8 sm:h-9 md:h-10 rounded-xl font-black text-xs sm:text-sm border transition active:scale-95 shadow-xs cursor-pointer ${
                       customStatus
                         ? customStatus
-                        : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:bg-gray-100 dark:hover:bg-gray-800'
-                    } ${isSpecial ? 'px-2 sm:px-3 font-extrabold text-[10px] sm:text-[11px]' : 'min-w-[22px] sm:min-w-[28px] md:min-w-[32px] px-1'}`}
+                        : 'bg-zinc-900/90 border-zinc-700/70 text-zinc-100 hover:border-amber-400 hover:text-amber-200'
+                    } ${
+                      isSpecial
+                        ? 'px-2.5 sm:px-3.5 bg-amber-500/20 text-amber-300 border-amber-500/40 font-extrabold text-[10px] sm:text-xs'
+                        : 'min-w-[24px] sm:min-w-[30px] md:min-w-[34px] px-1'
+                    }`}
                   >
                     {key}
                   </button>
@@ -695,93 +796,132 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* RIGHT DASHBOARD: RECENT WORDS & 1v1 DUEL (lg:flex)        */}
+      {/* RIGHT DASHBOARD: LIVE RANKINGS, USED LETTERS & TROPHIES   */}
       {/* ======================================================== */}
-      <aside className="hidden lg:flex flex-col w-56 lg:w-60 xl:w-64 shrink-0 space-y-2.5 text-xs select-none">
-        {/* 1v1 Quick Challenge Card */}
-        <div className="p-3 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent shadow-xs">
-          <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 font-extrabold text-[11px] mb-1">
+      <aside className="hidden lg:flex flex-col w-56 lg:w-64 xl:w-72 shrink-0 space-y-2.5 text-xs select-none">
+        {/* Canlı Liderlik Tablosu (Option 1 Live Rankings) */}
+        <div className="p-3 rounded-2xl border-2 border-amber-500/30 bg-[var(--bg-card)] shadow-md">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--border-color)]">
+            <h4 className="font-extrabold text-[11px] tracking-wider uppercase text-amber-400 flex items-center gap-1.5">
+              <Trophy size={13} className="text-amber-400" />
+              <span>{isTr ? 'LİDERLİK SIRALAMASI' : 'LIVE RANKINGS'}</span>
+            </h4>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold">
+              {isTr ? 'CANLI' : 'LIVE'}
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            {liveRankings.map((r) => (
+              <div
+                key={r.rank}
+                className={`flex items-center justify-between p-1.5 rounded-xl border text-xs transition ${
+                  r.isUser
+                    ? 'border-amber-400 bg-amber-500/15 text-amber-200 font-bold shadow-xs ring-1 ring-amber-400/40'
+                    : 'border-[var(--border-color)] bg-[var(--bg-secondary)]/60 text-[var(--text-primary)]'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-4 font-mono font-black text-amber-400 text-xs text-center shrink-0">
+                    {r.rank}.
+                  </span>
+                  <img
+                    src={r.avatar}
+                    alt={r.name}
+                    className="w-6 h-6 rounded-full object-cover border border-amber-400/30 shrink-0"
+                  />
+                  <span className="truncate text-xs font-semibold">{r.name}</span>
+                </div>
+                <span className="font-mono text-[11px] font-bold text-amber-400 shrink-0 ml-1">
+                  {r.score.toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Kullanılan Harfler Havuzu (Option 1 Used Letters) */}
+        <div className="p-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs">
+          <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[var(--border-color)]">
+            <h4 className="font-extrabold text-[11px] tracking-wider uppercase text-gray-400 flex items-center gap-1.5">
+              <span>{isTr ? 'KULLANILAN HARFLER' : 'USED LETTERS'}</span>
+            </h4>
+            <span className="text-[10px] text-gray-500 font-mono">
+              {usedLetters.length}
+            </span>
+          </div>
+
+          {usedLetters.length === 0 ? (
+            <p className="text-[10px] text-gray-400 italic py-1">
+              {isTr ? 'İlk tahminle harfler listelenecek.' : 'Letters will appear with your first guess.'}
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-1">
+              {usedLetters.map(({ char, status }) => (
+                <span
+                  key={char}
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs border ${
+                    status === 'correct'
+                      ? 'bg-emerald-700 text-white border-emerald-400 shadow-xs'
+                      : status === 'present'
+                      ? 'bg-amber-600 text-white border-amber-400 shadow-xs'
+                      : 'bg-zinc-800 text-zinc-500 border-zinc-700'
+                  }`}
+                >
+                  {char}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Kupalar ve Başarılar (Option 1 Trophies) */}
+        <div className="p-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs space-y-2">
+          <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+            <Trophy size={12} className="text-amber-500" />
+            <span>{isTr ? 'KUPALAR & BAŞARILAR' : 'TROPHIES'}</span>
+          </div>
+
+          <div className="space-y-1.5 text-xs">
+            <div className="flex items-center gap-2 p-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300">
+              <span className="text-base">🏆</span>
+              <div className="truncate">
+                <div className="font-bold text-[11px] truncate">{isTr ? 'Kusursuz Çözüm' : 'The Royal Flush'}</div>
+                <div className="text-[9px] text-amber-400/80">{isTr ? 'İlk 2 denemede bilme' : 'Solved in <=2 attempts'}</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-1.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-300">
+              <span className="text-base">🔥</span>
+              <div className="truncate">
+                <div className="font-bold text-[11px] truncate">{isTr ? 'Seri Ustası' : 'Streak Master'}</div>
+                <div className="text-[9px] text-purple-400/80">{isTr ? '3 ve üzeri ardışık zafer' : '3+ win streak'}</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
+              <span className="text-base">👑</span>
+              <div className="truncate">
+                <div className="font-bold text-[11px] truncate">{isTr ? 'Efsanevi Çözücü' : 'Legendary Solver'}</div>
+                <div className="text-[9px] text-emerald-400/80">{isTr ? 'Toplam 10+ galibiyet' : '10+ lifetime wins'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 1v1 Hızlı Düello Butonu */}
+        <div className="p-3 rounded-2xl border border-purple-500/30 bg-purple-500/10 shadow-xs">
+          <div className="flex items-center gap-1.5 text-purple-400 font-extrabold text-[11px] mb-1">
             <Swords size={13} />
             <span>{isTr ? '1v1 ÇEVRİMİÇİ DÜELLO' : '1v1 ONLINE DUEL'}</span>
           </div>
-          <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-2 leading-tight">
-            {isTr
-              ? 'Arkadaşınla aynı kelimeyi eşzamanlı çöz, önce bulan maçı kazansın!'
-              : 'Solve the same word in real-time with a friend. Fastest wins!'}
-          </p>
           <button
             onClick={onOpenMultiplayer}
-            className="w-full py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[11px] font-black transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-[11px] font-black transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer mt-1"
           >
             <Users size={12} />
             <span>{isTr ? 'Düello Başlat' : 'Start Duel'}</span>
           </button>
-        </div>
-
-        {/* Recent Solved Words & Definition Library */}
-        <div className="p-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs flex-1 flex flex-col max-h-[300px]">
-          <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[var(--border-color)]">
-            <h4 className="font-extrabold text-[11px] tracking-wider uppercase text-gray-500 flex items-center gap-1.5">
-              <History size={13} className="text-[var(--accent-color)]" />
-              <span>{isTr ? 'ÇÖZÜLEN KELİMELER' : 'SOLVED WORDS'}</span>
-            </h4>
-            <span className="text-[10px] text-gray-400 font-mono font-bold">
-              {recentSolved.length}
-            </span>
-          </div>
-
-          {recentSolved.length === 0 ? (
-            <div className="py-6 text-center text-gray-400 text-[11px] italic">
-              {isTr ? 'Henüz kelime çözülmedi. İlk galibiyetini al!' : 'No solved words yet. Get your first win!'}
-            </div>
-          ) : (
-            <div className="space-y-1.5 overflow-y-auto flex-1 pr-1">
-              {recentSolved.map((item, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedSolvedWord(item)}
-                  className="p-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/60 dark:hover:bg-gray-800 border border-[var(--border-color)] transition cursor-pointer flex items-center justify-between group"
-                >
-                  <div className="truncate">
-                    <span className="font-black text-[var(--accent-color)] text-xs mr-1.5">{item.word}</span>
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold">
-                      {item.length}H
-                    </span>
-                  </div>
-                  <BookOpen size={11} className="text-gray-400 group-hover:text-[var(--accent-color)] shrink-0" />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Popover meaning card if clicked */}
-          {selectedSolvedWord && selectedSolvedWord.meaning && (
-            <div className="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[10px] text-gray-700 dark:text-gray-300 animate-fadeIn">
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="font-black text-amber-600 dark:text-amber-400">{selectedSolvedWord.word}:</span>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setSelectedSolvedWord(null); }}
-                  className="text-[9px] font-bold text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-              </div>
-              <p className="italic line-clamp-3 leading-tight">{selectedSolvedWord.meaning}</p>
-            </div>
-          )}
-        </div>
-
-        {/* Pro Tip Card */}
-        <div className="p-2.5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs">
-          <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-amber-600 dark:text-amber-400 mb-1">
-            <Sparkles size={12} className="text-amber-500" />
-            <span>{isTr ? 'Günün Taktik İpucu' : 'Pro Tip'}</span>
-          </div>
-          <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-normal">
-            {isTr
-              ? '💡 İlk denemede A, E, İ gibi çok geçen sesli harfleri içeren bir kelime seçmek çözümü hızlandırır.'
-              : '💡 Starting with common vowels like A, E, I reveals the skeleton of the hidden word faster.'}
-          </p>
         </div>
       </aside>
     </div>
