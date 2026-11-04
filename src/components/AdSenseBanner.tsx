@@ -63,9 +63,9 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
           </span>
           <button
             onClick={onOpenRemoveAds}
-            className="flex items-center gap-1 font-extrabold text-[10px] text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+            className="flex items-center gap-1 font-bold text-[10px] text-[var(--text-primary)] hover:underline cursor-pointer opacity-80 hover:opacity-100"
           >
-            <Crown size={11} className="text-amber-500" />
+            <Crown size={11} className="text-[var(--text-primary)]" />
             <span>{isTr ? 'Reklamları Kaldır (VIP)' : 'Remove Ads (VIP)'}</span>
           </button>
         </div>
@@ -89,15 +89,15 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
 
           {/* Clean Placeholder while Google AdSense review is pending */}
           {!adLoaded && (
-            <div className="absolute inset-0 w-full h-full rounded-lg bg-gradient-to-r from-gray-50 via-gray-100 to-gray-50 dark:from-gray-800/40 dark:via-gray-800/70 dark:to-gray-800/40 border border-dashed border-[var(--border-color)] flex items-center justify-center px-3 text-[11px] text-gray-500 dark:text-gray-400 shadow-2xs pointer-events-none">
+            <div className="absolute inset-0 w-full h-full rounded-lg bg-[var(--bg-secondary)]/50 border border-dashed border-[var(--border-color)] flex items-center justify-center px-3 text-[11px] text-[var(--text-primary)]/70 shadow-2xs pointer-events-none">
               <div className="flex items-center justify-center gap-2 font-medium truncate">
-                <Sparkles size={12} className="text-amber-500 shrink-0" />
+                <Sparkles size={12} className="text-[var(--text-primary)] shrink-0 opacity-70" />
                 <span className="truncate">
                   {isTr
                     ? 'Google AdSense Reklam Alanı (ca-pub-1086062430851863)'
                     : 'Google AdSense Ad Space (ca-pub-1086062430851863)'}
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded shrink-0">
+                <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]/80 px-1.5 py-0.5 rounded shrink-0">
                   {isTr ? 'Hazırlanıyor' : 'Ready'}
                 </span>
               </div>

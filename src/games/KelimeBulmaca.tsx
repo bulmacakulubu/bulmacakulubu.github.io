@@ -378,17 +378,17 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
       {/* 1v1 Multiplayer Opponent Live Bar */}
       {isMultiplayer && (
-        <div className="w-full max-w-xl sm:max-w-2xl p-1.5 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-between text-xs font-bold text-purple-600 dark:text-purple-300 animate-fadeIn shrink-0">
+        <div className="w-full max-w-xl sm:max-w-2xl p-1.5 rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-color)] flex items-center justify-between text-xs font-bold text-[var(--text-primary)] animate-fadeIn shrink-0">
           <div className="flex items-center gap-2">
             <Users size={15} />
             <span>1v1 Düello: {multiplayerSession?.opponentName || 'Rakip'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] px-2 py-0.5 rounded-lg bg-purple-600/20">
+            <span className="text-[11px] px-2 py-0.5 rounded-lg bg-[var(--accent-light)] border border-[var(--border-color)]">
               {opponentProgress ? `${opponentProgress.attempt}/6 Deneme` : 'Başlamadı'}
             </span>
             {opponentProgress?.won && (
-              <span className="text-emerald-500 font-black animate-pulse">KAZANDI! 🏆</span>
+              <span className="text-white font-black animate-pulse">KAZANDI! 🏆</span>
             )}
           </div>
         </div>
@@ -397,7 +397,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full max-w-md sm:max-w-lg md:max-w-xl flex items-center justify-between pb-1 border-b border-[var(--border-color)] shrink-0">
         {/* Length selector */}
-        <div className="flex bg-gray-100 dark:bg-gray-800/80 p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
+        <div className="flex bg-[var(--bg-card)] p-0.5 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {[5, 7, 9].map((len) => (
             <button
               key={len}
@@ -409,8 +409,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
               disabled={isMultiplayer}
               className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
                 wordLength === len
-                  ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-[var(--accent-color)] !text-[var(--accent-contrast)] shadow-xs font-black'
+                  : 'text-[var(--text-primary)] opacity-60 hover:opacity-100'
               }`}
             >
               {isTr ? `${len} Harf` : `${len} Letters`}
@@ -432,7 +432,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           <button
             onClick={handleRequestHint}
             disabled={gameStatus !== 'playing'}
-            className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            className="px-2.5 py-1 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
             title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
           >
             <Lightbulb size={13} />
@@ -449,8 +449,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         </div>
       </div>
 
-      {/* LÜKS ALTIN ÇERÇEVELİ OYUN ALANI (Option 1 Game Bezel Box - Widen Sideways by +50%) */}
-      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-2xl border border-amber-500/40 bg-zinc-950/80 shadow-xl backdrop-blur-md ring-1 ring-amber-400/20 flex flex-col items-center justify-center shrink-0">
+      {/* NORDIC MONOCHROME OYUN ALANI */}
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-xl px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)]/50 shadow-xl backdrop-blur-md flex flex-col items-center justify-center shrink-0">
         <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5 w-full">
           {Array.from({ length: 6 }).map((_, rowIndex) => {
             const guess = guesses[rowIndex] || (rowIndex === guesses.length ? currentGuess : '');

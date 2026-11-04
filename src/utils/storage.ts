@@ -54,7 +54,7 @@ export function getDailyPuzzleInfo(): { gameId: GameId; dateKey: string; nextRes
 
 export const defaultSettings: Settings = {
   theme: 'dark',
-  palette: 'slate-rose',
+  palette: 'monochrome',
   language: 'tr',
   soundEnabled: true,
   volume: 30,

@@ -539,17 +539,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* PWA Install Button */}
           <button
             onClick={handleInstallApp}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-xs font-bold transition shadow-2xs group cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] text-xs font-bold transition shadow-2xs group cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 group-hover:scale-105 flex items-center justify-center transition">
+              <div className="w-6 h-6 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] group-hover:scale-105 flex items-center justify-center transition border border-[var(--border-color)]">
                 <Download size={13} />
               </div>
               <span className="font-bold">
                 {language === 'tr' ? 'Uygulamayı İndir' : 'Install App'}
               </span>
             </div>
-            <span className="text-[10px] text-indigo-500 font-semibold uppercase tracking-wider">
+            <span className="text-[10px] text-[var(--text-primary)] opacity-70 font-semibold uppercase tracking-wider">
               PWA ➔
             </span>
           </button>

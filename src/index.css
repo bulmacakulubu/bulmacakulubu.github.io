@@ -146,15 +146,16 @@
   }
 
   :root[data-palette="monochrome"][data-theme="dark"],
+  :root[data-palette="monochrome"],
   :root[data-palette="oled"] {
-    --bg-primary: #000000;
-    --bg-secondary: #0a0a0a;
-    --bg-card: #121214;
-    --text-primary: #f4f4f5;
-    --border-color: #27272a;
-    --accent-color: #fafafa;
-    --accent-contrast: #09090b;
-    --accent-light: #222226;
+    --bg-primary: #121213;
+    --bg-secondary: #18181b;
+    --bg-card: #202024;
+    --text-primary: #ffffff;
+    --border-color: #2f2f32;
+    --accent-color: #ffffff;
+    --accent-contrast: #121213;
+    --accent-light: #27272a;
     --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.7);
   }
 
@@ -394,6 +395,23 @@ body.theme-rose-bronze {
   --accent-light: #352822;
 }
 
+body.theme-monochrome {
+  --bg-main: #121213;
+  --panel-bg: #18181b;
+  --text-color: #ffffff;
+  --accent-gold: #ffffff;
+  --board-dark: #1f1f23;
+  --board-light: #ffffff;
+  --border-color: #2f2f32;
+  --bg-primary: #121213;
+  --bg-secondary: #18181b;
+  --bg-card: #202024;
+  --text-primary: #ffffff;
+  --accent-color: #ffffff;
+  --accent-contrast: #121213;
+  --accent-light: #27272a;
+}
+
 /* ======================================================== */
 /* STRICT 2-COLOR MONOLITH TEXT & BORDER ENFORCEMENT       */
 /* Tüm yazılar ve çizgiler tek renk vurguya bağlanır        */
@@ -403,7 +421,8 @@ body[class*="theme-emerald"],
 body[class*="theme-slate-rose"],
 body[class*="theme-champagne-carbon"],
 body[class*="theme-royal-amber"],
-body[class*="theme-rose-bronze"] {
+body[class*="theme-rose-bronze"],
+body[class*="theme-monochrome"] {
   color: var(--text-primary);
 }
 
@@ -413,12 +432,14 @@ body[class*="theme-slate-rose"] [class*="text-gray-"],
 body[class*="theme-champagne-carbon"] [class*="text-gray-"],
 body[class*="theme-royal-amber"] [class*="text-gray-"],
 body[class*="theme-rose-bronze"] [class*="text-gray-"],
+body[class*="theme-monochrome"] [class*="text-gray-"],
 body[class*="theme-obsidian"] [class*="text-slate-"],
 body[class*="theme-emerald"] [class*="text-slate-"],
 body[class*="theme-slate-rose"] [class*="text-slate-"],
 body[class*="theme-champagne-carbon"] [class*="text-slate-"],
 body[class*="theme-royal-amber"] [class*="text-slate-"],
-body[class*="theme-rose-bronze"] [class*="text-slate-"] {
+body[class*="theme-rose-bronze"] [class*="text-slate-"],
+body[class*="theme-monochrome"] [class*="text-slate-"] {
   color: var(--text-primary) !important;
   opacity: 0.78;
 }
@@ -428,12 +449,20 @@ body[class*="theme-emerald"] .text-white,
 body[class*="theme-slate-rose"] .text-white,
 body[class*="theme-champagne-carbon"] .text-white,
 body[class*="theme-royal-amber"] .text-white,
-body[class*="theme-rose-bronze"] .text-white {
+body[class*="theme-rose-bronze"] .text-white,
+body[class*="theme-monochrome"] .text-white {
   color: var(--text-primary) !important;
 }
 
 body[class*="theme-obsidian"] [class*="border-gray-"],
 body[class*="theme-emerald"] [class*="border-gray-"],
+body[class*="theme-slate-rose"] [class*="border-gray-"],
+body[class*="theme-champagne-carbon"] [class*="border-gray-"],
+body[class*="theme-royal-amber"] [class*="border-gray-"],
+body[class*="theme-rose-bronze"] [class*="border-gray-"],
+body[class*="theme-monochrome"] [class*="border-gray-"] {
+  border-color: var(--border-color) !important;
+}
 body[class*="theme-slate-rose"] [class*="border-gray-"],
 body[class*="theme-champagne-carbon"] [class*="border-gray-"],
 body[class*="theme-royal-amber"] [class*="border-gray-"],

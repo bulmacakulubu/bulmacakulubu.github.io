@@ -349,7 +349,7 @@ export default function App() {
           <div className="h-4 w-px border-r border-[var(--border-color)]"></div>
           <button
             onClick={() => setIsLeaderboardOpen(true)}
-            className="p-1.5 rounded-lg text-xs transition cursor-pointer hover:bg-[var(--bg-secondary)] text-amber-500 hover:opacity-90"
+            className="p-1.5 rounded-lg text-xs transition cursor-pointer hover:bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:opacity-90"
             title={settings.language === 'tr' ? 'Liderlik Sıralaması & Skor Tablosu' : 'Leaderboard & Rankings'}
           >
             <Trophy className="w-3.5 h-3.5" />
@@ -528,14 +528,10 @@ export default function App() {
             {/* VIP / Remove Ads Action Button */}
             <button
               onClick={() => setIsRemoveAdsOpen(true)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border font-bold transition text-xs shadow-2xs group cursor-pointer ${
-                currentUser.isPremium
-                  ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                  : 'border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400'
-              }`}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-bold transition text-xs shadow-2xs group cursor-pointer"
               title={currentUser.isPremium ? (settings.language === 'tr' ? 'VIP Üye (Aktif)' : 'VIP Member (Active)') : (settings.language === 'tr' ? 'Reklamları Kaldır & VIP Ol' : 'Remove Ads & Get VIP')}
             >
-              <Crown size={13} className={currentUser.isPremium ? 'text-amber-500 fill-amber-500' : 'text-amber-500 group-hover:scale-110 transition'} />
+              <Crown size={13} className="text-[var(--text-primary)] group-hover:scale-110 transition" />
               <span className="hidden md:inline">
                 {currentUser.isPremium ? (settings.language === 'tr' ? '👑 VIP Üye' : '👑 VIP') : (settings.language === 'tr' ? 'VIP / Reklamsız' : 'VIP Pass')}
               </span>
@@ -544,10 +540,10 @@ export default function App() {
             {/* 1v1 Multiplayer Action Button */}
             <button
               onClick={() => setIsMultiplayerOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 font-bold transition text-xs shadow-2xs group"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-bold transition text-xs shadow-2xs group cursor-pointer"
               title={settings.language === 'tr' ? '1v1 Çevrimiçi Düello (Arkadaşınla Oyna)' : '1v1 Online Duel (Play with friend)'}
             >
-              <Users size={13} className="group-hover:scale-110 transition" />
+              <Users size={13} className="text-[var(--text-primary)] group-hover:scale-110 transition" />
               <span className="hidden md:inline">{settings.language === 'tr' ? '1v1 Düello' : '1v1 Duel'}</span>
               {multiplayerSession?.connected && (
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -582,10 +578,10 @@ export default function App() {
             <div className="flex items-center bg-[var(--bg-secondary)] p-0.5 rounded-xl border border-[var(--border-color)]">
               <button
                 onClick={() => setIsLeaderboardOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer hover:bg-[var(--bg-card)] text-[var(--accent-color)] hover:opacity-90 shadow-2xs"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer hover:bg-[var(--bg-card)] text-[var(--text-primary)] hover:opacity-90 shadow-2xs"
                 title={settings.language === 'tr' ? 'Liderlik Sıralaması & Skor Tablosu' : 'Leaderboard & Rankings'}
               >
-                <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                <Trophy className="w-3.5 h-3.5 text-[var(--text-primary)]" />
                 <span className="hidden sm:inline">{settings.language === 'tr' ? 'Liderlik Sıralaması' : 'Leaderboard'}</span>
               </button>
 
