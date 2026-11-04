@@ -619,7 +619,7 @@ export const Satranc: React.FC<SatrancProps> = ({
       <div className="w-full flex flex-col md:flex-row gap-3 items-center md:items-start justify-center">
         {/* CHESSBOARD */}
         <div className="flex flex-col items-center justify-center">
-          <div className="border-4 sm:border-5 border-amber-950/40 rounded-3xl overflow-hidden shadow-xl bg-amber-100 inline-block relative">
+          <div className="border-4 sm:border-5 border-[var(--border-color)] rounded-3xl overflow-hidden shadow-2xl bg-[var(--bg-secondary)] inline-block relative">
             <div className="grid grid-cols-8">
               {board.map((row, r) =>
                 row.map((piece, c) => {
@@ -627,18 +627,19 @@ export const Satranc: React.FC<SatrancProps> = ({
                   const isSelected = selectedCell && selectedCell[0] === r && selectedCell[1] === c;
                   const isValidTarget = validMoves.some(([vr, vc]) => vr === r && vc === c);
                   const hasStar = remainingStars.some(([sr, sc]) => sr === r && sc === c);
+                  const isWhitePiece = piece ? piece === piece.toUpperCase() : false;
 
                   return (
                     <div
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
                       className={`w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-15 2xl:h-15 max-h-[calc((100vh-210px)/8)] max-w-[calc((100vh-210px)/8)] aspect-square flex items-center justify-center cursor-pointer transition-all duration-200 relative select-none ${
-                        isDark ? 'text-white' : 'text-gray-900'
-                      } ${isSelected ? 'ring-3 ring-amber-500 z-10 scale-102 shadow-md' : 'hover:opacity-90'}`}
+                        isSelected ? 'ring-3 ring-emerald-400 z-10 scale-102 shadow-md' : 'hover:opacity-90'
+                      }`}
                       style={{
                         backgroundColor: isDark
-                          ? 'var(--board-dark, #b58863)'
-                          : 'var(--board-light, #f0d9b5)',
+                          ? 'var(--board-dark, #3f4753)'
+                          : 'var(--board-light, #b4bcc8)',
                       }}
                     >
                       {/* Legal Move Glow Dot */}
@@ -659,10 +660,20 @@ export const Satranc: React.FC<SatrancProps> = ({
                         </span>
                       )}
 
-                      {/* Chess Piece Symbol */}
-                      <span className="text-xl sm:text-2xl md:text-3xl lg:text-3.5xl xl:text-4xl leading-none inline-block transform scale-110 z-5 select-none font-chess">
-                        {piece ? PIECE_SYMBOLS[piece] : ''}
-                      </span>
+                      {/* Chess Piece Symbol - Fully solid & outlined for 100% contrast */}
+                      {piece && (
+                        <span
+                          className="text-xl sm:text-2xl md:text-3xl lg:text-3.5xl xl:text-4xl leading-none inline-block transform scale-110 z-5 select-none font-chess"
+                          style={{
+                            color: isWhitePiece ? '#ffffff' : '#111317',
+                            filter: isWhitePiece
+                              ? 'drop-shadow(0 0 1.5px #000000) drop-shadow(0 1px 2px rgba(0,0,0,0.95))'
+                              : 'drop-shadow(0 0 1.5px rgba(255,255,255,0.95)) drop-shadow(0 1px 2px rgba(0,0,0,0.6))',
+                          }}
+                        >
+                          {PIECE_SYMBOLS[piece] || ''}
+                        </span>
+                      )}
                     </div>
                   );
                 })
