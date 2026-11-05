@@ -579,7 +579,7 @@ export default function App() {
                 className="flex items-center gap-1.5 px-1.5 max-w-[130px] sm:max-w-[180px] cursor-pointer group"
                 title={
                   isCurrentLocal
-                    ? `${currentTrack?.title} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Müziklerimi Aç' : 'Open My Music'})`
+                    ? `${currentTrack?.title} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Müziklerim' : 'Open My Music'})`
                     : `${currentTrack?.title}${currentTrack?.frequency ? ` (${currentTrack.frequency})` : ''} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Canlı Radyoları Aç' : 'Open Live Radios'})`
                 }
               >
@@ -662,18 +662,6 @@ export default function App() {
                 )}
               </button>
             </div>
-
-            {/* VIP / Remove Ads Action Button */}
-            <button
-              onClick={() => setIsRemoveAdsOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-bold transition text-xs shadow-2xs group cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
-              title={currentUser.isPremium ? (settings.language === 'tr' ? 'VIP Üye (Aktif)' : 'VIP Member (Active)') : (settings.language === 'tr' ? 'Reklamları Kaldır & VIP Ol' : 'Remove Ads & Get VIP')}
-            >
-              <Crown size={13} className="text-[var(--text-primary)] group-hover:scale-110 transition" />
-              <span className="hidden md:inline">
-                {currentUser.isPremium ? (settings.language === 'tr' ? 'VIP Üye' : 'VIP') : (settings.language === 'tr' ? 'VIP / Reklamsız' : 'VIP Pass')}
-              </span>
-            </button>
 
             {/* 1v1 Multiplayer Action Button */}
             <button

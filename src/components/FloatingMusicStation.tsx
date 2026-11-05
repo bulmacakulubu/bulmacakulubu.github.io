@@ -146,7 +146,7 @@ export const FloatingMusicStation: React.FC<FloatingMusicStationProps> = ({
         title: file.name.replace(/\.[^/.]+$/, ''),
         artist: language === 'tr' ? 'Yerel Dosya' : 'Local Audio',
         duration: '--:--',
-        playlistName: language === 'tr' ? 'Benim Müziklerim' : 'My Music',
+        playlistName: language === 'tr' ? 'Müziklerim' : 'My Music',
         audioUrl: URL.createObjectURL(file),
         isBuiltIn: false,
         category: 'diger',
@@ -331,7 +331,7 @@ export const FloatingMusicStation: React.FC<FloatingMusicStationProps> = ({
                 <div className="font-bold text-xs flex items-center gap-1.5">
                   <span>
                     {isCurrentTrackLocal
-                      ? (language === 'tr' ? 'Benim Müziklerim' : 'Local Music Player')
+                      ? (language === 'tr' ? 'Müziklerim' : 'Local Music Player')
                       : (language === 'tr' ? 'Türkiye Ulusal Canlı Radyoları' : 'Turkey National Live Radios')}
                   </span>
                   {!isCurrentTrackLocal && (
@@ -364,7 +364,7 @@ export const FloatingMusicStation: React.FC<FloatingMusicStationProps> = ({
             </div>
           </div>
 
-          {/* MAIN SEGMENTED SWITCHER: CANLI RADYOLAR vs BENİM MÜZİKLERİM */}
+          {/* MAIN SEGMENTED SWITCHER: CANLI RADYOLAR vs MÜZİKLERİM */}
           <div className="p-2 border-b border-[var(--border-color)] bg-[var(--bg-secondary)]/70 flex items-center gap-1.5">
             <button
               onClick={() => onTabChange('radio')}
@@ -394,7 +394,7 @@ export const FloatingMusicStation: React.FC<FloatingMusicStationProps> = ({
               }`}
             >
               <FolderOpen size={13} className={activeTab === 'local' ? 'text-amber-500' : ''} />
-              <span>{language === 'tr' ? 'Benim Müziklerim' : 'My Music'}</span>
+              <span>{language === 'tr' ? 'Müziklerim' : 'My Music'}</span>
               <span
                 className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
                   activeTab === 'local' ? 'bg-zinc-900 text-zinc-100' : 'bg-zinc-800 text-zinc-400'
@@ -651,7 +651,7 @@ export const FloatingMusicStation: React.FC<FloatingMusicStationProps> = ({
             </>
           )}
 
-          {/* TAB 2: BENİM MÜZİKLERİM (LOCAL MP3) CONTENT */}
+          {/* TAB 2: MÜZİKLERİM (LOCAL MP3) CONTENT */}
           {activeTab === 'local' && (
             <>
               {/* Local Actions Bar */}
@@ -712,7 +712,7 @@ export const FloatingMusicStation: React.FC<FloatingMusicStationProps> = ({
                   >
                     <UploadCloud size={30} className="mx-auto text-amber-400/80" />
                     <div className="text-xs font-bold text-zinc-200">
-                      {language === 'tr' ? 'Kendi Müziklerinizi Ekleyin' : 'Add Your Own Music'}
+                      {language === 'tr' ? 'Müziklerinizi Ekleyin' : 'Add Your Music'}
                     </div>
                     <div className="text-[10px] text-zinc-400 max-w-[220px] mx-auto leading-normal">
                       {language === 'tr'
