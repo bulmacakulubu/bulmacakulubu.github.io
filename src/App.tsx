@@ -9,7 +9,7 @@ import { AuthModal } from './components/AuthModal';
 import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
-import { BUILT_IN_TRACKS, startAmbientMusic, stopAmbientMusic, setAmbientVolume } from './utils/audio';
+import { BUILT_IN_TRACKS, TURKISH_RADIO_STATIONS, startAmbientMusic, stopAmbientMusic, setAmbientVolume, playStreamTrack, stopStreamTrack } from './utils/audio';
 import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy, Boxes, Grid3X3, Type, LayoutGrid, Shuffle, Search, Grid, Layers, UserX } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
@@ -148,10 +148,11 @@ export default function App() {
     }
   }, []);
 
-  // Music Player state (Multiple files / Folder support)
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [currentTrackId, setCurrentTrackId] = useState<string>('');
+  // Türkiye Canlı Radyo & Müzik İstasyonu state
+  const [tracks, setTracks] = useState<Track[]>(() => TURKISH_RADIO_STATIONS);
+  const [currentTrackId, setCurrentTrackId] = useState<string>(() => TURKISH_RADIO_STATIONS[0]?.id || '');
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const [radioStatus, setRadioStatus] = useState<'idle' | 'loading' | 'playing' | 'error'>('idle');
   const [isFloatingMusicOpen, setIsFloatingMusicOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -258,26 +259,35 @@ export default function App() {
     });
   };
 
-  const playCurrentTrack = (track: Track) => {
+  const playCurrentTrack = async (track: Track) => {
     const effectiveVolume = settings.soundEnabled ? settings.volume / 100 : 0;
+
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
+    audioRef.current.muted = !settings.soundEnabled;
+    audioRef.current.volume = effectiveVolume;
 
     if (track.audioUrl) {
       stopAmbientMusic();
-      if (!audioRef.current) {
-        audioRef.current = new Audio(track.audioUrl);
-      } else {
-        audioRef.current.src = track.audioUrl;
-      }
-      audioRef.current.muted = !settings.soundEnabled;
-      audioRef.current.volume = effectiveVolume;
-      audioRef.current.play().catch(() => {});
+      setRadioStatus('loading');
+      await playStreamTrack(audioRef.current, track.audioUrl, (status) => {
+        setRadioStatus(status);
+        if (status === 'playing') {
+          setIsPlayingMusic(true);
+        } else if (status === 'error') {
+          setIsPlayingMusic(false);
+        }
+      });
     } else {
       // Built-in synthetic ambient track
       if (audioRef.current) {
-        audioRef.current.pause();
+        stopStreamTrack(audioRef.current);
       }
       const idx = BUILT_IN_TRACKS.findIndex((t) => t.id === track.id);
       startAmbientMusic(effectiveVolume, Math.max(0, idx));
+      setRadioStatus('playing');
+      setIsPlayingMusic(true);
     }
   };
 
@@ -291,10 +301,11 @@ export default function App() {
 
     if (isPlayingMusic) {
       if (audioRef.current) {
-        audioRef.current.pause();
+        stopStreamTrack(audioRef.current);
       }
       stopAmbientMusic();
       setIsPlayingMusic(false);
+      setRadioStatus('idle');
     } else {
       if (!settings.soundEnabled) {
         setSettings((prev) => ({ ...prev, soundEnabled: true, volume: prev.volume === 0 ? 50 : prev.volume }));
@@ -472,7 +483,6 @@ export default function App() {
               {/* Play / Pause Button */}
               <button
                 onClick={handleTogglePlayMusic}
-                disabled={!settings.soundEnabled}
                 className={`w-6 h-6 rounded-lg flex items-center justify-center transition font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
                   isPlayingMusic
                     ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
@@ -492,24 +502,34 @@ export default function App() {
                 <SkipForward size={12} />
               </button>
 
-              {/* Current Track Label & Visualizer (Click opens playlist) */}
+              {/* Current Track / Radio Label & Visualizer (Click opens playlist) */}
               <div
                 onClick={() => setIsFloatingMusicOpen((prev) => !prev)}
-                className="flex items-center gap-1.5 px-1.5 max-w-[110px] sm:max-w-[155px] cursor-pointer group"
-                title={`${currentTrack?.title} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Çalma Listesini Aç' : 'Open Playlist'})`}
+                className="flex items-center gap-1.5 px-1.5 max-w-[130px] sm:max-w-[180px] cursor-pointer group"
+                title={`${currentTrack?.title}${currentTrack?.frequency ? ` (${currentTrack.frequency})` : ''} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Canlı Radyoları Aç' : 'Open Live Radios'})`}
               >
-                {isPlayingMusic ? (
+                {radioStatus === 'loading' ? (
+                  <span className="w-2.5 h-2.5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin shrink-0"></span>
+                ) : isPlayingMusic ? (
                   <span className="flex items-center gap-0.5 shrink-0">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse mr-0.5" title="CANLI"></span>
                     <span className="w-0.5 h-2.5 bg-emerald-500 rounded-full animate-bounce"></span>
                     <span className="w-0.5 h-3.5 bg-emerald-500 rounded-full animate-bounce delay-100"></span>
                     <span className="w-0.5 h-2 bg-emerald-500 rounded-full animate-bounce delay-200"></span>
                   </span>
                 ) : (
-                  <Music size={12} className="text-gray-400 group-hover:text-[var(--accent-color)] shrink-0" />
+                  <Radio size={12} className="text-gray-400 group-hover:text-[var(--accent-color)] shrink-0" />
                 )}
-                <span className="text-[11px] font-bold truncate group-hover:text-[var(--accent-color)] transition">
-                  {currentTrack ? currentTrack.title : (settings.language === 'tr' ? 'Müzik Ekle +' : 'Add Music +')}
-                </span>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[11px] font-bold truncate group-hover:text-[var(--accent-color)] transition leading-tight">
+                    {currentTrack ? currentTrack.title : (settings.language === 'tr' ? 'Radyo Seç +' : 'Select Radio +')}
+                  </span>
+                  {currentTrack?.frequency && (
+                    <span className="text-[9px] font-mono text-zinc-400 truncate leading-none">
+                      {currentTrack.frequency}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Mute/Unmute Quick Toggle */}
@@ -838,6 +858,7 @@ export default function App() {
         soundEnabled={settings.soundEnabled}
         onToggleSound={handleToggleSound}
         language={settings.language}
+        radioStatus={radioStatus}
       />
 
       {/* RevenueCat Remove Ads & VIP Club Modal */}

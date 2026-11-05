@@ -1,4 +1,8 @@
 // Web Audio API Synthesizer & Sound Effects
+import { Track } from '../types';
+import { TURKISH_RADIO_STATIONS } from '../data/radioStations';
+
+export { TURKISH_RADIO_STATIONS };
 
 let audioCtx: AudioContext | null = null;
 let currentOscillator: OscillatorNode | null = null;
@@ -80,39 +84,22 @@ export function playSound(type: 'click' | 'win' | 'error' | 'success' | 'tile', 
   }
 }
 
-import { Track } from '../types';
-
 export const BUILT_IN_TRACKS: Track[] = [
+  ...TURKISH_RADIO_STATIONS,
   {
-    id: 'builtin_0',
-    title: 'Lo-Fi Bulmaca Rüyası',
+    id: 'builtin_synth_0',
+    title: 'Lo-Fi Bulmaca Rüyası (Dahili Sentez)',
     artist: 'Bulmaca Kulübü Ambient',
     duration: '∞ Odak',
-    playlistName: 'Dahili Odak Radyosu',
+    playlistName: 'Sentezleyici',
     isBuiltIn: true,
   },
   {
-    id: 'builtin_1',
+    id: 'builtin_synth_1',
     title: 'Gece Kahvesi & Yağmur',
     artist: 'Bulmaca Kulübü Ambient',
     duration: '∞ Odak',
-    playlistName: 'Dahili Odak Radyosu',
-    isBuiltIn: true,
-  },
-  {
-    id: 'builtin_2',
-    title: 'Zen Meditasyonu & Akarsu',
-    artist: 'Bulmaca Kulübü Ambient',
-    duration: '∞ Odak',
-    playlistName: 'Dahili Odak Radyosu',
-    isBuiltIn: true,
-  },
-  {
-    id: 'builtin_3',
-    title: 'Umut Işığı & Gün Doğumu',
-    artist: 'Bulmaca Kulübü Ambient',
-    duration: '∞ Odak',
-    playlistName: 'Dahili Odak Radyosu',
+    playlistName: 'Sentezleyici',
     isBuiltIn: true,
   },
 ];
@@ -200,4 +187,113 @@ export function stopAmbientMusic() {
 
 export function isMusicPlaying() {
   return isPlayingMusic;
+}
+
+// Live Radio & Stream Engine with dynamic HLS.js loader
+let hlsInstance: any = null;
+
+async function getHlsClass(): Promise<any> {
+  if (typeof window === 'undefined') return null;
+  if ((window as any).Hls) return (window as any).Hls;
+
+  return new Promise((resolve) => {
+    const existing = document.getElementById('hlsjs-cdn-script');
+    if (existing) {
+      existing.addEventListener('load', () => resolve((window as any).Hls));
+      return;
+    }
+    const script = document.createElement('script');
+    script.id = 'hlsjs-cdn-script';
+    script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js';
+    script.async = true;
+    script.onload = () => resolve((window as any).Hls);
+    script.onerror = () => resolve(null);
+    document.head.appendChild(script);
+  });
+}
+
+export async function playStreamTrack(
+  audioEl: HTMLAudioElement,
+  url: string,
+  onStatus?: (status: 'loading' | 'playing' | 'error') => void
+): Promise<void> {
+  if (onStatus) onStatus('loading');
+
+  // Clean up any existing Hls session
+  if (hlsInstance) {
+    try {
+      hlsInstance.destroy();
+    } catch (e) {}
+    hlsInstance = null;
+  }
+
+  const isHls = url.includes('.m3u8');
+
+  // Safari or native HLS support
+  if (isHls && audioEl.canPlayType('application/vnd.apple.mpegurl')) {
+    audioEl.src = url;
+    try {
+      await audioEl.play();
+      if (onStatus) onStatus('playing');
+    } catch (e) {
+      if (onStatus) onStatus('error');
+    }
+    return;
+  }
+
+  if (isHls) {
+    try {
+      const Hls = await getHlsClass();
+      if (Hls && Hls.isSupported()) {
+        hlsInstance = new Hls({
+          enableWorker: true,
+          lowLatencyMode: true,
+          backBufferLength: 30,
+        });
+        hlsInstance.loadSource(url);
+        hlsInstance.attachMedia(audioEl);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, async () => {
+          try {
+            await audioEl.play();
+            if (onStatus) onStatus('playing');
+          } catch (e) {
+            if (onStatus) onStatus('error');
+          }
+        });
+        hlsInstance.on(Hls.Events.ERROR, (_: any, data: any) => {
+          if (data && data.fatal) {
+            if (onStatus) onStatus('error');
+          }
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn('HLS initialization error:', e);
+    }
+  }
+
+  // Direct MP3, AAC or Icecast stream
+  audioEl.src = url;
+  try {
+    await audioEl.play();
+    if (onStatus) onStatus('playing');
+  } catch (e) {
+    if (onStatus) onStatus('error');
+  }
+}
+
+export function stopStreamTrack(audioEl?: HTMLAudioElement | null) {
+  if (hlsInstance) {
+    try {
+      hlsInstance.destroy();
+    } catch (e) {}
+    hlsInstance = null;
+  }
+  if (audioEl) {
+    try {
+      audioEl.pause();
+      audioEl.removeAttribute('src');
+      audioEl.load();
+    } catch (e) {}
+  }
 }

@@ -58,6 +58,10 @@ export interface Track {
   playlistName: string;
   audioUrl?: string;
   isBuiltIn?: boolean;
+  frequency?: string;
+  category?: 'odak' | 'pop' | 'akustik' | 'klasik' | 'nostalji' | 'haber' | 'diger';
+  isLive?: boolean;
+  city?: string;
 }
 
 export interface UserProfile {
