@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GameId, Settings, AllStats, Track, UserProfile, MultiplayerSession } from './types';
 import { loadStats, saveStats, updateGameStats, loadSettings, saveSettings } from './utils/storage';
 import { loadUserProfile, saveUserProfile } from './utils/auth';
@@ -10,7 +10,7 @@ import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
 import { BUILT_IN_TRACKS, TURKISH_RADIO_STATIONS, startAmbientMusic, stopAmbientMusic, setAmbientVolume, playStreamTrack, stopStreamTrack } from './utils/audio';
-import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy, Boxes, Grid3X3, Type, LayoutGrid, Shuffle, Search, Grid, Layers, UserX } from 'lucide-react';
+import { Music, Radio, Disc, FolderOpen, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy, Boxes, Grid3X3, Type, LayoutGrid, Shuffle, Search, Grid, Layers, UserX } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
 import confetti from 'canvas-confetti';
@@ -148,11 +148,14 @@ export default function App() {
     }
   }, []);
 
-  // Türkiye Canlı Radyo & Müzik İstasyonu state
-  const [tracks, setTracks] = useState<Track[]>(() => TURKISH_RADIO_STATIONS);
+  // Türkiye Canlı Radyoları ve Yerel Müzikler (Tamamen İzole ve Ayrı)
+  const [radioTracks] = useState<Track[]>(() => TURKISH_RADIO_STATIONS);
+  const [localTracks, setLocalTracks] = useState<Track[]>([]);
+  const [activeMusicTab, setActiveMusicTab] = useState<'radio' | 'local'>('radio');
   const [currentTrackId, setCurrentTrackId] = useState<string>(() => TURKISH_RADIO_STATIONS[0]?.id || '');
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [radioStatus, setRadioStatus] = useState<'idle' | 'loading' | 'playing' | 'error'>('idle');
+  const [playbackTime, setPlaybackTime] = useState<{ current: number; duration: number }>({ current: 0, duration: 0 });
   const [isFloatingMusicOpen, setIsFloatingMusicOpen] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -249,15 +252,43 @@ export default function App() {
     setSettings({ ...settings, language: nextLang });
   };
 
-  const handleAddTracks = (newTracks: Track[]) => {
-    setTracks((prev) => {
-      const updated = [...prev, ...newTracks];
-      if (!currentTrackId && updated.length > 0) {
-        setCurrentTrackId(updated[0].id);
-      }
-      return updated;
-    });
+  const handleAddLocalTracks = (newTracks: Track[]) => {
+    setLocalTracks((prev) => [...prev, ...newTracks]);
+    setActiveMusicTab('local');
+    if (newTracks.length > 0 && !isPlayingMusic) {
+      setCurrentTrackId(newTracks[0].id);
+    }
   };
+
+  const handleRemoveLocalTrack = (id: string) => {
+    setLocalTracks((prev) => prev.filter((t) => t.id !== id));
+    if (currentTrackId === id) {
+      if (isPlayingMusic && audioRef.current) {
+        stopStreamTrack(audioRef.current);
+        setIsPlayingMusic(false);
+      }
+      setCurrentTrackId(radioTracks[0]?.id || '');
+    }
+  };
+
+  const handleClearLocalTracks = () => {
+    if (currentTrack?.id.startsWith('local_') && isPlayingMusic && audioRef.current) {
+      stopStreamTrack(audioRef.current);
+      setIsPlayingMusic(false);
+    }
+    setLocalTracks([]);
+    setActiveMusicTab('radio');
+    setCurrentTrackId(radioTracks[0]?.id || '');
+  };
+
+  const currentTrack = useMemo(() => {
+    const all = [...radioTracks, ...localTracks];
+    const found = all.find((t) => t.id === currentTrackId);
+    if (found) return found;
+    return activeMusicTab === 'local' && localTracks.length > 0 ? localTracks[0] : radioTracks[0];
+  }, [radioTracks, localTracks, currentTrackId, activeMusicTab]);
+
+  const isCurrentLocal = currentTrack?.id.startsWith('local_') || false;
 
   const playCurrentTrack = async (track: Track) => {
     const effectiveVolume = settings.soundEnabled ? settings.volume / 100 : 0;
@@ -267,6 +298,22 @@ export default function App() {
     }
     audioRef.current.muted = !settings.soundEnabled;
     audioRef.current.volume = effectiveVolume;
+
+    // Local track progress tracking
+    audioRef.current.ontimeupdate = () => {
+      if (audioRef.current && track.id.startsWith('local_')) {
+        setPlaybackTime({
+          current: audioRef.current.currentTime || 0,
+          duration: audioRef.current.duration || 0,
+        });
+      }
+    };
+
+    audioRef.current.onended = () => {
+      if (track.id.startsWith('local_')) {
+        handleNextTrack();
+      }
+    };
 
     if (track.audioUrl) {
       stopAmbientMusic();
@@ -291,12 +338,14 @@ export default function App() {
     }
   };
 
-  const handleTogglePlayMusic = () => {
-    if (tracks.length === 0) {
-      setIsFloatingMusicOpen(true);
-      return;
+  const handleSeek = (seconds: number) => {
+    if (audioRef.current && isCurrentLocal) {
+      audioRef.current.currentTime = seconds;
+      setPlaybackTime((prev) => ({ ...prev, current: seconds }));
     }
-    const currentTrack = tracks.find((t) => t.id === currentTrackId) || tracks[0];
+  };
+
+  const handleTogglePlayMusic = () => {
     if (!currentTrack) return;
 
     if (isPlayingMusic) {
@@ -315,38 +364,60 @@ export default function App() {
     }
   };
 
-  const handleSelectTrack = (id: string) => {
-    setCurrentTrackId(id);
-    const selected = tracks.find((t) => t.id === id);
-    if (selected) {
-      playCurrentTrack(selected);
-      setIsPlayingMusic(true);
+  const handleSelectTrack = (track: Track) => {
+    setCurrentTrackId(track.id);
+    if (track.id.startsWith('local_')) {
+      setActiveMusicTab('local');
+    } else {
+      setActiveMusicTab('radio');
     }
+    playCurrentTrack(track);
+    setIsPlayingMusic(true);
   };
 
   const handleNextTrack = () => {
-    if (tracks.length === 0) return;
-    const idx = tracks.findIndex((t) => t.id === currentTrackId);
-    const nextIdx = (idx + 1) % tracks.length;
-    const nextTrack = tracks[nextIdx];
-    setCurrentTrackId(nextTrack.id);
-    if (isPlayingMusic) {
-      playCurrentTrack(nextTrack);
+    if (isCurrentLocal) {
+      if (localTracks.length === 0) return;
+      const idx = localTracks.findIndex((t) => t.id === currentTrackId);
+      const nextIdx = (idx + 1) % localTracks.length;
+      const nextTrack = localTracks[nextIdx];
+      setCurrentTrackId(nextTrack.id);
+      if (isPlayingMusic) {
+        playCurrentTrack(nextTrack);
+      }
+    } else {
+      if (radioTracks.length === 0) return;
+      const idx = radioTracks.findIndex((t) => t.id === currentTrackId);
+      const nextIdx = (idx + 1) % radioTracks.length;
+      const nextTrack = radioTracks[nextIdx];
+      setCurrentTrackId(nextTrack.id);
+      if (isPlayingMusic) {
+        playCurrentTrack(nextTrack);
+      }
     }
   };
 
   const handlePrevTrack = () => {
-    if (tracks.length === 0) return;
-    const idx = tracks.findIndex((t) => t.id === currentTrackId);
-    const prevIdx = (idx - 1 + tracks.length) % tracks.length;
-    const prevTrack = tracks[prevIdx];
-    setCurrentTrackId(prevTrack.id);
-    if (isPlayingMusic) {
-      playCurrentTrack(prevTrack);
+    if (isCurrentLocal) {
+      if (localTracks.length === 0) return;
+      const idx = localTracks.findIndex((t) => t.id === currentTrackId);
+      const prevIdx = (idx - 1 + localTracks.length) % localTracks.length;
+      const prevTrack = localTracks[prevIdx];
+      setCurrentTrackId(prevTrack.id);
+      if (isPlayingMusic) {
+        playCurrentTrack(prevTrack);
+      }
+    } else {
+      if (radioTracks.length === 0) return;
+      const idx = radioTracks.findIndex((t) => t.id === currentTrackId);
+      const prevIdx = (idx - 1 + radioTracks.length) % radioTracks.length;
+      const prevTrack = radioTracks[prevIdx];
+      setCurrentTrackId(prevTrack.id);
+      if (isPlayingMusic) {
+        playCurrentTrack(prevTrack);
+      }
     }
   };
-
-  const currentTrack = tracks.find((t) => t.id === currentTrackId) || tracks[0];
   const currentStats = stats[activeGame] || { played: 0, won: 0, streak: 0, maxStreak: 0 };
   const winRate = currentStats.played > 0 ? Math.round((currentStats.won / currentStats.played) * 100) : 0;
   const bestRecord =
@@ -428,8 +499,8 @@ export default function App() {
           onOpenSettings={() => setIsSettingsOpen(true)}
           volume={settings.volume}
           soundEnabled={settings.soundEnabled}
-          tracks={tracks}
-          onAddTracks={handleAddTracks}
+          tracks={[...radioTracks, ...localTracks]}
+          onAddTracks={handleAddLocalTracks}
           currentTrackId={currentTrackId}
           onSelectTrack={(id) => {
             setCurrentTrackId(id);
@@ -506,29 +577,48 @@ export default function App() {
               <div
                 onClick={() => setIsFloatingMusicOpen((prev) => !prev)}
                 className="flex items-center gap-1.5 px-1.5 max-w-[130px] sm:max-w-[180px] cursor-pointer group"
-                title={`${currentTrack?.title}${currentTrack?.frequency ? ` (${currentTrack.frequency})` : ''} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Canlı Radyoları Aç' : 'Open Live Radios'})`}
+                title={
+                  isCurrentLocal
+                    ? `${currentTrack?.title} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Müziklerimi Aç' : 'Open My Music'})`
+                    : `${currentTrack?.title}${currentTrack?.frequency ? ` (${currentTrack.frequency})` : ''} - ${currentTrack?.artist} (${settings.language === 'tr' ? 'Canlı Radyoları Aç' : 'Open Live Radios'})`
+                }
               >
                 {radioStatus === 'loading' ? (
                   <span className="w-2.5 h-2.5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin shrink-0"></span>
                 ) : isPlayingMusic ? (
                   <span className="flex items-center gap-0.5 shrink-0">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse mr-0.5" title="CANLI"></span>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full mr-0.5 ${
+                        isCurrentLocal ? 'bg-amber-400' : 'bg-red-500 animate-pulse'
+                      }`}
+                      title={isCurrentLocal ? 'MP3' : 'CANLI'}
+                    ></span>
                     <span className="w-0.5 h-2.5 bg-emerald-500 rounded-full animate-bounce"></span>
                     <span className="w-0.5 h-3.5 bg-emerald-500 rounded-full animate-bounce delay-100"></span>
                     <span className="w-0.5 h-2 bg-emerald-500 rounded-full animate-bounce delay-200"></span>
                   </span>
+                ) : isCurrentLocal ? (
+                  <Disc size={12} className="text-amber-400 group-hover:scale-110 shrink-0 transition" />
                 ) : (
                   <Radio size={12} className="text-gray-400 group-hover:text-[var(--accent-color)] shrink-0" />
                 )}
                 <div className="flex flex-col min-w-0">
                   <span className="text-[11px] font-bold truncate group-hover:text-[var(--accent-color)] transition leading-tight">
-                    {currentTrack ? currentTrack.title : (settings.language === 'tr' ? 'Radyo Seç +' : 'Select Radio +')}
+                    {currentTrack
+                      ? currentTrack.title
+                      : isCurrentLocal
+                      ? (settings.language === 'tr' ? 'Müzik Ekle +' : 'Add Music +')
+                      : (settings.language === 'tr' ? 'Radyo Seç +' : 'Select Radio +')}
                   </span>
-                  {currentTrack?.frequency && (
+                  {isCurrentLocal && playbackTime.duration > 0 ? (
+                    <span className="text-[9px] font-mono text-zinc-400 truncate leading-none">
+                      {Math.floor(playbackTime.current / 60)}:{Math.floor(playbackTime.current % 60).toString().padStart(2, '0')} / {Math.floor(playbackTime.duration / 60)}:{Math.floor(playbackTime.duration % 60).toString().padStart(2, '0')}
+                    </span>
+                  ) : currentTrack?.frequency ? (
                     <span className="text-[9px] font-mono text-zinc-400 truncate leading-none">
                       {currentTrack.frequency}
                     </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
@@ -545,7 +635,7 @@ export default function App() {
                 )}
               </button>
 
-              {/* Integrated Playlist Button */}
+              {/* Integrated Playlist Button (Shows active mode: Radio vs Local) */}
               <button
                 onClick={() => setIsFloatingMusicOpen((prev) => !prev)}
                 className={`flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-bold transition ml-0.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
@@ -553,10 +643,23 @@ export default function App() {
                     ? 'border-[var(--accent-color)] bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-2xs'
                     : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] text-gray-700 dark:text-gray-300'
                 }`}
-                title={settings.language === 'tr' ? 'Çalma Listesini Aç / Kapat' : 'Toggle Playlist'}
+                title={
+                  isCurrentLocal
+                    ? (settings.language === 'tr' ? 'Yerel Çalma Listesini Aç / Kapat' : 'Toggle Local Playlist')
+                    : (settings.language === 'tr' ? 'Canlı Radyoları Aç / Kapat' : 'Toggle Radio List')
+                }
               >
-                <ListMusic size={11} />
-                <span>{tracks.length}</span>
+                {isCurrentLocal ? (
+                  <>
+                    <FolderOpen size={11} className="text-amber-400" />
+                    <span>{localTracks.length}</span>
+                  </>
+                ) : (
+                  <>
+                    <Radio size={11} className="text-red-400" />
+                    <span>{radioTracks.length}</span>
+                  </>
+                )}
               </button>
             </div>
 
@@ -841,12 +944,17 @@ export default function App() {
         }}
       />
 
-      {/* Floating Everywhere Music Station & Playlist */}
+      {/* Floating Everywhere Music Station & Playlist (Radyo ve Yerel Müzikler Ayrı) */}
       <FloatingMusicStation
         isOpen={isFloatingMusicOpen}
         onClose={() => setIsFloatingMusicOpen(false)}
-        tracks={tracks}
-        onAddTracks={handleAddTracks}
+        radioTracks={radioTracks}
+        localTracks={localTracks}
+        onAddLocalTracks={handleAddLocalTracks}
+        onRemoveLocalTrack={handleRemoveLocalTrack}
+        onClearLocalTracks={handleClearLocalTracks}
+        activeTab={activeMusicTab}
+        onTabChange={setActiveMusicTab}
         currentTrackId={currentTrackId}
         onSelectTrack={handleSelectTrack}
         isPlaying={isPlayingMusic}
@@ -859,6 +967,8 @@ export default function App() {
         onToggleSound={handleToggleSound}
         language={settings.language}
         radioStatus={radioStatus}
+        playbackTime={playbackTime}
+        onSeek={handleSeek}
       />
 
       {/* RevenueCat Remove Ads & VIP Club Modal */}
