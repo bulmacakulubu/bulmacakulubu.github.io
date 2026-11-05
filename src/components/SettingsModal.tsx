@@ -152,16 +152,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const [isPaletteDropdownOpen, setIsPaletteDropdownOpen] = useState(false);
   const totalRecordedGames = Object.values(stats || {}).reduce((acc, s) => acc + (s?.played || 0), 0);
-
-  const currentPalette = PALETTES.find((p) => p.id === settings.palette) ||
-    PALETTES.find((p) => (
-      (settings.palette === 'sage' && p.id === 'nordic') ||
-      (settings.palette === 'classic' && p.id === 'kyoto') ||
-      (settings.palette === 'pastel' && p.id === 'aurora') ||
-      (settings.palette === 'oled' && p.id === 'monochrome')
-    )) || PALETTES[0];
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
@@ -182,165 +173,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Content */}
         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-          {/* Renk Paleti Açılır Menü */}
-          <div className="space-y-2.5">
+          {/* Bauhaus Mono Zinc: Sabit Koyu Görünüm Kartı */}
+          <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-sm space-y-2">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="font-semibold text-sm flex items-center gap-2">
-                  <Palette size={16} className="text-amber-400" />
-                  <span>Renk Teması & Palet</span>
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-primary)] shadow-xs shrink-0">
+                  <Moon size={16} />
                 </div>
-                <div className="text-xs text-gray-500">Açılır menüden 11 özel tasarım renk temasını seçin</div>
+                <div>
+                  <div className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <span>Bauhaus Mono Zinc</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--text-primary)] font-semibold border border-[var(--border-color)]">
+                      {settings.language === 'tr' ? 'Sabit Koyu Mod' : 'Fixed Dark Mode'}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                    {settings.language === 'tr'
+                      ? 'Göz yormayan mat kömür & gümüş çinko tonları ile optimize edilmiştir.'
+                      : 'Ergonomic matte zinc & soft silver palette optimized for eye comfort.'}
+                  </div>
+                </div>
               </div>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] border border-[var(--border-color)]">
-                {currentPalette.name}
-              </span>
-            </div>
-
-            {/* Açılır Menü Tetikleyici (Dropdown Trigger with Palette Icon) */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setIsPaletteDropdownOpen(!isPaletteDropdownOpen)}
-                className="w-full flex items-center justify-between p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--accent-color)] transition shadow-xs group cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[var(--accent-light)] text-[var(--accent-color)] shadow-xs transition-transform group-hover:scale-105 border border-[var(--accent-color)]/20">
-                    <Palette size={19} />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-bold flex items-center gap-2">
-                      <span>{currentPalette.name}</span>
-                      <span className="text-[10px] px-1.5 py-0.2 rounded bg-black/20 text-gray-400 font-normal">
-                        {currentPalette.category}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-gray-400">{currentPalette.tag}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2.5">
-                  <div className="flex items-center -space-x-1 p-1 rounded-lg bg-black/30 border border-white/5">
-                    <span className="w-4 h-4 rounded-full border border-white/20 shadow-xs" style={{ backgroundColor: currentPalette.bg }} />
-                    <span className="w-4 h-4 rounded-full border border-white/20 shadow-xs" style={{ backgroundColor: currentPalette.accent }} />
-                  </div>
-                  <ChevronDown
-                    size={16}
-                    className={`text-gray-400 transition-transform duration-200 ${isPaletteDropdownOpen ? 'rotate-180 text-[var(--accent-color)]' : ''}`}
-                  />
-                </div>
-              </button>
-
-              {/* Açılır Menü Listesi */}
-              {isPaletteDropdownOpen && (
-                <div className="mt-2 p-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xl space-y-3 animate-fadeIn max-h-72 overflow-y-auto">
-                  {(['Lüks & Metalik', 'Doğal & Kristal', 'Modern & Dijital'] as const).map((category) => (
-                    <div key={category} className="space-y-1.5">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-2 pt-1 flex items-center gap-1.5">
-                        <Sparkles size={11} className="text-amber-400" />
-                        <span>{category}</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                        {PALETTES.filter((p) => p.category === category).map((p) => {
-                          const isSelected = currentPalette.id === p.id;
-                          return (
-                            <button
-                              key={p.id}
-                              type="button"
-                              onClick={() => {
-                                onUpdateSettings({
-                                  ...settings,
-                                  palette: p.id,
-                                  theme: p.darkOnly ? 'dark' : settings.theme,
-                                });
-                                setIsPaletteDropdownOpen(false);
-                              }}
-                              className={`flex items-center justify-between p-2 rounded-lg border text-left transition cursor-pointer ${
-                                isSelected
-                                  ? 'border-[var(--accent-color)] bg-[var(--accent-light)] ring-1 ring-[var(--accent-color)]/30'
-                                  : 'border-transparent hover:bg-[var(--bg-secondary)]'
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className="flex items-center -space-x-1 shrink-0">
-                                  <span className="w-3.5 h-3.5 rounded-full border border-white/30" style={{ backgroundColor: p.bg }} />
-                                  <span className="w-3.5 h-3.5 rounded-full border border-white/30 shadow-xs" style={{ backgroundColor: p.accent }} />
-                                </div>
-                                <div className="truncate">
-                                  <div className="text-xs font-semibold truncate">{p.name}</div>
-                                  <div className="text-[10px] text-gray-400 truncate">{p.tag}</div>
-                                </div>
-                              </div>
-                              {isSelected && <Check size={14} className="text-[var(--accent-color)] shrink-0 ml-1.5" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Hızlı Seçim Rozetleri (Quick Select Pills) */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
-              {PALETTES.map((p) => {
-                const isSelected = currentPalette.id === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    title={`${p.name} (${p.tag})`}
-                    onClick={() => {
-                      onUpdateSettings({
-                        ...settings,
-                        palette: p.id,
-                        theme: p.darkOnly ? 'dark' : settings.theme,
-                      });
-                    }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs shrink-0 border transition cursor-pointer ${
-                      isSelected
-                        ? 'border-[var(--accent-color)] bg-[var(--accent-light)] text-[var(--accent-color)] font-bold shadow-2xs'
-                        : 'border-[var(--border-color)] bg-[var(--bg-secondary)]/50 text-gray-400 hover:text-white hover:border-gray-500'
-                    }`}
-                  >
-                    <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-2xs" style={{ backgroundColor: p.accent }} />
-                    <span className="truncate max-w-[100px]">{p.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tema */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-medium text-sm">Tema</div>
-              <div className="text-xs text-gray-500">Koyu ya da açık görünüm</div>
-            </div>
-            <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-              <button
-                onClick={() => onUpdateSettings({ ...settings, theme: 'dark' })}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                  settings.theme === 'dark'
-                    ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 shadow'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                }`}
-              >
-                <Moon size={14} />
-                Koyu
-              </button>
-              <button
-                onClick={() => onUpdateSettings({ ...settings, theme: 'light' })}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-                  settings.theme === 'light'
-                    ? 'bg-white text-gray-900 shadow'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900'
-                }`}
-              >
-                <Sun size={14} />
-                Açık
-              </button>
+              <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shrink-0">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#09090b] border border-white/20 shadow-xs" title="Zemin #09090b" />
+                <span className="w-3.5 h-3.5 rounded-full bg-[#18181c] border border-white/20 shadow-xs" title="Panel #18181c" />
+                <span className="w-3.5 h-3.5 rounded-full bg-[#f4f4f5] border border-white/20 shadow-xs" title="Yazı #f4f4f5" />
+              </div>
             </div>
           </div>
 

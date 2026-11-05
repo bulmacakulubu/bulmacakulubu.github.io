@@ -117,23 +117,10 @@ export function loadSettings(): Settings {
     if (!data) return defaultSettings;
     const parsed = JSON.parse(data);
 
-    // Apply the requested Slate & Rose Gold theme as active
-    const themeAppliedKey = 'bk_theme_applied_slaterose_v1';
-    const hasAppliedSlateRose = localStorage.getItem(themeAppliedKey);
+    // Bauhaus Mono Zinc permanent unified dark mode
+    const palette = 'monochrome';
+    const theme = 'dark';
 
-    let palette = parsed.palette;
-    let theme = parsed.theme || 'dark';
-
-    if (!hasAppliedSlateRose) {
-      palette = 'slate-rose';
-      theme = 'dark';
-      localStorage.setItem(themeAppliedKey, 'true');
-    }
-
-    if (palette === 'sage') palette = 'nordic';
-    if (palette === 'classic') palette = 'kyoto';
-    if (palette === 'pastel') palette = 'aurora';
-    if (palette === 'oled') palette = 'monochrome';
     const merged = { ...defaultSettings, ...parsed, palette, theme };
     saveSettings(merged);
     return merged;

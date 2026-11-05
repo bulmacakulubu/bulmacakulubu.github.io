@@ -25,457 +25,84 @@
 }
 
 @layer base {
-  /* 1. NORDIC SAGE (Ödüllü Minimal İskandinav & Organik Adaçayı) */
+  /* ======================================================== */
+  /* BAUHAUS MONO ZINC (SABİT TEK RENK KOYU GÖRÜNÜM MODU)      */
+  /* Göz yormayan mat kömür & çinko monokrom mimari          */
+  /* ======================================================== */
   :root,
-  :root[data-palette="nordic"][data-theme="light"],
-  :root[data-palette="sage"][data-theme="light"] {
-    --bg-primary: #f3f6f3;
-    --bg-secondary: #e5ece5;
-    --bg-card: #ffffff;
-    --text-primary: #18281e;
-    --border-color: #cbdad0;
-    --accent-color: #2b6146;
-    --accent-contrast: #ffffff;
-    --accent-light: #e6f3eb;
-    --card-shadow: 0 4px 20px -2px rgba(27, 43, 33, 0.07);
-  }
+  :root[data-theme="dark"],
+  :root[data-theme="light"],
+  :root[data-palette],
+  body {
+    --bg-main: #09090b;
+    --bg-primary: #09090b;
+    --bg-secondary: #111114;
+    --bg-card: #16161a;
+    --panel-bg: #16161a;
+    --border-color: #27272a;
 
-  :root[data-palette="nordic"][data-theme="dark"],
-  :root[data-palette="sage"][data-theme="dark"] {
-    --bg-primary: #0d1510;
-    --bg-secondary: #132018;
-    --bg-card: #192a20;
-    --text-primary: #e6f1eb;
-    --border-color: #263e30;
-    --accent-color: #4ade80;
-    --accent-contrast: #07150e;
-    --accent-light: #163624;
-    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.4);
-  }
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    --text-color: #f4f4f5;
 
-  /* 2. NEO KYOTO (Awwwards Yılın Sanat Ödülü - Washi & Terrakotta) */
-  :root[data-palette="kyoto"][data-theme="light"],
-  :root[data-palette="classic"][data-theme="light"] {
-    --bg-primary: #faf6f0;
-    --bg-secondary: #f2e9dc;
-    --bg-card: #ffffff;
-    --text-primary: #2b221e;
-    --border-color: #e6dacb;
-    --accent-color: #c84b31;
-    --accent-contrast: #ffffff;
-    --accent-light: #fbeee9;
-    --card-shadow: 0 4px 20px -2px rgba(45, 30, 25, 0.06);
-  }
-
-  :root[data-palette="kyoto"][data-theme="dark"],
-  :root[data-palette="classic"][data-theme="dark"] {
-    --bg-primary: #15100e;
-    --bg-secondary: #201815;
-    --bg-card: #2b211e;
-    --text-primary: #f5ebe6;
-    --border-color: #42332e;
-    --accent-color: #ff6e4a;
-    --accent-contrast: #15100e;
-    --accent-light: #3d231c;
-    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.45);
-  }
-
-  /* 3. CYBER INDIGO (FWA of the Day - Derin Uzay & Elektrik İndigo) */
-  :root[data-palette="cyber"][data-theme="light"] {
-    --bg-primary: #f4f6fc;
-    --bg-secondary: #e7ebfa;
-    --bg-card: #ffffff;
-    --text-primary: #0f1530;
-    --border-color: #d2d8f7;
-    --accent-color: #4f46e5;
-    --accent-contrast: #ffffff;
-    --accent-light: #eef0ff;
-    --card-shadow: 0 4px 20px -2px rgba(20, 27, 65, 0.08);
-  }
-
-  :root[data-palette="cyber"][data-theme="dark"] {
-    --bg-primary: #090b14;
-    --bg-secondary: #101424;
-    --bg-card: #181e35;
-    --text-primary: #eef2ff;
-    --border-color: #273155;
-    --accent-color: #818cf8;
-    --accent-contrast: #070914;
-    --accent-light: #202747;
-    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.5);
-  }
-
-  /* 4. EMERALD AURORA (Biyo-Lüks / Kristal Okyanus Esintisi) */
-  :root[data-palette="aurora"][data-theme="light"],
-  :root[data-palette="pastel"][data-theme="light"] {
-    --bg-primary: #f0fbf7;
-    --bg-secondary: #def6ee;
-    --bg-card: #ffffff;
-    --text-primary: #11362e;
-    --border-color: #c1eee1;
-    --accent-color: #0d9488;
-    --accent-contrast: #ffffff;
-    --accent-light: #e6faf5;
-    --card-shadow: 0 4px 20px -2px rgba(13, 56, 48, 0.07);
-  }
-
-  :root[data-palette="aurora"][data-theme="dark"],
-  :root[data-palette="pastel"][data-theme="dark"] {
-    --bg-primary: #071613;
-    --bg-secondary: #0d221e;
-    --bg-card: #14302a;
-    --text-primary: #e6faf5;
-    --border-color: #204c42;
-    --accent-color: #2dd4bf;
-    --accent-contrast: #041410;
-    --accent-light: #183e36;
-    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.45);
-  }
-
-  /* 5. MONOCHROME STUDIO & OLED (Editorial Bauhaus & Saf Karartma) */
-  :root[data-palette="monochrome"][data-theme="light"] {
-    --bg-primary: #f7f7f8;
-    --bg-secondary: #eaeaea;
-    --bg-card: #ffffff;
-    --text-primary: #09090b;
-    --border-color: #e4e4e7;
-    --accent-color: #18181b;
-    --accent-contrast: #ffffff;
-    --accent-light: #f4f4f5;
-    --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
-  }
-
-  :root[data-palette="monochrome"][data-theme="dark"],
-  :root[data-palette="monochrome"],
-  :root[data-palette="oled"] {
-    --bg-primary: #121213;
-    --bg-secondary: #18181b;
-    --bg-card: #202024;
-    --text-primary: #ffffff;
-    --border-color: #2f2f32;
     --accent-color: #ffffff;
-    --accent-contrast: #121213;
-    --accent-light: #27272a;
-    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.7);
-  }
+    --accent-contrast: #09090b;
+    --accent-light: #202024;
+    --accent-gold: #ffffff;
 
-  /* 6. OBSİDİYEN & ALTIN (Obsidian & Gold) - Saf İki Renk */
-  :root[data-palette="obsidian"],
-  body.theme-obsidian {
-    --bg-main: #0a0a0c;
-    --panel-bg: #141418;
-    --text-color: #d4af37;
-    --accent-gold: #d4af37;
-    --board-dark: #1b1b20;
-    --board-light: #d4af37;
-    --border-color: #332910;
+    --board-dark: #27272a;
+    --board-light: #8e95a5;
 
-    /* App Standard Variables (2-Color Monolith) */
-    --bg-primary: #0a0a0c;
-    --bg-secondary: #0a0a0c;
-    --bg-card: #141418;
-    --text-primary: #d4af37;
-    --accent-color: #d4af37;
-    --accent-contrast: #0a0a0c;
-    --accent-light: #231f13;
-    --card-shadow: 0 6px 24px -2px rgba(0, 0, 0, 0.85);
-  }
-
-  /* 7. ZÜMRÜT & TİTAN (Emerald & Titanium) - Saf İki Renk */
-  :root[data-palette="emerald"],
-  body.theme-emerald {
-    --bg-main: #06150e;
-    --panel-bg: #0d2217;
-    --text-color: #c5a059;
-    --accent-gold: #c5a059;
-    --board-dark: #123122;
-    --board-light: #c5a059;
-    --border-color: #243526;
-
-    /* App Standard Variables (2-Color Monolith) */
-    --bg-primary: #06150e;
-    --bg-secondary: #06150e;
-    --bg-card: #0d2217;
-    --text-primary: #c5a059;
-    --accent-color: #c5a059;
-    --accent-contrast: #06150e;
-    --accent-light: #1f3020;
-    --card-shadow: 0 6px 24px -2px rgba(4, 15, 10, 0.7);
-  }
-
-  /* 8. GRAFİT & GÜL ALTIN (Slate & Rose Gold) - Saf İki Renk */
-  :root[data-palette="slate-rose"],
-  body.theme-slate-rose {
-    --bg-main: #16191d;
-    --panel-bg: #1f2329;
-    --text-color: #e0a96d;
-    --accent-gold: #e0a96d;
-    --board-dark: #232830;
-    --board-light: #e0a96d;
-    --border-color: #382a20;
-
-    /* App Standard Variables (2-Color Monolith) */
-    --bg-primary: #16191d;
-    --bg-secondary: #16191d;
-    --bg-card: #1f2329;
-    --text-primary: #e0a96d;
-    --accent-color: #e0a96d;
-    --accent-contrast: #15171a;
-    --accent-light: #36291e;
-    --card-shadow: 0 6px 24px -2px rgba(10, 12, 14, 0.7);
-  }
-
-  /* 9. ŞAMPANYA & KARBON (Champagne & Carbon) - Saf İki Renk */
-  :root[data-palette="champagne-carbon"],
-  body.theme-champagne-carbon {
-    --bg-main: #181a1f;
-    --panel-bg: #22252c;
-    --text-color: #c9bbae;
-    --accent-gold: #c9bbae;
-    --board-dark: #282c35;
-    --board-light: #c9bbae;
-    --border-color: #36332e;
-
-    /* App Standard Variables (2-Color Monolith) */
-    --bg-primary: #181a1f;
-    --bg-secondary: #181a1f;
-    --bg-card: #22252c;
-    --text-primary: #c9bbae;
-    --accent-color: #c9bbae;
-    --accent-contrast: #1a1c22;
-    --accent-light: #333130;
-    --card-shadow: 0 6px 24px -2px rgba(12, 14, 18, 0.65);
-  }
-
-  /* 10. KRALİYET KEHRİBARI (Royal Amber & Night) - Saf İki Renk */
-  :root[data-palette="royal-amber"],
-  body.theme-royal-amber {
-    --bg-main: #10131a;
-    --panel-bg: #161b24;
-    --text-color: #df9858;
-    --accent-gold: #df9858;
-    --board-dark: #1e2430;
-    --board-light: #df9858;
-    --border-color: #382616;
-
-    /* App Standard Variables (2-Color Monolith) */
-    --bg-primary: #10131a;
-    --bg-secondary: #10131a;
-    --bg-card: #161b24;
-    --text-primary: #df9858;
-    --accent-color: #df9858;
-    --accent-contrast: #0e121a;
-    --accent-light: #2f2216;
-    --card-shadow: 0 6px 24px -2px rgba(6, 8, 14, 0.7);
-  }
-
-  /* 11. GÜL BRONZU & BAKIR (Rose Bronze & Copper) - Saf İki Renk */
-  :root[data-palette="rose-bronze"],
-  body.theme-rose-bronze {
-    --bg-main: #181516;
-    --panel-bg: #221c1d;
-    --text-color: #d48c66;
-    --accent-gold: #d48c66;
-    --board-dark: #221c1d;
-    --board-light: #d48c66;
-    --border-color: #382820;
-
-    /* App Standard Variables (2-Color Monolith) */
-    --bg-primary: #181516;
-    --bg-secondary: #181516;
-    --bg-card: #221c1d;
-    --text-primary: #d48c66;
-    --accent-color: #d48c66;
-    --accent-contrast: #181820;
-    --accent-light: #352822;
-    --card-shadow: 0 6px 24px -2px rgba(12, 12, 16, 0.7);
+    --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.7);
   }
 }
 
-/* Explicit class definitions for body.theme-* (Saf İki Renk) */
-body.theme-obsidian {
-  --bg-main: #0a0a0c;
-  --panel-bg: #141418;
-  --text-color: #d4af37;
-  --accent-gold: #d4af37;
-  --board-dark: #1b1b20;
-  --board-light: #d4af37;
-  --border-color: #332910;
-  --bg-primary: #0a0a0c;
-  --bg-secondary: #0a0a0c;
-  --bg-card: #141418;
-  --text-primary: #d4af37;
-  --accent-color: #d4af37;
-  --accent-contrast: #0a0a0c;
-  --accent-light: #231f13;
-}
-
-body.theme-emerald {
-  --bg-main: #06150e;
-  --panel-bg: #0d2217;
-  --text-color: #c5a059;
-  --accent-gold: #c5a059;
-  --board-dark: #123122;
-  --board-light: #c5a059;
-  --border-color: #243526;
-  --bg-primary: #06150e;
-  --bg-secondary: #06150e;
-  --bg-card: #0d2217;
-  --text-primary: #c5a059;
-  --accent-color: #c5a059;
-  --accent-contrast: #06150e;
-  --accent-light: #1f3020;
-}
-
-body.theme-slate-rose {
-  --bg-main: #16191d;
-  --panel-bg: #1f2329;
-  --text-color: #e0a96d;
-  --accent-gold: #e0a96d;
-  --board-dark: #232830;
-  --board-light: #e0a96d;
-  --border-color: #382a20;
-  --bg-primary: #16191d;
-  --bg-secondary: #16191d;
-  --bg-card: #1f2329;
-  --text-primary: #e0a96d;
-  --accent-color: #e0a96d;
-  --accent-contrast: #15171a;
-  --accent-light: #36291e;
-}
-
-body.theme-champagne-carbon {
-  --bg-main: #181a1f;
-  --panel-bg: #22252c;
-  --text-color: #c9bbae;
-  --accent-gold: #c9bbae;
-  --board-dark: #282c35;
-  --board-light: #c9bbae;
-  --border-color: #36332e;
-  --bg-primary: #181a1f;
-  --bg-secondary: #181a1f;
-  --bg-card: #22252c;
-  --text-primary: #c9bbae;
-  --accent-color: #c9bbae;
-  --accent-contrast: #1a1c22;
-  --accent-light: #333130;
-}
-
-body.theme-royal-amber {
-  --bg-main: #10131a;
-  --panel-bg: #161b24;
-  --text-color: #df9858;
-  --accent-gold: #df9858;
-  --board-dark: #1e2430;
-  --board-light: #df9858;
-  --border-color: #382616;
-  --bg-primary: #10131a;
-  --bg-secondary: #10131a;
-  --bg-card: #161b24;
-  --text-primary: #df9858;
-  --accent-color: #df9858;
-  --accent-contrast: #0e121a;
-  --accent-light: #2f2216;
-}
-
-body.theme-rose-bronze {
-  --bg-main: #181516;
-  --panel-bg: #221c1d;
-  --text-color: #d48c66;
-  --accent-gold: #d48c66;
-  --board-dark: #221c1d;
-  --board-light: #d48c66;
-  --border-color: #382820;
-  --bg-primary: #181516;
-  --bg-secondary: #181516;
-  --bg-card: #221c1d;
-  --text-primary: #d48c66;
-  --accent-color: #d48c66;
-  --accent-contrast: #181820;
-  --accent-light: #352822;
-}
-
-body.theme-monochrome {
-  --bg-main: #121213;
-  --panel-bg: #18181b;
-  --text-color: #ffffff;
-  --accent-gold: #ffffff;
-  --board-dark: #3f4753;
-  --board-light: #b4bcc8;
-  --border-color: #2f2f32;
-  --bg-primary: #121213;
-  --bg-secondary: #18181b;
-  --bg-card: #202024;
-  --text-primary: #ffffff;
-  --accent-color: #ffffff;
-  --accent-contrast: #121213;
-  --accent-light: #27272a;
-}
-
-/* ======================================================== */
-/* STRICT 2-COLOR MONOLITH TEXT & BORDER ENFORCEMENT       */
-/* Tüm yazılar ve çizgiler tek renk vurguya bağlanır        */
-/* ======================================================== */
-body[class*="theme-obsidian"],
-body[class*="theme-emerald"],
-body[class*="theme-slate-rose"],
-body[class*="theme-champagne-carbon"],
-body[class*="theme-royal-amber"],
-body[class*="theme-rose-bronze"],
-body[class*="theme-monochrome"] {
+/* Tüm body varyantlarını tek bir standart monokrom temaya kilitler */
+body,
+body[class*="theme-"] {
+  --bg-main: #09090b !important;
+  --panel-bg: #16161a !important;
+  --text-color: #f4f4f5 !important;
+  --accent-gold: #ffffff !important;
+  --board-dark: #27272a !important;
+  --board-light: #8e95a5 !important;
+  --border-color: #27272a !important;
+  --bg-primary: #09090b !important;
+  --bg-secondary: #111114 !important;
+  --bg-card: #16161a !important;
+  --text-primary: #f4f4f5 !important;
+  --accent-color: #ffffff !important;
+  --accent-contrast: #09090b !important;
+  --accent-light: #202024 !important;
   color: var(--text-primary);
 }
 
-body[class*="theme-obsidian"] [class*="text-gray-"],
-body[class*="theme-emerald"] [class*="text-gray-"],
-body[class*="theme-slate-rose"] [class*="text-gray-"],
-body[class*="theme-champagne-carbon"] [class*="text-gray-"],
-body[class*="theme-royal-amber"] [class*="text-gray-"],
-body[class*="theme-rose-bronze"] [class*="text-gray-"],
-body[class*="theme-monochrome"] [class*="text-gray-"],
-body[class*="theme-obsidian"] [class*="text-slate-"],
-body[class*="theme-emerald"] [class*="text-slate-"],
-body[class*="theme-slate-rose"] [class*="text-slate-"],
-body[class*="theme-champagne-carbon"] [class*="text-slate-"],
-body[class*="theme-royal-amber"] [class*="text-slate-"],
-body[class*="theme-rose-bronze"] [class*="text-slate-"],
-body[class*="theme-monochrome"] [class*="text-slate-"] {
-  color: var(--text-primary) !important;
-  opacity: 0.78;
+body [class*="text-gray-"],
+body [class*="text-slate-"],
+body [class*="text-zinc-"] {
+  color: var(--text-secondary);
 }
 
-body[class*="theme-obsidian"] .text-white,
-body[class*="theme-emerald"] .text-white,
-body[class*="theme-slate-rose"] .text-white,
-body[class*="theme-champagne-carbon"] .text-white,
-body[class*="theme-royal-amber"] .text-white,
-body[class*="theme-rose-bronze"] .text-white,
-body[class*="theme-monochrome"] .text-white {
+body .text-white {
   color: var(--text-primary) !important;
 }
 
-body[class*="theme-obsidian"] [class*="border-gray-"],
-body[class*="theme-emerald"] [class*="border-gray-"],
-body[class*="theme-slate-rose"] [class*="border-gray-"],
-body[class*="theme-champagne-carbon"] [class*="border-gray-"],
-body[class*="theme-royal-amber"] [class*="border-gray-"],
-body[class*="theme-rose-bronze"] [class*="border-gray-"],
-body[class*="theme-monochrome"] [class*="border-gray-"] {
-  border-color: var(--border-color) !important;
-}
-body[class*="theme-slate-rose"] [class*="border-gray-"],
-body[class*="theme-champagne-carbon"] [class*="border-gray-"],
-body[class*="theme-royal-amber"] [class*="border-gray-"],
-body[class*="theme-rose-bronze"] [class*="border-gray-"] {
-  border-color: var(--border-color) !important;
+body [class*="border-gray-"],
+body [class*="border-slate-"],
+body [class*="border-zinc-"] {
+  border-color: var(--border-color);
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-size: 1.05rem;
-  letter-spacing: 0.01em;
-  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
   user-select: none;
 }
 
