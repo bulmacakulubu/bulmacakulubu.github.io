@@ -581,13 +581,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
         const hoveredItem = currentItems.find((g) => g.id === hoveredGame.id);
         const Icon = hoveredItem?.icon || Sparkles;
 
+        // Prevent gameplay card from sagging underneath the bottom AdSense banner
+        const adBannerHeight = !isPremium ? 78 : 16;
+        const bottomSafetyPadding = 16;
+        const safeBottomLimit = typeof window !== 'undefined' ? window.innerHeight - adBannerHeight - bottomSafetyPadding : 600;
+        const maxCardHeight = Math.min(420, Math.max(240, safeBottomLimit - 32));
+        const calculatedTop = Math.max(16, Math.min(hoveredGame.top - 8, safeBottomLimit - maxCardHeight));
+
         return (
           <div
             style={{
-              top: Math.max(16, Math.min(window.innerHeight - 320, hoveredGame.top - 8)),
-              left: 296,
+              top: `${calculatedTop}px`,
+              left: 288,
+              maxHeight: `${maxCardHeight}px`,
             }}
-            className="fixed z-50 w-80 p-4 rounded-2xl shadow-2xl border border-[var(--border-color)] bg-[var(--bg-card)]/95 text-[var(--text-primary)] backdrop-blur-xl pointer-events-none animate-tooltip select-none"
+            className="fixed z-50 w-80 p-4 rounded-2xl shadow-2xl border border-[var(--border-color)] bg-[var(--bg-card)]/95 text-[var(--text-primary)] backdrop-blur-xl pointer-events-none animate-tooltip select-none overflow-y-auto"
           >
             {/* Header */}
             <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[var(--border-color)]">
