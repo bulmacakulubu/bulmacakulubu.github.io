@@ -299,7 +299,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
     }
 
     // 3. Default idle cell
-    return 'bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-800/80';
+    return 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)]/70 hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] shadow-2xs';
   };
 
   const formatTime = (secs: number) => {
@@ -313,7 +313,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
       {/* COMPACT & SPACIOUS CONTROL BAR */}
       <div className="w-full flex flex-col md:flex-row items-center justify-between gap-2 pb-2 border-b border-[var(--border-color)]">
         {/* WIDE CATEGORY SELECTOR (No scroll, fitted buttons) */}
-        <div className="flex flex-wrap items-center justify-center md:justify-start gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl text-xs font-semibold border border-[var(--border-color)]">
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-1 p-1 bg-[var(--bg-secondary)] rounded-xl text-xs font-semibold border border-[var(--border-color)]">
           {Object.keys(categories).map((cat) => (
             <button
               key={cat}
@@ -324,7 +324,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
               className={`px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-lg transition font-extrabold whitespace-nowrap cursor-pointer ${
                 activeCategory === cat
                   ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               {cat}
@@ -334,12 +334,12 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
 
         {/* METRICS, HINT & RESTART BUTTON */}
         <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold shrink-0">
-          <div className="px-2.5 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
+          <div className="px-2.5 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs font-mono tabular-nums">
             ⏱ {formatTime(seconds)}
           </div>
           <div className="px-2.5 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
-            {isTr ? 'BULUNAN' : 'FOUND'}{' '}
-            <span className="font-extrabold text-[var(--accent-color)]">
+            <span className="text-[var(--text-secondary)]">{isTr ? 'Bulunan' : 'Found'}</span>{' '}
+            <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">
               {foundWords.length}/{words.length}
             </span>
           </div>
@@ -347,7 +347,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
           <button
             onClick={handleHint}
             disabled={foundWords.length === words.length}
-            className="px-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            className="px-2.5 py-1.5 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
             title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
           >
             <Lightbulb size={13} />
@@ -356,7 +356,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
 
           <button
             onClick={() => initBoard(activeCategory)}
-            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+            className="px-3 py-1.5 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-[var(--text-primary)] shadow-2xs cursor-pointer"
           >
             <RotateCcw size={13} />
             <span>{isTr ? 'Yeni Tahta' : 'New Board'}</span>
@@ -367,7 +367,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
       {/* BALANCED PLAYING AREA (Side-by-side, perfectly fitted, zero-scroll) */}
       <div className="w-full flex flex-col md:flex-row gap-3.5 lg:gap-4.5 items-center md:items-start justify-center pt-0.5">
         {/* Interactive Mouse & Touch Drag 12x12 Grid */}
-        <div className="bg-gray-50 dark:bg-gray-800/60 p-2 sm:p-2.5 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xs touch-none select-none">
+        <div className="bg-[var(--bg-secondary)] p-2 sm:p-2.5 border border-[var(--border-color)] rounded-2xl shadow-sm touch-none select-none">
           <div className="grid grid-cols-12 gap-1 sm:gap-1.5 text-center">
             {grid.map((row, rIdx) =>
               row.map((char, cIdx) => (
@@ -390,12 +390,12 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
         </div>
 
         {/* WORDS SIDEBAR (2-Column Balanced Grid, zero scroll) */}
-        <div className="w-full md:w-64 lg:w-72 border border-gray-200 dark:border-gray-800 rounded-2xl p-2.5 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col select-none">
-          <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-gray-200 dark:border-gray-800">
-            <h4 className="font-bold text-[11px] tracking-wider text-gray-500 uppercase">
-              {isTr ? 'GİZLİ KELİMELER' : 'HIDDEN WORDS'}
+        <div className="w-full md:w-64 lg:w-72 border border-[var(--border-color)] rounded-2xl p-2.5 bg-[var(--bg-secondary)] flex flex-col select-none shadow-sm">
+          <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-[var(--border-color)]">
+            <h4 className="font-bold text-[11px] text-[var(--text-secondary)]">
+              {isTr ? 'Gizli Kelimeler' : 'Hidden Words'}
             </h4>
-            <span className="text-xs font-extrabold text-[var(--accent-color)]">
+            <span className="text-xs font-mono tabular-nums font-bold text-[var(--accent-color)]">
               {foundWords.length} / {words.length}
             </span>
           </div>
@@ -411,7 +411,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
                   className={`p-1.5 rounded-lg text-[11px] font-semibold flex justify-between items-center cursor-pointer transition select-none ${
                     isFound
                       ? `${colorClass || 'bg-emerald-600 text-white'} line-through opacity-90`
-                      : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-gray-100 dark:border-gray-800 hover:border-gray-400'
+                      : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] hover:border-[var(--accent-color)]'
                   }`}
                   title={isTr ? 'Doğrudan açmak için tıklayın' : 'Click to reveal'}
                 >
@@ -424,10 +424,10 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
             })}
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-gray-200/60 dark:border-gray-800/60 text-[10px] text-gray-400 text-center leading-normal">
+          <div className="mt-2.5 pt-2 border-t border-[var(--border-color)] text-[10px] text-[var(--text-secondary)] text-center leading-normal">
             {isTr
-              ? '🖱️ Kelimeleri yatay, dikey veya çapraz sürükleyip bırakarak bulun.'
-              : '🖱️ Find words by dragging horizontally, vertically, or diagonally.'}
+              ? 'Kelimeleri yatay, dikey veya çapraz sürükleyip bırakarak bulun.'
+              : 'Find words by dragging horizontally, vertically, or diagonally.'}
           </div>
         </div>
       </div>

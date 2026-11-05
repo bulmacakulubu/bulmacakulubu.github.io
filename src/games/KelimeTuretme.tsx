@@ -324,8 +324,8 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
             )}
           </div>
 
-          {/* Scrabble Wooden Letter Tiles Rack */}
-          <div className="p-2 sm:p-3 rounded-2xl bg-amber-900/10 dark:bg-amber-950/30 border border-amber-900/20 flex flex-wrap justify-center gap-2 sm:gap-3 mb-4 w-full max-w-lg shadow-inner">
+          {/* Single-Row Letter Tiles Rack */}
+          <div className="p-2 sm:p-2.5 rounded-2xl bg-[var(--bg-secondary)] border border-[var(--border-color)] flex flex-nowrap items-center justify-center gap-1.5 sm:gap-2 mb-4 w-full max-w-xl overflow-x-auto shadow-inner scrollbar-none">
             {letters.map((item, idx) => {
               const isSelected = selectedIndices.includes(idx);
               return (
@@ -333,14 +333,14 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
                   key={idx}
                   onClick={() => handleSelectTile(item, idx)}
                   disabled={!isPlaying || isSelected}
-                  className={`w-12 h-16 sm:w-15 sm:h-18 rounded-2xl flex flex-col items-center justify-center border-2 transition-all duration-150 cursor-pointer ${
+                  className={`w-10 h-14 sm:w-12 sm:h-16 md:w-13 md:h-17 rounded-xl flex flex-col items-center justify-center border transition-all duration-150 cursor-pointer shrink-0 select-none ${
                     isSelected
-                      ? 'border-gray-300 dark:border-gray-700 bg-gray-200/50 dark:bg-gray-800/50 text-gray-400 opacity-30 scale-90 shadow-none'
-                      : 'bg-amber-100 dark:bg-amber-900/40 border-amber-300 dark:border-amber-700 hover:border-[var(--accent-color)] shadow-md hover:scale-105 active:scale-95'
+                      ? 'border-[var(--border-color)] bg-[var(--bg-card)]/40 text-[var(--text-secondary)] opacity-25 scale-95 shadow-none'
+                      : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:border-[var(--accent-color)] hover:bg-[var(--accent-light)] shadow-xs hover:scale-105 active:scale-95'
                   }`}
                 >
-                  <span className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-amber-100">{item.letter}</span>
-                  <span className="text-[10px] text-amber-700 dark:text-amber-300 font-extrabold">{item.points}p</span>
+                  <span className="text-xl sm:text-2xl md:text-3xl font-black leading-none">{item.letter}</span>
+                  <span className="text-[9px] sm:text-[10px] font-bold text-[var(--text-secondary)] mt-0.5">{item.points}p</span>
                 </button>
               );
             })}
@@ -350,7 +350,7 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
           <div className="flex items-center gap-2.5 sm:gap-3">
             <button
               onClick={handleShuffle}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] shadow-2xs cursor-pointer"
+              className="px-4 py-2 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] shadow-2xs cursor-pointer"
             >
               <Shuffle size={14} />
               <span>{isTr ? 'Karıştır' : 'Shuffle'}</span>
@@ -358,7 +358,7 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
             <button
               onClick={handleBackspace}
               disabled={currentWord.length === 0}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 disabled:opacity-40 rounded-xl text-xs sm:text-sm font-bold transition border border-[var(--border-color)] shadow-2xs cursor-pointer"
+              className="px-4 py-2 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] disabled:opacity-40 rounded-xl text-xs sm:text-sm font-bold transition border border-[var(--border-color)] shadow-2xs cursor-pointer"
             >
               {isTr ? 'Sil (⌫)' : 'Delete (⌫)'}
             </button>

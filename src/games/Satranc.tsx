@@ -44,7 +44,7 @@ const INITIAL_BOARD = [
 
 const PIECE_SYMBOLS: Record<string, string> = {
   r: '♜', n: '♞', b: '♝', q: '♛', k: '♚', p: '♟',
-  R: '♖', N: '♘', B: '♗', Q: '♕', K: '♔', P: '♙',
+  R: '♜', N: '♞', B: '♝', Q: '♛', K: '♚', P: '♟',
 };
 
 const COLS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -664,12 +664,15 @@ export const Satranc: React.FC<SatrancProps> = ({
                       {/* Chess Piece Symbol - Fully solid & outlined for 100% contrast */}
                       {piece && (
                         <span
-                          className="text-xl sm:text-2xl md:text-3xl lg:text-3.5xl xl:text-4xl leading-none inline-block transform scale-110 z-5 select-none font-chess"
+                          className="text-xl sm:text-2xl md:text-3xl lg:text-3.5xl xl:text-4xl leading-none inline-block transform scale-110 z-5 select-none"
                           style={{
                             color: isWhitePiece ? '#ffffff' : '#111317',
+                            WebkitTextStroke: isWhitePiece ? '1.5px #0f172a' : '1px #94a3b8',
+                            paintOrder: 'stroke fill',
+                            fontFamily: '"Segoe UI Symbol", "Noto Sans Symbols", "DejaVu Sans", "Arial Unicode MS", system-ui, sans-serif',
                             filter: isWhitePiece
-                              ? 'drop-shadow(0 0 1.5px #000000) drop-shadow(0 1px 2px rgba(0,0,0,0.95))'
-                              : 'drop-shadow(0 0 1.5px rgba(255,255,255,0.95)) drop-shadow(0 1px 2px rgba(0,0,0,0.6))',
+                              ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.85)) drop-shadow(0 0 1px #000000)'
+                              : 'drop-shadow(0 2px 3px rgba(0,0,0,0.6))',
                           }}
                         >
                           {PIECE_SYMBOLS[piece] || ''}

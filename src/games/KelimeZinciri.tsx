@@ -202,29 +202,29 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
       <div className="w-full flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
         {/* LEFT: Mode */}
         <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-xs font-semibold">
-          {isTr ? 'MOD' : 'MODE'}{' '}
-          <span className="font-extrabold text-[var(--accent-color)] ml-1">
+          <span className="text-[var(--text-secondary)]">{isTr ? 'Mod' : 'Mode'}</span>{' '}
+          <span className="font-bold text-[var(--accent-color)] ml-1">
             {isTr ? 'Kelime Zinciri' : 'Word Chain'}
           </span>
         </div>
 
         {/* CENTER: Live Metrics */}
         <div className="flex items-center gap-1.5 text-xs font-semibold">
-          <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
+          <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs font-mono tabular-nums">
             ⏱ {formatTime(timeLeft)}
           </div>
           <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs flex items-center gap-1">
-            <span>{isTr ? 'PUAN' : 'SCORE'}</span>
-            <span className="font-extrabold text-[var(--accent-color)]">{score}</span>
+            <span className="text-[var(--text-secondary)]">{isTr ? 'Puan' : 'Score'}</span>
+            <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">{score}</span>
             {combo > 1 && (
-              <span className="text-[10px] bg-amber-500/20 text-amber-500 font-black px-1 rounded animate-pulse">
+              <span className="text-[10px] bg-[var(--accent-light)] text-[var(--accent-color)] font-bold px-1.5 py-0.5 rounded animate-pulse">
                 {combo}x
               </span>
             )}
           </div>
           <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs">
-            {isTr ? 'ZİNCİR' : 'CHAIN'}{' '}
-            <span className="font-extrabold text-[var(--accent-color)]">{chain.length}</span>
+            <span className="text-[var(--text-secondary)]">{isTr ? 'Zincir' : 'Chain'}</span>{' '}
+            <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">{chain.length}</span>
           </div>
         </div>
 
@@ -233,7 +233,7 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
           <button
             onClick={handleHint}
             disabled={!isPlaying}
-            className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            className="px-2.5 py-1 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
             title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
           >
             <Lightbulb size={13} />
@@ -242,7 +242,7 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
 
           <button
             onClick={resetGame}
-            className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+            className="px-2.5 py-1 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-[var(--text-primary)] shadow-2xs cursor-pointer"
           >
             <RotateCcw size={12} />
             <span>{isTr ? 'Yeni' : 'New'}</span>
@@ -252,21 +252,23 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
 
       <div className="w-full flex flex-col sm:flex-row gap-3 items-start justify-center">
         <div className="flex-1 w-full flex flex-col items-center justify-center">
-          <div className="bg-amber-500/10 border-2 border-amber-500/30 rounded-2xl p-4 text-center w-full max-w-md mb-3 shadow-xs">
-            <div className="flex items-center justify-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-bold mb-0.5">
-              <span>{isTr ? 'SON KELİME' : 'LAST WORD'}</span>
+          <div className="bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-5 text-center w-full max-w-md mb-3 shadow-sm">
+            <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--text-secondary)] mb-1">
+              <span>{isTr ? 'Son Kelime' : 'Last Word'}</span>
               {combo > 1 && (
-                <span className="px-1.5 py-0.5 bg-amber-500 text-white rounded-full text-[10px] font-extrabold flex items-center gap-0.5 animate-bounce">
+                <span className="px-1.5 py-0.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] rounded-full text-[10px] font-extrabold flex items-center gap-0.5 animate-bounce">
                   <Zap size={10} fill="currentColor" /> {combo}x Kombo!
                 </span>
               )}
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-amber-950 dark:text-amber-100 tracking-wider my-1">
+            <div className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-wide my-1.5">
               {currentWord}
             </div>
-            <div className="text-xs text-amber-700 dark:text-amber-300">
-              {isTr ? 'Şu harfle başlayan bir kelime yaz:' : 'Type a word starting with:'}{' '}
-              <span className="font-extrabold uppercase text-sm underline text-amber-500 ml-1">{requiredLetter}</span>
+            <div className="text-xs text-[var(--text-secondary)] flex items-center justify-center gap-1 mt-1">
+              <span>{isTr ? 'Şu harfle başlayan bir kelime yaz:' : 'Type a word starting with:'}</span>
+              <span className="font-black px-2 py-0.5 rounded-md bg-[var(--accent-color)] text-[var(--accent-contrast)] text-xs shadow-xs">
+                {requiredLetter}
+              </span>
             </div>
           </div>
 
@@ -281,13 +283,13 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
                   ? `"${requiredLetter}" ile başlayan kelime...`
                   : `Word starting with "${requiredLetter}"...`
               }
-              className="flex-1 px-3.5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="flex-1 px-3.5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] placeholder:text-[var(--text-secondary)]/50"
               autoFocus
             />
             <button
               type="submit"
               disabled={!isPlaying}
-              className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-40"
+              className="px-5 py-2.5 bg-[var(--accent-color)] hover:opacity-90 text-[var(--accent-contrast)] rounded-xl text-xs font-bold transition shadow-xs cursor-pointer disabled:opacity-40"
             >
               {isTr ? 'Ekle' : 'Add'}
             </button>
@@ -346,10 +348,10 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
         </div>
 
         {/* Chain history sidebar */}
-        <div className="w-full sm:w-60 h-64 sm:h-72 border border-[var(--border-color)] rounded-2xl p-2.5 bg-gray-50/50 dark:bg-gray-800/40 flex flex-col">
-          <h4 className="font-bold text-[11px] tracking-wider text-gray-500 uppercase mb-2 border-b border-[var(--border-color)] pb-1 flex justify-between items-center">
-            <span>{isTr ? 'ZİNCİR LİSTESİ' : 'CHAIN LIST'}</span>
-            <span className="font-extrabold text-[var(--accent-color)]">{chain.length}</span>
+        <div className="w-full sm:w-60 h-64 sm:h-72 border border-[var(--border-color)] rounded-2xl p-2.5 bg-[var(--bg-secondary)] flex flex-col shadow-sm">
+          <h4 className="font-bold text-[11px] text-[var(--text-secondary)] mb-2 border-b border-[var(--border-color)] pb-1 flex justify-between items-center">
+            <span>{isTr ? 'Zincir Listesi' : 'Chain List'}</span>
+            <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">{chain.length}</span>
           </h4>
           <div className="space-y-1 overflow-y-auto flex-1">
             {chain.map((w, idx) => (
@@ -358,7 +360,7 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
                 className="p-1.5 rounded-xl text-xs font-semibold flex justify-between items-center bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-color)] shadow-2xs"
               >
                 <span>{idx + 1}. {w}</span>
-                <span className="text-[10px] text-amber-600 font-extrabold">+{w.length * 10}</span>
+                <span className="text-[10px] text-[var(--accent-color)] font-mono tabular-nums font-bold">+{w.length * 10}</span>
               </div>
             ))}
           </div>
