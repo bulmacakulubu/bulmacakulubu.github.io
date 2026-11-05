@@ -588,8 +588,8 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
     <div className="w-full flex flex-col items-center justify-start select-none pt-1 sm:pt-2 pb-2 relative max-w-2xl sm:max-w-3xl space-y-2.5 sm:space-y-3.5">
       {/* Toast feedback */}
       {toastMessage && (
-        <div className="absolute -top-3 z-30 px-4 py-2 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
-          <AlertCircle size={14} className="text-amber-400" />
+        <div className="fixed top-16 sm:top-18 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 border border-zinc-700 dark:border-zinc-300 rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 max-w-[92vw] animate-bounce pointer-events-none">
+          <AlertCircle size={15} className="text-amber-500 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}

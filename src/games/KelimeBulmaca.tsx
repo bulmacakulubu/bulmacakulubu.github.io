@@ -371,8 +371,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
     <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between px-2 sm:px-4 py-1 select-none relative max-w-2xl sm:max-w-3xl xl:max-w-4xl mx-auto overflow-hidden">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 bg-gray-900 text-white dark:bg-white dark:text-gray-900 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 animate-bounce">
-          <AlertCircle size={14} className="text-amber-400" />
+        <div className="fixed top-16 sm:top-18 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 border border-zinc-700 dark:border-zinc-300 rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 max-w-[92vw] animate-bounce pointer-events-none">
+          <AlertCircle size={15} className="text-amber-500 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
