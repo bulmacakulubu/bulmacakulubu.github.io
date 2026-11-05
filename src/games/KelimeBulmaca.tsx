@@ -9,6 +9,7 @@ import {
   Lightbulb,
   Users,
   MessageSquare,
+  Trophy,
 } from 'lucide-react';
 import { WORDLE_WORDS_TR, WORDLE_WORDS_EN } from '../data/wordBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
@@ -388,7 +389,10 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
               {opponentProgress ? `${opponentProgress.attempt}/6 Deneme` : 'Başlamadı'}
             </span>
             {opponentProgress?.won && (
-              <span className="text-white font-black animate-pulse">KAZANDI! 🏆</span>
+              <span className="flex items-center gap-1 text-emerald-400 font-bold px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <Trophy size={12} />
+                <span>{isTr ? 'Kazandı' : 'Won'}</span>
+              </span>
             )}
           </div>
         </div>
@@ -407,7 +411,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 startNewRound(len as any);
               }}
               disabled={isMultiplayer}
-              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
+              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
                 wordLength === len
                   ? 'bg-[var(--accent-color)] !text-[var(--accent-contrast)] shadow-xs font-black'
                   : 'text-[var(--text-primary)] opacity-60 hover:opacity-100'
@@ -421,10 +425,10 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         {/* Metric + Memory Progress */}
         <div className="flex items-center gap-1.5 text-xs font-semibold">
           <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
-            {isTr ? 'DENEME' : 'ATTEMPT'} <span className="font-extrabold text-[var(--accent-color)]">{guesses.length}/6</span>
+            {isTr ? 'Deneme' : 'Attempt'} <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">{guesses.length}/6</span>
           </div>
-          <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
-            {isTr ? 'HAVUZ' : 'POOL'} <span className="font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
+          <div className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-[var(--text-secondary)]">
+            {isTr ? 'Havuz' : 'Pool'} <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
           </div>
         </div>
 
@@ -432,7 +436,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           <button
             onClick={handleRequestHint}
             disabled={gameStatus !== 'playing'}
-            className="px-2.5 py-1 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40"
+            className="px-2.5 py-1 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] border border-[var(--border-color)] rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
             title={isPremium ? 'VIP İpucu' : 'Ödüllü Reklam ile İpucu'}
           >
             <Lightbulb size={13} />
@@ -441,7 +445,7 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
 
           <button
             onClick={() => startNewRound()}
-            className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+            className="px-2.5 py-1 bg-[var(--bg-card)] hover:bg-[var(--accent-light)] rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-[var(--text-primary)] shadow-2xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
           >
             <RotateCcw size={12} />
             <span>{isTr ? 'Yeni Oyun' : 'New'}</span>

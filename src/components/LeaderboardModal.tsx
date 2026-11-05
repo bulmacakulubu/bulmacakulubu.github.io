@@ -89,17 +89,20 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
                   {isTr ? 'Sen' : 'You'}
                 </span>
               </div>
-              <div className="text-[11px] text-gray-500 flex items-center gap-2 mt-0.5">
+              <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-2 mt-0.5">
                 <span>{won} {isTr ? 'Zafer' : 'Wins'}</span>
                 <span>•</span>
-                <span>🔥 {streak} {isTr ? 'Seri' : 'Streak'}</span>
+                <span className="flex items-center gap-1 font-medium">
+                  <Flame size={12} className="text-amber-500" />
+                  <span className="font-mono tabular-nums">{streak}</span> {isTr ? 'Seri' : 'Streak'}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="text-right">
-            <div className="text-[10px] uppercase font-bold text-gray-400">{isTr ? 'PUANIN' : 'SCORE'}</div>
-            <div className="text-base font-black text-amber-400 font-mono">
+            <div className="text-[10px] font-semibold text-[var(--text-secondary)]">{isTr ? 'Puanın' : 'Score'}</div>
+            <div className="text-base font-black text-amber-400 font-mono tabular-nums">
               {userScore.toLocaleString()}
             </div>
           </div>
@@ -109,23 +112,25 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
         <div className="flex gap-1.5 p-1 bg-[var(--bg-secondary)] rounded-xl my-3 border border-[var(--border-color)]">
           <button
             onClick={() => setTab('all')}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
               tab === 'all'
                 ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            {isTr ? '🏆 Genel Sıralama' : '🏆 Global Rank'}
+            <Trophy size={13} />
+            <span>{isTr ? 'Genel Sıralama' : 'Global Rank'}</span>
           </button>
           <button
             onClick={() => setTab('weekly')}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
               tab === 'weekly'
                 ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                 : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
-            {isTr ? '🔥 Haftalık Şampiyonlar' : '🔥 Weekly Champions'}
+            <Flame size={13} />
+            <span>{isTr ? 'Haftalık Şampiyonlar' : 'Weekly Champions'}</span>
           </button>
         </div>
 

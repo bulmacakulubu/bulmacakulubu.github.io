@@ -57,13 +57,13 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
     >
       <div className="w-full max-w-3xl flex flex-col items-center justify-center mx-auto">
         {/* Sleek inline top line: Sponsorlu & VIP */}
-        <div className="w-full flex items-center justify-between text-[10px] leading-tight text-gray-400 dark:text-gray-500 mb-0.5 max-w-xl px-1">
-          <span className="font-bold uppercase tracking-wider text-[9px] bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-[var(--border-color)]">
+        <div className="w-full flex items-center justify-between text-[10px] leading-tight text-[var(--text-secondary)] mb-0.5 max-w-xl px-1">
+          <span className="font-medium text-[10px] bg-[var(--bg-secondary)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">
             {isTr ? 'Sponsorlu Reklam' : 'Sponsored Ad'}
           </span>
           <button
             onClick={onOpenRemoveAds}
-            className="flex items-center gap-1 font-bold text-[10px] text-[var(--text-primary)] hover:underline cursor-pointer opacity-80 hover:opacity-100"
+            className="flex items-center gap-1 font-semibold text-[10px] text-[var(--text-primary)] hover:underline cursor-pointer opacity-80 hover:opacity-100 focus-visible:ring-1 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
           >
             <Crown size={11} className="text-[var(--text-primary)]" />
             <span>{isTr ? 'Reklamları Kaldır (VIP)' : 'Remove Ads (VIP)'}</span>

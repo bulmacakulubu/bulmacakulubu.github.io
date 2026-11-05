@@ -478,8 +478,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         onScroll={() => setHoveredGame(null)}
         className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 relative scrollbar-none"
       >
-        <div className="px-2.5 py-0.5 text-[9px] font-bold tracking-wider" style={{ color: 'var(--accent-color)' }}>
-          {language === 'tr' ? 'OYUNLAR' : 'GAMES'}
+        <div className="px-2.5 py-1 text-[11px] font-semibold text-[var(--text-secondary)]">
+          {language === 'tr' ? 'Oyunlar' : 'Games'}
         </div>
         {gameItems.map((item) => {
           const Icon = item.icon;
@@ -539,35 +539,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* PWA Install Button */}
           <button
             onClick={handleInstallApp}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] text-xs font-bold transition shadow-2xs group cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] text-xs font-semibold transition shadow-2xs group cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-6 h-6 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] group-hover:scale-105 flex items-center justify-center transition border border-[var(--border-color)]">
                 <Download size={13} />
               </div>
-              <span className="font-bold">
+              <span className="font-semibold">
                 {language === 'tr' ? 'Uygulamayı İndir' : 'Install App'}
               </span>
             </div>
-            <span className="text-[10px] text-[var(--text-primary)] opacity-70 font-semibold uppercase tracking-wider">
-              PWA ➔
+            <span className="text-[10px] text-[var(--text-secondary)] font-medium px-1.5 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)]">
+              PWA
             </span>
           </button>
 
           <button
             onClick={onOpenSettings}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] text-xs font-bold transition shadow-2xs group cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] text-xs font-semibold transition shadow-2xs group cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-lg bg-gray-100 dark:bg-gray-800 group-hover:bg-[var(--accent-color)] group-hover:text-white flex items-center justify-center transition">
-                <Settings size={14} />
+              <div className="w-6 h-6 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] group-hover:scale-105 flex items-center justify-center transition border border-[var(--border-color)]">
+                <Settings size={13} />
               </div>
-              <span className="font-bold text-gray-800 dark:text-gray-100 group-hover:text-[var(--accent-color)]">
+              <span className="font-semibold">
                 {language === 'tr' ? 'Ayarlar' : 'Settings'}
               </span>
             </div>
-            <span className="text-[10px] text-gray-400 group-hover:text-[var(--accent-color)] font-medium">
-              {language === 'tr' ? 'Tema · Ses' : 'Theme · Sound'} ➔
+            <span className="text-[10px] text-[var(--text-secondary)] font-medium">
+              {language === 'tr' ? 'Tema & Ses' : 'Theme & Sound'}
             </span>
           </button>
         </div>

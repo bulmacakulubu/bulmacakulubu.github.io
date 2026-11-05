@@ -160,9 +160,9 @@ export const RemoveAdsModal: React.FC<RemoveAdsModalProps> = ({
           )}
 
           {isAlreadyVip ? (
-            <div className="w-full py-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-2xl font-black text-sm flex items-center justify-center gap-2">
+            <div className="w-full py-3 bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-2xl font-bold text-sm flex items-center justify-center gap-2">
               <ShieldCheck size={18} />
-              <span>{isTr ? 'VIP Üyeliğiniz Zaten Aktif 👑' : 'VIP Membership Active 👑'}</span>
+              <span>{isTr ? 'VIP Üyeliğiniz Zaten Aktif' : 'VIP Membership Active'}</span>
             </div>
           ) : (
             <div className="space-y-2.5">
@@ -176,7 +176,7 @@ export const RemoveAdsModal: React.FC<RemoveAdsModalProps> = ({
                       : 'Shopier payment page opened.'
                   );
                 }}
-                className="w-full py-3 bg-gradient-to-r from-amber-500 via-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-600 text-white font-black text-sm rounded-2xl shadow-lg shadow-amber-500/30 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm rounded-2xl shadow-md shadow-amber-600/20 active:scale-98 transition flex items-center justify-center gap-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:outline-none"
               >
                 <CreditCard size={17} />
                 <span>

@@ -216,7 +216,7 @@ export const DailyPuzzleView: React.FC<DailyPuzzleViewProps> = ({
           </div>
 
           <div className="divide-y divide-[var(--border-color)]">
-            <div className="grid grid-cols-12 px-4 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-[var(--bg-secondary)]/10">
+            <div className="grid grid-cols-12 px-4 py-1.5 text-[11px] font-semibold text-[var(--text-secondary)] bg-[var(--bg-secondary)]/10">
               <div className="col-span-2">{language === 'tr' ? 'Sıra' : 'Rank'}</div>
               <div className="col-span-5">{language === 'tr' ? 'Oyuncu' : 'Player'}</div>
               <div className="col-span-3 text-right">{language === 'tr' ? 'Skor' : 'Score'}</div>

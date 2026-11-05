@@ -10,7 +10,7 @@ import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
 import { BUILT_IN_TRACKS, startAmbientMusic, stopAmbientMusic, setAmbientVolume } from './utils/audio';
-import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy } from 'lucide-react';
+import { Music, Radio, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy, Boxes, Grid3X3, Type, LayoutGrid, Shuffle, Search, Grid, Layers, UserX } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
 import confetti from 'canvas-confetti';
@@ -91,6 +91,23 @@ const GAME_HEADER_INFO: Record<GameId, { tr: { title: string; desc: string }; en
     tr: { title: 'Günün Bulmacası', desc: 'Her 24 saatte bir yenilenen rastgele bulmaca ve skor tablosu.' },
     en: { title: 'Daily Puzzle', desc: 'Daily randomized synchronized puzzle refreshed every 24 hours.' },
   },
+};
+
+const GAME_ICONS: Record<GameId, React.ComponentType<{ size?: number; className?: string }>> = {
+  'gunun-bulmacasi': Trophy,
+  'baglantilar': Boxes,
+  'nonogram': Grid3X3,
+  'kelime-bulmaca': Type,
+  'kare-bulmaca': LayoutGrid,
+  'anagram': Shuffle,
+  'kelime-turetme': FileText,
+  'sozcuk-avi': Search,
+  'satranc': Crown,
+  'sudoku': Grid,
+  'kelime-zinciri': Sparkles,
+  'hafiza-kartlari': Layers,
+  'adam-asmaca': UserX,
+  'nokta-avi': Sparkles,
 };
 
 export default function App() {
@@ -430,7 +447,10 @@ export default function App() {
               className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs"
               style={{ backgroundColor: 'var(--accent-color)', color: 'var(--accent-contrast)' }}
             >
-              ⚡
+              {(() => {
+                const ActiveIcon = GAME_ICONS[activeGame] || Sparkles;
+                return <ActiveIcon size={15} />;
+              })()}
             </div>
             <div className="truncate">
               <h2 className="font-bold text-xs sm:text-sm truncate">
@@ -448,7 +468,7 @@ export default function App() {
               {/* Previous Track */}
               <button
                 onClick={handlePrevTrack}
-                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 hover:text-[var(--text-primary)] transition"
+                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 hover:text-[var(--text-primary)] transition focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none cursor-pointer"
                 title={settings.language === 'tr' ? 'Önceki' : 'Previous'}
               >
                 <SkipBack size={12} />
@@ -458,7 +478,7 @@ export default function App() {
               <button
                 onClick={handleTogglePlayMusic}
                 disabled={!settings.soundEnabled}
-                className={`w-6 h-6 rounded-lg flex items-center justify-center transition font-bold ${
+                className={`w-6 h-6 rounded-lg flex items-center justify-center transition font-bold cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
                   isPlayingMusic
                     ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
                     : 'bg-gray-900 text-white dark:bg-white dark:text-gray-900 hover:scale-105'
@@ -471,7 +491,7 @@ export default function App() {
               {/* Next Track */}
               <button
                 onClick={handleNextTrack}
-                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 hover:text-[var(--text-primary)] transition"
+                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-500 hover:text-[var(--text-primary)] transition focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none cursor-pointer"
                 title={settings.language === 'tr' ? 'Sonraki' : 'Next'}
               >
                 <SkipForward size={12} />
@@ -500,7 +520,7 @@ export default function App() {
               {/* Mute/Unmute Quick Toggle */}
               <button
                 onClick={handleToggleSound}
-                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-400 hover:text-[var(--text-primary)] transition cursor-pointer"
+                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-gray-400 hover:text-[var(--text-primary)] transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
                 title={settings.soundEnabled ? (settings.language === 'tr' ? 'Sesi Kapat' : 'Mute') : (settings.language === 'tr' ? 'Sesi Aç' : 'Unmute')}
               >
                 {settings.soundEnabled && settings.volume > 0 ? (
@@ -513,7 +533,7 @@ export default function App() {
               {/* Integrated Playlist Button */}
               <button
                 onClick={() => setIsFloatingMusicOpen((prev) => !prev)}
-                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-bold transition ml-0.5 ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-bold transition ml-0.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
                   isFloatingMusicOpen
                     ? 'border-[var(--accent-color)] bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-2xs'
                     : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] hover:text-[var(--accent-color)] text-gray-700 dark:text-gray-300'
@@ -528,19 +548,19 @@ export default function App() {
             {/* VIP / Remove Ads Action Button */}
             <button
               onClick={() => setIsRemoveAdsOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-bold transition text-xs shadow-2xs group cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-bold transition text-xs shadow-2xs group cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
               title={currentUser.isPremium ? (settings.language === 'tr' ? 'VIP Üye (Aktif)' : 'VIP Member (Active)') : (settings.language === 'tr' ? 'Reklamları Kaldır & VIP Ol' : 'Remove Ads & Get VIP')}
             >
               <Crown size={13} className="text-[var(--text-primary)] group-hover:scale-110 transition" />
               <span className="hidden md:inline">
-                {currentUser.isPremium ? (settings.language === 'tr' ? '👑 VIP Üye' : '👑 VIP') : (settings.language === 'tr' ? 'VIP / Reklamsız' : 'VIP Pass')}
+                {currentUser.isPremium ? (settings.language === 'tr' ? 'VIP Üye' : 'VIP') : (settings.language === 'tr' ? 'VIP / Reklamsız' : 'VIP Pass')}
               </span>
             </button>
 
             {/* 1v1 Multiplayer Action Button */}
             <button
               onClick={() => setIsMultiplayerOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-bold transition text-xs shadow-2xs group cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] font-bold transition text-xs shadow-2xs group cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
               title={settings.language === 'tr' ? '1v1 Çevrimiçi Düello (Arkadaşınla Oyna)' : '1v1 Online Duel (Play with friend)'}
             >
               <Users size={13} className="text-[var(--text-primary)] group-hover:scale-110 transition" />
@@ -553,22 +573,22 @@ export default function App() {
             {/* Ticker Stats Group (Shown on large 2xl screens, covered by Leaderboard Modal elsewhere) */}
             {!hideGameStats && (
               <div className="hidden 2xl:flex items-center gap-2.5">
-                <div className="h-5 w-px bg-gray-200 dark:bg-gray-800"></div>
+                <div className="h-5 w-px bg-zinc-200 dark:bg-zinc-800"></div>
                 <div className="text-center">
-                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'OYNANAN' : 'PLAYED'}</div>
-                  <div className="font-bold text-xs">{currentStats.played}</div>
+                  <div className="text-[10px] font-medium text-[var(--text-secondary)]">{settings.language === 'tr' ? 'Oynanan' : 'Played'}</div>
+                  <div className="font-mono tabular-nums font-bold text-xs">{currentStats.played}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'BAŞARI' : 'WIN %'}</div>
-                  <div className="font-bold text-xs">{winRate}%</div>
+                  <div className="text-[10px] font-medium text-[var(--text-secondary)]">{settings.language === 'tr' ? 'Başarı' : 'Win %'}</div>
+                  <div className="font-mono tabular-nums font-bold text-xs">{winRate}%</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'SERİ' : 'STREAK'}</div>
-                  <div className="font-bold text-xs">{currentStats.streak}</div>
+                  <div className="text-[10px] font-medium text-[var(--text-secondary)]">{settings.language === 'tr' ? 'Seri' : 'Streak'}</div>
+                  <div className="font-mono tabular-nums font-bold text-xs">{currentStats.streak}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: 'var(--accent-color)' }}>{settings.language === 'tr' ? 'EN İYİ' : 'BEST'}</div>
-                  <div className="font-bold text-xs">{bestRecord}</div>
+                  <div className="text-[10px] font-medium text-[var(--text-secondary)]">{settings.language === 'tr' ? 'En İyi' : 'Best'}</div>
+                  <div className="font-mono tabular-nums font-bold text-xs">{bestRecord}</div>
                 </div>
                 <div className="h-5 w-px border-r" style={{ borderColor: 'var(--border-color)' }}></div>
               </div>

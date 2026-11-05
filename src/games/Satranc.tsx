@@ -443,27 +443,28 @@ export const Satranc: React.FC<SatrancProps> = ({
             <>
               <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px] flex items-center gap-1">
                 <BookOpen size={12} className="text-amber-500" />
-                <span>{isEn ? 'LESSON' : 'DERS'}</span>
-                <span className="font-extrabold text-[var(--accent-color)]">{activeLessonIndex + 1}/{CHESS_LESSONS.length}</span>
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Lesson' : 'Ders'}</span>
+                <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">{activeLessonIndex + 1}/{CHESS_LESSONS.length}</span>
               </div>
               {remainingStars.length > 0 && (
                 <div className="px-2.5 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/30 shadow-2xs text-[11px] flex items-center gap-1 font-bold animate-pulse">
-                  <span>⭐</span>
-                  <span>{remainingStars.length} {isEn ? 'Left' : 'Kaldı'}</span>
+                  <Sparkles size={11} className="text-amber-500" />
+                  <span className="font-mono tabular-nums">{remainingStars.length} {isEn ? 'Left' : 'Kaldı'}</span>
                 </div>
               )}
             </>
           ) : (
             <>
               <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px]">
-                {isEn ? 'TURN' : 'SIRA'}{' '}
-                <span className="font-extrabold text-[var(--accent-color)] ml-1">
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Turn' : 'Sıra'}</span>{' '}
+                <span className="font-bold text-[var(--accent-color)] ml-1">
                   {turn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah')}
                   {isOnline && (turn === myColor ? (isEn ? ' (Your Turn!)' : ' (Senin Sıran!)') : (isEn ? ' (Opponent...)' : ' (Rakip...)'))}
                 </span>
               </div>
               <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px]">
-                {isEn ? 'MOVES' : 'HAMLE'} <span className="font-extrabold text-[var(--accent-color)]">{moveHistory.length}</span>
+                <span className="text-[var(--text-secondary)]">{isEn ? 'Moves' : 'Hamle'}</span>{' '}
+                <span className="font-mono tabular-nums font-bold text-[var(--accent-color)]">{moveHistory.length}</span>
               </div>
             </>
           )}
@@ -601,7 +602,7 @@ export const Satranc: React.FC<SatrancProps> = ({
 
           <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-2 text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2">
             <Sparkles size={14} className="text-amber-500 shrink-0" />
-            <span>🎯 {currentLesson.instruction[isEn ? 'en' : 'tr']}</span>
+            <span>{currentLesson.instruction[isEn ? 'en' : 'tr']}</span>
           </div>
 
           {showHint && (
