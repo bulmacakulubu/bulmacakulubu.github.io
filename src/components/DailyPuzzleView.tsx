@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GameId, AllStats, UserProfile } from '../types';
 import { getDailyPuzzleInfo } from '../utils/storage';
-import { Trophy, Clock, Flame, Play, Award, CheckCircle2, ArrowRight, Share2, Timer } from 'lucide-react';
+import { Trophy, Clock, Flame, Play, Award, CheckCircle2, ArrowRight, Share2, ShieldCheck, Zap } from 'lucide-react';
 import { openShareModal } from '../utils/shareService';
 
 interface DailyPuzzleViewProps {
@@ -28,24 +28,6 @@ const GAME_NAMES_MAP: Record<GameId, { tr: string; en: string }> = {
   'nonogram': { tr: 'Nonogram (Piksel)', en: 'Nonogram' },
   'gunun-bulmacasi': { tr: 'Günün Bulmacası', en: 'Daily Puzzle' },
 };
-
-const LEADERBOARD_TR = [
-  { rank: 1, name: 'Eleanor Vance', score: '9,840 Puan', time: '14 sn', badge: 'Büyükusta', isUser: false },
-  { rank: 2, name: 'Jurnin V.', score: '9,420 Puan', time: '18 sn', badge: 'Usta Çözücü', isUser: false },
-  { rank: 3, name: 'ZekaKüpü', score: '8,950 Puan', time: '21 sn', badge: 'Uzman', isUser: false },
-  { rank: 4, name: 'Julian Finch', score: '8,410 Puan', time: '26 sn', badge: 'Kelime Avcısı', isUser: false },
-  { rank: 5, name: 'Boran Tekin', score: '7,890 Puan', time: '32 sn', badge: 'Zeka Ustası', isUser: false },
-  { rank: 6, name: 'Zeynep Kaya', score: '7,340 Puan', time: '37 sn', badge: 'Hızlı Düşünür', isUser: false },
-];
-
-const LEADERBOARD_EN = [
-  { rank: 1, name: 'Eleanor Vance', score: '9,840 pts', time: '14s', badge: 'Grandmaster', isUser: false },
-  { rank: 2, name: 'Jurnin V.', score: '9,420 pts', time: '18s', badge: 'Master Solver', isUser: false },
-  { rank: 3, name: 'BrainTeaser', score: '8,950 pts', time: '21s', badge: 'Expert', isUser: false },
-  { rank: 4, name: 'Julian Finch', score: '8,410 pts', time: '26s', badge: 'Word Hunter', isUser: false },
-  { rank: 5, name: 'Marcus Sterling', score: '7,890 pts', time: '32s', badge: 'Tactician', isUser: false },
-  { rank: 6, name: 'Sarah_99', score: '7,340 pts', time: '37s', badge: 'Speed Solver', isUser: false },
-];
 
 export const DailyPuzzleView: React.FC<DailyPuzzleViewProps> = ({
   language,
@@ -88,8 +70,7 @@ export const DailyPuzzleView: React.FC<DailyPuzzleViewProps> = ({
 
   const rawBest = gameStats.bestScore ?? gameStats.bestTime ?? dailyStats.bestScore ?? dailyStats.bestTime;
   const bestRecord = rawBest ? (typeof rawBest === 'number' && rawBest > 1000 ? `${rawBest} P` : `${rawBest}`) : '—';
-
-  const baseLeaderboard = isTr ? LEADERBOARD_TR : LEADERBOARD_EN;
+  const winRate = gameStats.played > 0 ? Math.round((gameStats.won / gameStats.played) * 100) : 0;
 
   const handleShareDaily = () => {
     openShareModal({
@@ -125,8 +106,8 @@ export const DailyPuzzleView: React.FC<DailyPuzzleViewProps> = ({
 
           <p className="text-xs text-zinc-400 max-w-lg leading-relaxed">
             {isTr
-              ? 'Her 24 saatte bir güncellenen resmi günlük bulmacayı çöz, günün liderlik tablosunda yerini al.'
-              : 'Solve today’s official 24-hour challenge, record your record time and climb the daily leaderboard.'}
+              ? 'Her 24 saatte bir güncellenen resmi günlük bulmacayı çöz, kişisel rekorunu kaydet ve serini koru.'
+              : 'Solve today’s official 24-hour challenge, record your personal record time and maintain your streak.'}
           </p>
         </div>
 
@@ -245,20 +226,20 @@ export const DailyPuzzleView: React.FC<DailyPuzzleViewProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Bauhaus Leaderboard Table */}
+        {/* Right Column: 100% Genuine Personal Record & Solution Status */}
         <div
-          className="md:col-span-7 border rounded-2xl overflow-hidden shadow-2xs"
+          className="md:col-span-7 border rounded-2xl overflow-hidden shadow-2xs flex flex-col justify-between"
           style={{ backgroundColor: '#121215', borderColor: '#27272a' }}
         >
-          {/* Leaderboard Header */}
+          {/* Header */}
           <div
             className="px-4 py-3 border-b flex items-center justify-between bg-[#16161a]"
             style={{ borderColor: '#27272a' }}
           >
             <div className="flex items-center gap-2">
-              <Trophy size={14} className="text-amber-400" />
+              <ShieldCheck size={14} className="text-emerald-400" />
               <h2 className="font-bold text-xs text-zinc-200">
-                {isTr ? 'Günün Liderlik Tablosu' : "Today's Leaderboard"}
+                {isTr ? 'Kişisel Çözüm Kaydı ve Geçmişi' : "Personal Solution Record & History"}
               </h2>
             </div>
             <div className="text-[10px] font-mono font-medium px-2 py-0.5 bg-zinc-800 border border-zinc-700/60 rounded text-zinc-400">
@@ -266,83 +247,101 @@ export const DailyPuzzleView: React.FC<DailyPuzzleViewProps> = ({
             </div>
           </div>
 
-          {/* Table Header */}
-          <div className="grid grid-cols-12 px-4 py-2 text-[10px] font-mono uppercase tracking-wider text-zinc-400 bg-[#141418] border-b border-zinc-800/80">
-            <div className="col-span-2">{isTr ? 'Sıra' : 'Rank'}</div>
-            <div className="col-span-5">{isTr ? 'Oyuncu' : 'Player'}</div>
-            <div className="col-span-3 text-right">{isTr ? 'Skor / Süre' : 'Score'}</div>
-            <div className="col-span-2 text-right">{isTr ? 'Unvan' : 'Badge'}</div>
+          {/* Main Status Panel */}
+          <div className="p-5 flex flex-col items-center justify-center text-center space-y-3">
+            {hasPlayedToday ? (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+                  <CheckCircle2 size={24} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-zinc-100">
+                    {isTr ? 'Günün Bulmacası Tamamlandı' : 'Daily Puzzle Completed'}
+                  </div>
+                  <p className="text-xs text-zinc-400 max-w-sm mt-1">
+                    {isTr
+                      ? 'Tebrikler! Bugünkü bulmacayı başarıyla çözdünüz. Dereceniz cihaz hafızasına kaydedildi.'
+                      : 'Congratulations! You solved today’s puzzle. Your result is securely saved on this device.'}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 bg-zinc-900/80 border border-zinc-800 px-4 py-2 rounded-xl text-xs">
+                  <div>
+                    <span className="text-[10px] text-zinc-500 block uppercase font-mono">{isTr ? 'Derece' : 'Record'}</span>
+                    <span className="font-mono font-bold text-emerald-400">{bestRecord}</span>
+                  </div>
+                  <div className="h-6 w-px bg-zinc-800" />
+                  <div>
+                    <span className="text-[10px] text-zinc-500 block uppercase font-mono">{isTr ? 'Seri' : 'Streak'}</span>
+                    <span className="font-mono font-bold text-amber-400">{activeStreak} {isTr ? 'Gün' : 'Days'}</span>
+                  </div>
+                  <div className="h-6 w-px bg-zinc-800" />
+                  <div>
+                    <span className="text-[10px] text-zinc-500 block uppercase font-mono">{isTr ? 'Kullanıcı' : 'User'}</span>
+                    <span className="font-bold text-zinc-200">{currentUser?.name || (isTr ? 'Sen' : 'You')}</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleShareDaily}
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-xl text-xs transition cursor-pointer mt-1"
+                >
+                  <Share2 size={13} />
+                  <span>{isTr ? 'Başarını Sosyal Ağlarda Paylaş' : 'Share Your Achievement'}</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-2xl bg-zinc-800/80 border border-zinc-700/60 text-zinc-400 flex items-center justify-center">
+                  <Clock size={24} />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-zinc-200">
+                    {isTr ? 'Günün Çözümü Bekleniyor' : 'Awaiting Today’s Solution'}
+                  </div>
+                  <p className="text-xs text-zinc-400 max-w-sm mt-1">
+                    {isTr
+                      ? 'Bugünkü 24 saatlik özel mücadeleyi henüz çözmediniz. Çözümü bitirdiğinizde dereceniz burada belgelenecektir.'
+                      : 'You haven’t completed today’s challenge yet. Once solved, your verified time and score will appear here.'}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => onPlayGame(puzzleInfo.gameId)}
+                  className="flex items-center gap-2 px-5 py-2 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-xl text-xs transition cursor-pointer mt-1"
+                >
+                  <Play size={13} fill="currentColor" />
+                  <span>{isTr ? 'Bulmacaya Başla' : 'Start Puzzle'}</span>
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Table Rows */}
-          <div className="divide-y divide-zinc-800/60">
-            {baseLeaderboard.map((row) => (
-              <div
-                key={row.rank}
-                className="grid grid-cols-12 px-4 py-2.5 items-center text-xs hover:bg-zinc-800/30 transition"
-              >
-                {/* Rank Badge */}
-                <div className="col-span-2 flex items-center gap-1.5 font-bold">
-                  <span
-                    className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-mono font-bold ${
-                      row.rank === 1
-                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                        : row.rank === 2
-                        ? 'bg-slate-400/20 text-slate-300 border border-slate-400/40'
-                        : row.rank === 3
-                        ? 'bg-amber-700/20 text-amber-500 border border-amber-700/40'
-                        : 'bg-zinc-800/80 text-zinc-400 border border-zinc-700/50'
-                    }`}
-                  >
-                    {row.rank}
-                  </span>
-                </div>
+          {/* Genuine Local Stats Breakdown for This Game */}
+          <div className="border-t border-zinc-800/80 bg-[#16161a] p-3 text-xs">
+            <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 mb-2 flex items-center justify-between">
+              <span>{isTr ? `Bu Oyundaki Geçmişiniz (${gameName})` : `Your History in (${gameName})`}</span>
+              <span className="text-zinc-500">{isTr ? 'Gerçek Cihaz Verisi' : 'Verified Device Data'}</span>
+            </div>
 
-                {/* Player Name */}
-                <div className="col-span-5 font-medium flex items-center gap-2 truncate text-zinc-200">
-                  <div className="w-5 h-5 rounded bg-zinc-800 border border-zinc-700/60 text-zinc-400 flex items-center justify-center text-[9px] font-mono font-bold uppercase shrink-0">
-                    {row.name.charAt(0)}
-                  </div>
-                  <span className="truncate text-xs">{row.name}</span>
-                </div>
-
-                {/* Score & Time */}
-                <div className="col-span-3 text-right font-mono font-semibold text-xs text-zinc-300">
-                  <div>{row.score}</div>
-                  <div className="text-[10px] text-zinc-500 font-mono">{row.time}</div>
-                </div>
-
-                {/* Badge / Title */}
-                <div className="col-span-2 text-right text-[10px] font-medium text-zinc-400 truncate">
-                  {row.badge}
-                </div>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-400 block">{isTr ? 'Oynanan' : 'Played'}</span>
+                <span className="font-mono font-bold text-zinc-200 text-xs">{gameStats.played}</span>
               </div>
-            ))}
-
-            {/* Current User Row if played */}
-            {hasPlayedToday && (
-              <div className="grid grid-cols-12 px-4 py-2.5 items-center text-xs bg-amber-500/5 border-t border-amber-500/30">
-                <div className="col-span-2 flex items-center gap-1.5 font-bold">
-                  <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40">
-                    ★
-                  </span>
-                </div>
-                <div className="col-span-5 font-semibold flex items-center gap-2 truncate text-amber-300">
-                  <div className="w-5 h-5 rounded bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center text-[9px] font-mono font-bold uppercase shrink-0">
-                    {(currentUser?.name || 'S').charAt(0)}
-                  </div>
-                  <span className="truncate text-xs">
-                    {currentUser?.name || (isTr ? 'Sen (Bugün)' : 'You (Today)')}
-                  </span>
-                </div>
-                <div className="col-span-3 text-right font-mono font-bold text-xs text-amber-400">
-                  {bestRecord}
-                </div>
-                <div className="col-span-2 text-right text-[10px] font-medium text-amber-400/80 truncate">
-                  {isTr ? 'Kayıtlı' : 'Recorded'}
-                </div>
+              <div className="p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-400 block">{isTr ? 'Kazanılan' : 'Won'}</span>
+                <span className="font-mono font-bold text-emerald-400 text-xs">{gameStats.won}</span>
               </div>
-            )}
+              <div className="p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-400 block">{isTr ? 'Başarı %' : 'Win %'}</span>
+                <span className="font-mono font-bold text-zinc-200 text-xs">%{winRate}</span>
+              </div>
+              <div className="p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/80">
+                <span className="text-[10px] text-zinc-400 block">{isTr ? 'En İyi Seri' : 'Best Streak'}</span>
+                <span className="font-mono font-bold text-amber-400 text-xs">{gameStats.maxStreak || gameStats.streak || 0}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

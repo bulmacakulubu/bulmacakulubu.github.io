@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { X, Trophy, Crown, Flame, Award, Medal, Sparkles, UserCheck } from 'lucide-react';
-import { UserProfile, GameStats } from '../types';
+import React from 'react';
+import { X, Trophy, Flame, Award, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { UserProfile, GameStats, AllStats } from '../types';
+import { loadStats } from '../utils/storage';
 
 interface LeaderboardModalProps {
   isOpen: boolean;
@@ -8,7 +9,25 @@ interface LeaderboardModalProps {
   language?: 'tr' | 'en';
   currentUser: UserProfile;
   stats?: GameStats;
+  allStats?: AllStats;
 }
+
+const GAME_DISPLAY_NAMES: Record<string, { tr: string; en: string }> = {
+  'kelime-bulmaca': { tr: 'Kelime Bulmaca', en: 'Word Puzzle' },
+  'kare-bulmaca': { tr: 'Kare / Çengel Bulmaca', en: 'Crossword' },
+  'anagram': { tr: 'Anagram Çözücü', en: 'Anagram Solver' },
+  'kelime-turetme': { tr: 'Kelime Türetme', en: 'Word Builder' },
+  'sozcuk-avi': { tr: 'Sözcük Avı', en: 'Word Search' },
+  'adam-asmaca': { tr: 'Adam Asmaca', en: 'Hangman' },
+  'satranc': { tr: 'Satranç', en: 'Chess' },
+  'sudoku': { tr: 'Sudoku', en: 'Sudoku' },
+  'kelime-zinciri': { tr: 'Kelime Zinciri', en: 'Word Chain' },
+  'hafiza-kartlari': { tr: 'Hafıza Kartları', en: 'Memory Cards' },
+  'nokta-avi': { tr: 'Nokta Avı', en: 'Dot Hunt' },
+  'baglantilar': { tr: 'Bağlantılar (Connections)', en: 'Connections' },
+  'nonogram': { tr: 'Nonogram (Piksel)', en: 'Nonogram' },
+  'gunun-bulmacasi': { tr: 'Günün Bulmacası', en: 'Daily Puzzle' },
+};
 
 export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   isOpen,
@@ -16,176 +35,150 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   language = 'tr',
   currentUser,
   stats,
+  allStats: propAllStats,
 }) => {
   const isTr = language === 'tr';
-  const [tab, setTab] = useState<'all' | 'weekly'>('all');
 
   if (!isOpen) return null;
 
-  const won = stats?.won || 0;
-  const played = stats?.played || 0;
-  const streak = stats?.streak || 0;
-  const userScore = 12000 + won * 150;
+  const currentStats = propAllStats || loadStats();
 
-  const rankings = [
-    { rank: 1, name: 'Eleanor Vance', title: isTr ? 'Büyükusta' : 'Grandmaster', score: 14890, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&h=100&q=80', isUser: false },
-    { rank: 2, name: 'Jurnin V.', title: isTr ? 'Usta Çözücü' : 'Master Solver', score: 14640, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80', isUser: false },
-    { rank: 3, name: currentUser.name || (isTr ? 'Sen (Misafir)' : 'You (Guest)'), title: isTr ? 'Yıldız Oyuncu' : 'Star Player', score: userScore, avatar: currentUser.avatar, isUser: true },
-    { rank: 4, name: 'Julian Finch', title: isTr ? 'Kelime Avcısı' : 'Word Hunter', score: 11270, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&h=100&q=80', isUser: false },
-    { rank: 5, name: 'Boran Tekin', title: isTr ? 'Zeka Ustası' : 'Puzzle Expert', score: 10450, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=100&h=100&q=80', isUser: false },
-    { rank: 6, name: 'Zeynep Kaya', title: isTr ? 'Hızlı Düşünür' : 'Speed Solver', score: 9820, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80', isUser: false },
-    { rank: 7, name: 'Marcus Sterling', title: isTr ? 'Taktisyen' : 'Tactician', score: 9340, avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=100&h=100&q=80', isUser: false },
-    { rank: 8, name: 'Selin Demir', title: isTr ? 'Stratejist' : 'Strategist', score: 8910, avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&h=100&q=80', isUser: false },
-  ];
+  let totalPlayed = 0;
+  let totalWon = 0;
+  let maxStreak = 0;
+
+  Object.values(currentStats).forEach((s) => {
+    if (s) {
+      totalPlayed += s.played || 0;
+      totalWon += s.won || 0;
+      if (s.streak > maxStreak) maxStreak = s.streak;
+      if (s.maxStreak && s.maxStreak > maxStreak) maxStreak = s.maxStreak;
+    }
+  });
+
+  const winRate = totalPlayed > 0 ? Math.round((totalWon / totalPlayed) * 100) : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fadeIn select-none">
       <div
-        className="w-full max-w-lg rounded-3xl border-2 border-amber-500/40 p-5 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
-        style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)', color: 'var(--text-primary)' }}
+        className="w-full max-w-lg rounded-2xl border p-5 shadow-2xl flex flex-col max-h-[85vh] overflow-hidden"
+        style={{
+          backgroundColor: '#121215',
+          borderColor: '#27272a',
+          color: '#f4f4f5',
+        }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-color)]">
+        <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500 shadow-sm">
-              <Trophy size={20} />
+            <div className="w-9 h-9 rounded-xl bg-zinc-800/80 border border-zinc-700/60 flex items-center justify-center text-amber-400 shadow-2xs">
+              <Trophy size={18} />
             </div>
             <div>
-              <h2 className="text-base font-extrabold flex items-center gap-1.5" style={{ color: 'var(--accent-color)' }}>
-                <span>{isTr ? 'Liderlik Sıralaması' : 'Leaderboard & Rankings'}</span>
-                <Sparkles size={14} className="text-amber-400" />
+              <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-1.5">
+                <span>{isTr ? 'Kişisel Başarı & Derece Tablosu' : 'Personal Records & Achievements'}</span>
               </h2>
-              <p className="text-[11px] text-gray-500">
-                {isTr ? 'En yüksek puanlı ve en serili bulmaca ustaları' : 'Top ranked players & puzzle masters'}
+              <p className="text-[11px] text-zinc-400">
+                {isTr ? 'Bu cihazda kayıtlı gerçek oyun geçmişiniz ve rekorlarınız' : 'Authentic gameplay history saved on this device'}
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[var(--bg-secondary)] transition cursor-pointer text-gray-400 hover:text-white"
+            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Current User Card */}
-        <div className="mt-3 p-3 rounded-2xl border-2 border-amber-400/40 bg-amber-500/10 flex items-center justify-between shadow-sm">
+        {/* Current User Summary Card */}
+        <div className="mt-3 p-3 rounded-xl border border-zinc-800 bg-[#16161a] flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-3">
             <div className="relative">
               <img
                 src={currentUser.avatar}
                 alt={currentUser.name}
-                className="w-11 h-11 rounded-full object-cover border-2 border-amber-400 p-0.5"
+                className="w-10 h-10 rounded-lg object-cover border border-zinc-700 p-0.5 bg-zinc-800"
               />
-              <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-500 text-black flex items-center justify-center text-[10px] font-black shadow-xs">
-                #3
-              </span>
             </div>
             <div>
-              <div className="text-xs font-black flex items-center gap-1.5">
-                <span>{currentUser.name}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400 font-bold">
-                  {isTr ? 'Sen' : 'You'}
+              <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+                <span>{currentUser.name || (isTr ? 'Misafir Oyuncu' : 'Guest Player')}</span>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 font-mono">
+                  {isTr ? 'Doğrulanmış Profil' : 'Verified'}
                 </span>
               </div>
-              <div className="text-[11px] text-[var(--text-secondary)] flex items-center gap-2 mt-0.5">
-                <span>{won} {isTr ? 'Zafer' : 'Wins'}</span>
+              <div className="text-[11px] text-zinc-400 flex items-center gap-2 mt-0.5">
+                <span>{totalWon} {isTr ? 'Galibiyet' : 'Wins'}</span>
                 <span>•</span>
-                <span className="flex items-center gap-1 font-medium">
-                  <Flame size={12} className="text-amber-500" />
-                  <span className="font-mono tabular-nums">{streak}</span> {isTr ? 'Seri' : 'Streak'}
+                <span className="flex items-center gap-1 font-medium text-amber-400">
+                  <Flame size={12} />
+                  <span className="font-mono">{maxStreak}</span> {isTr ? 'Seri' : 'Streak'}
                 </span>
               </div>
             </div>
           </div>
 
           <div className="text-right">
-            <div className="text-[10px] font-semibold text-[var(--text-secondary)]">{isTr ? 'Puanın' : 'Score'}</div>
-            <div className="text-base font-black text-amber-400 font-mono tabular-nums">
-              {userScore.toLocaleString()}
+            <div className="text-[10px] text-zinc-400 font-mono">{isTr ? 'Başarı Oranı' : 'Win Rate'}</div>
+            <div className="text-base font-bold text-emerald-400 font-mono">
+              %{winRate}
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1.5 p-1 bg-[var(--bg-secondary)] rounded-xl my-3 border border-[var(--border-color)]">
-          <button
-            onClick={() => setTab('all')}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
-              tab === 'all'
-                ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
-                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Trophy size={13} />
-            <span>{isTr ? 'Genel Sıralama' : 'Global Rank'}</span>
-          </button>
-          <button
-            onClick={() => setTab('weekly')}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none ${
-              tab === 'weekly'
-                ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] shadow-xs'
-                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Flame size={13} />
-            <span>{isTr ? 'Haftalık Şampiyonlar' : 'Weekly Champions'}</span>
-          </button>
+        {/* Honest Information Note */}
+        <div className="my-3 p-2.5 rounded-xl border border-zinc-800/80 bg-zinc-900/60 flex items-start gap-2.5 text-[11px] text-zinc-400">
+          <ShieldCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            {isTr
+              ? 'Sitede merkezi bir sunucu bağlı olmadığı için yapay bot isimleri kaldırılmıştır. Aşağıdaki tüm skorlar ve süreler sizin bu tarayıcıdaki gerçek oyun geçmişinizdir.'
+              : 'Simulated bot leaderboards have been removed. The records below reflect your genuine local gameplay on this device.'}
+          </p>
         </div>
 
-        {/* Rankings List */}
-        <div className="flex-1 overflow-y-auto space-y-1.5 pr-1">
-          {rankings.map((r) => {
-            const isTop3 = r.rank <= 3;
+        {/* Real Game Records Table */}
+        <div className="flex-1 overflow-y-auto space-y-1 pr-1 border border-zinc-800/80 rounded-xl bg-[#141418] divide-y divide-zinc-800/60">
+          <div className="grid grid-cols-12 px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-zinc-400 bg-zinc-900/60 sticky top-0">
+            <div className="col-span-5">{isTr ? 'Bulmaca Türü' : 'Game'}</div>
+            <div className="col-span-3 text-center">{isTr ? 'Oynama / Zafer' : 'Played / Won'}</div>
+            <div className="col-span-4 text-right">{isTr ? 'En İyi Derece' : 'Best Record'}</div>
+          </div>
+
+          {Object.entries(GAME_DISPLAY_NAMES).map(([gameId, names]) => {
+            const st = currentStats[gameId as keyof AllStats];
+            const played = st?.played || 0;
+            const won = st?.won || 0;
+            const raw = st?.bestScore ?? st?.bestTime;
+            const best = raw ? (typeof raw === 'number' && raw > 1000 ? `${raw} P` : `${raw}`) : '—';
+
             return (
               <div
-                key={r.rank}
-                className={`flex items-center justify-between p-2.5 rounded-2xl border transition ${
-                  r.isUser
-                    ? 'border-amber-400 bg-amber-500/15 shadow-sm ring-1 ring-amber-400/30'
-                    : 'border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-secondary)]/50'
-                }`}
+                key={gameId}
+                className="grid grid-cols-12 px-3 py-2 items-center text-xs hover:bg-zinc-800/30 transition"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span
-                    className={`w-6 text-center font-mono font-black text-xs shrink-0 ${
-                      r.rank === 1
-                        ? 'text-amber-400'
-                        : r.rank === 2
-                        ? 'text-gray-300'
-                        : r.rank === 3
-                        ? 'text-amber-600'
-                        : 'text-gray-500'
-                    }`}
-                  >
-                    {r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : `#${r.rank}`}
-                  </span>
-                  <img
-                    src={r.avatar}
-                    alt={r.name}
-                    className={`w-8 h-8 rounded-full object-cover shrink-0 ${
-                      isTop3 ? 'border border-amber-400/50' : 'border border-[var(--border-color)]'
-                    }`}
-                  />
-                  <div className="truncate min-w-0">
-                    <div className="text-xs font-bold truncate flex items-center gap-1.5">
-                      <span>{r.name}</span>
-                      {r.isUser && (
-                        <span className="text-[9px] px-1 py-0.2 rounded bg-amber-500 text-black font-extrabold">
-                          {isTr ? 'SEN' : 'YOU'}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[10px] text-gray-400 truncate">{r.title}</div>
-                  </div>
+                <div className="col-span-5 font-medium text-zinc-200 truncate flex items-center gap-1.5">
+                  {played > 0 ? (
+                    <CheckCircle2 size={12} className="text-emerald-400 shrink-0" />
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-600 shrink-0" />
+                  )}
+                  <span className="truncate">{names[language]}</span>
                 </div>
 
-                <div className="text-right shrink-0 ml-2">
-                  <span className="font-mono text-xs font-extrabold text-amber-400">
-                    {r.score.toLocaleString()}
-                  </span>
-                  <span className="text-[9px] text-gray-500 block">{isTr ? 'Puan' : 'Pts'}</span>
+                <div className="col-span-3 text-center font-mono text-[11px] text-zinc-400">
+                  {played > 0 ? (
+                    <span>
+                      <strong className="text-zinc-200">{played}</strong> / <span className="text-emerald-400">{won}</span>
+                    </span>
+                  ) : (
+                    <span className="text-zinc-600">0 / 0</span>
+                  )}
+                </div>
+
+                <div className="col-span-4 text-right font-mono font-bold text-xs text-amber-400">
+                  {best}
                 </div>
               </div>
             );
@@ -193,11 +186,11 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
         </div>
 
         {/* Footer info */}
-        <div className="pt-3 mt-2 border-t border-[var(--border-color)] flex items-center justify-between text-[11px] text-gray-500">
-          <span>{isTr ? 'Sıralamalar her gece 00:00\'da güncellenir.' : 'Rankings update daily at 00:00.'}</span>
+        <div className="pt-3 mt-3 border-t border-zinc-800 flex items-center justify-between text-[11px] text-zinc-500">
+          <span>{isTr ? 'Tüm veriler cihazınızda yerel saklanır.' : 'All data stored securely on this device.'}</span>
           <button
             onClick={onClose}
-            className="px-3.5 py-1 rounded-xl bg-[var(--accent-color)] text-[var(--accent-contrast)] font-bold text-xs hover:opacity-90 transition cursor-pointer"
+            className="px-4 py-1.5 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs transition cursor-pointer"
           >
             {isTr ? 'Kapat' : 'Close'}
           </button>
@@ -206,4 +199,3 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
     </div>
   );
 };
-

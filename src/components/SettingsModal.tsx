@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText, Mail, Palette, ChevronDown, Check, Users, Eye, Activity, TrendingUp } from 'lucide-react';
+import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText, Mail, Palette, ChevronDown, Check, Users, Eye, Activity, TrendingUp, Smartphone, Award, HardDrive, Calendar } from 'lucide-react';
 import { Settings, AllStats, PaletteId } from '../types';
 import { defaultAllStats } from '../utils/storage';
 import { getAchievements } from '../utils/achievements';
-import { getVisitorStats, VisitorStats } from '../utils/visitorStats';
+import { getDeviceStats, DeviceStats } from '../utils/visitorStats';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -153,7 +153,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const [visitorStats] = useState<VisitorStats>(() => getVisitorStats());
+  const [deviceStats] = useState<DeviceStats>(() => getDeviceStats(stats));
   const totalRecordedGames = Object.values(stats || {}).reduce((acc, s) => acc + (s?.played || 0), 0);
 
   return (
@@ -285,75 +285,75 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="text-[11px] text-gray-400">Müzik çalar ve radyo ses düzeyi</div>
           </div>
 
-          {/* Platform & Ziyaretçi İstatistikleri */}
+          {/* Cihaz ve Kullanım İstatistikleri */}
           <div className="pt-2 border-t border-[var(--border-color)] space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <Smartphone size={15} className="text-zinc-400" />
                 <div className="font-medium text-sm">
-                  {settings.language === 'tr' ? 'Platform & Ziyaretçi İstatistikleri' : 'Platform & Visitor Analytics'}
+                  {settings.language === 'tr' ? 'Cihaz & Kullanım Bilgileri' : 'Device & Usage Statistics'}
                 </div>
               </div>
-              <div className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-2xs">
-                <Activity size={11} className="text-emerald-400" />
-                <span>{visitorStats.onlinePlayers} {settings.language === 'tr' ? 'çevrimiçi' : 'online'}</span>
+              <div className="text-[10px] font-mono text-zinc-400 bg-zinc-800/80 border border-zinc-700/60 px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-2xs">
+                <HardDrive size={11} className="text-zinc-400" />
+                <span>{settings.language === 'tr' ? 'Yerel Hafıza' : 'Local Storage'}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
-              {/* Bugünkü Ziyaretçi */}
+              {/* Bu Cihazdaki Oturum Sayısı */}
               <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
                 <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
-                  <span>{settings.language === 'tr' ? 'Bugünkü Ziyaretçi' : "Today's Visitors"}</span>
-                  <Users size={14} className="text-zinc-400" />
+                  <span>{settings.language === 'tr' ? 'Cihaz Ziyaretiniz' : 'Device Visits'}</span>
+                  <Calendar size={14} className="text-zinc-400" />
                 </div>
-                <div className="text-base font-bold font-mono text-[var(--text-primary)] mt-1">
-                  {visitorStats.todayVisitors.toLocaleString('tr-TR')}
+                <div className="text-base font-bold font-mono text-amber-400 mt-1">
+                  {deviceStats.userVisitCount}. {settings.language === 'tr' ? 'ziyaret' : 'visit'}
                 </div>
-                <div className="text-[10px] text-zinc-500 mt-0.5">
-                  {settings.language === 'tr' ? 'Tekil ziyaret' : 'Unique visits'}
-                </div>
-              </div>
-
-              {/* Toplam Görüntülenme */}
-              <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
-                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
-                  <span>{settings.language === 'tr' ? 'Toplam Görüntülenme' : 'Total Pageviews'}</span>
-                  <Eye size={14} className="text-zinc-400" />
-                </div>
-                <div className="text-base font-bold font-mono text-[var(--text-primary)] mt-1">
-                  {visitorStats.totalPageviews.toLocaleString('tr-TR')}+
-                </div>
-                <div className="text-[10px] text-zinc-500 mt-0.5">
-                  {settings.language === 'tr' ? 'Sayfa gösterimi' : 'All-time pageviews'}
+                <div className="text-[10px] text-zinc-500 mt-0.5 truncate">
+                  {settings.language === 'tr' ? `İlk: ${deviceStats.userFirstVisit}` : `First: ${deviceStats.userFirstVisit}`}
                 </div>
               </div>
 
               {/* Çözülen Toplam Bulmaca */}
               <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
                 <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
-                  <span>{settings.language === 'tr' ? 'Çözülen Bulmaca' : 'Puzzles Solved'}</span>
-                  <TrendingUp size={14} className="text-zinc-400" />
+                  <span>{settings.language === 'tr' ? 'Oynanan Bulmaca' : 'Puzzles Played'}</span>
+                  <Award size={14} className="text-zinc-400" />
                 </div>
                 <div className="text-base font-bold font-mono text-[var(--text-primary)] mt-1">
-                  {visitorStats.communitySolvedPuzzles.toLocaleString('tr-TR')}+
+                  {deviceStats.totalPlayed} {settings.language === 'tr' ? 'oyun' : 'games'}
                 </div>
                 <div className="text-[10px] text-zinc-500 mt-0.5">
-                  {settings.language === 'tr' ? 'Topluluk çözümleri' : 'Community solved'}
+                  {settings.language === 'tr' ? 'Bu cihazda kayıtlı' : 'Recorded locally'}
                 </div>
               </div>
 
-              {/* Bu Cihazdaki Oturum Sayınız */}
+              {/* Kazanılan Bulmaca */}
               <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
                 <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
-                  <span>{settings.language === 'tr' ? 'Ziyaret Oturumunuz' : 'Your Visits'}</span>
-                  <Activity size={14} className="text-zinc-400" />
+                  <span>{settings.language === 'tr' ? 'Kazanılan Bulmaca' : 'Puzzles Won'}</span>
+                  <TrendingUp size={14} className="text-emerald-400" />
                 </div>
-                <div className="text-base font-bold font-mono text-amber-400 mt-1">
-                  {visitorStats.userVisitCount}. {settings.language === 'tr' ? 'ziyaret' : 'visit'}
+                <div className="text-base font-bold font-mono text-emerald-400 mt-1">
+                  {deviceStats.totalWon} {settings.language === 'tr' ? 'zafer' : 'wins'}
+                </div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">
+                  {settings.language === 'tr' ? `%${deviceStats.winRate} kazanma oranı` : `${deviceStats.winRate}% win rate`}
+                </div>
+              </div>
+
+              {/* Veri Saklama ve Güvenlik */}
+              <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
+                  <span>{settings.language === 'tr' ? 'Veri Deposu' : 'Data Storage'}</span>
+                  <HardDrive size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-xs font-bold text-zinc-200 mt-1">
+                  {settings.language === 'tr' ? 'Tarayıcı Yerel' : 'Local Browser'}
                 </div>
                 <div className="text-[10px] text-zinc-500 mt-0.5 truncate">
-                  {settings.language === 'tr' ? `İlk: ${visitorStats.userFirstVisit}` : `First: ${visitorStats.userFirstVisit}`}
+                  {settings.language === 'tr' ? 'Sunucuya gönderilmez' : 'Stored on device'}
                 </div>
               </div>
             </div>

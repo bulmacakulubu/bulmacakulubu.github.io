@@ -1,50 +1,27 @@
+import { AllStats } from '../types';
+import { loadStats } from './storage';
+
 /**
- * Visitor & Community Analytics Telemetry Utility
- * Computes realistic, consistent daily visitor metrics, total pageviews,
- * live online players, and tracks the user's local visit statistics.
+ * Device & Usage Statistics Utility
+ * Only tracks 100% authentic, local device telemetry stored in the user's browser.
+ * Zero simulated, fake, or synthetic numbers.
  */
 
-export interface VisitorStats {
-  todayVisitors: number;
-  totalPageviews: number;
-  onlinePlayers: number;
-  communitySolvedPuzzles: number;
+export interface DeviceStats {
   userVisitCount: number;
   userFirstVisit: string;
   userLastVisit: string;
-  lastUpdated: number;
+  totalPlayed: number;
+  totalWon: number;
+  winRate: number;
 }
 
-const STORAGE_KEY_VISIT_DATA = 'bulmaca_kulubu_visitor_data_v1';
+const STORAGE_KEY_VISIT_DATA = 'bulmaca_kulubu_device_visits_v1';
 
-export function getVisitorStats(): VisitorStats {
+export function getDeviceStats(statsInput?: AllStats): DeviceStats {
   const now = new Date();
   const todayDateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
-  const [year, month, day] = todayDateStr.split('-').map(Number);
 
-  // Deterministic daily seed based on date so it remains stable throughout the day
-  // while scaling realistically
-  const dayOfYear = Math.floor((now.getTime() - new Date(year, 0, 0).getTime()) / 86400000);
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-
-  // Peak puzzle playing hours: 12:00-14:00 and 19:00-23:00
-  const timeWeight = (hour >= 19 && hour <= 23) ? 1.4 : (hour >= 11 && hour <= 14) ? 1.2 : (hour >= 1 && hour <= 6) ? 0.4 : 0.9;
-
-  // Base metrics
-  const baseDailyVisitors = 1840 + (dayOfYear * 7) % 430;
-  // Progress throughout the day
-  const dailyProgress = Math.min(1, Math.max(0.08, (hour * 60 + minute) / 1440));
-  const currentDailyVisitors = Math.floor(baseDailyVisitors * dailyProgress * (0.95 + ((minute % 7) * 0.01)));
-
-  // Online active players right now (between 180 and 460 based on hour)
-  const baseOnline = Math.floor((190 + (day % 15) * 8 + (minute % 11) * 3) * timeWeight);
-
-  // Community solved puzzles and pageviews
-  const totalPageviews = 284500 + dayOfYear * 310 + Math.floor(currentDailyVisitors * 4.2);
-  const communitySolvedPuzzles = 142800 + dayOfYear * 180 + Math.floor(currentDailyVisitors * 2.8);
-
-  // Read / update local user visit data
   let userVisitCount = 1;
   let userFirstVisit = todayDateStr;
   let userLastVisit = todayDateStr;
@@ -57,7 +34,6 @@ export function getVisitorStats(): VisitorStats {
       userFirstVisit = parsed.userFirstVisit || todayDateStr;
       userLastVisit = todayDateStr;
     }
-    // Save updated local visit
     localStorage.setItem(
       STORAGE_KEY_VISIT_DATA,
       JSON.stringify({
@@ -68,17 +44,30 @@ export function getVisitorStats(): VisitorStats {
       })
     );
   } catch {
-    // LocalStorage fallback
+    // Fallback if localStorage restricted
   }
 
+  const allStats = statsInput || loadStats();
+  let totalPlayed = 0;
+  let totalWon = 0;
+
+  if (allStats) {
+    Object.values(allStats).forEach((game) => {
+      if (game) {
+        totalPlayed += game.played || 0;
+        totalWon += game.won || 0;
+      }
+    });
+  }
+
+  const winRate = totalPlayed > 0 ? Math.round((totalWon / totalPlayed) * 100) : 0;
+
   return {
-    todayVisitors: Math.max(120, currentDailyVisitors),
-    totalPageviews,
-    onlinePlayers: Math.max(45, baseOnline),
-    communitySolvedPuzzles,
     userVisitCount,
     userFirstVisit,
     userLastVisit,
-    lastUpdated: Date.now(),
+    totalPlayed,
+    totalWon,
+    winRate,
   };
 }

@@ -987,6 +987,7 @@ export default function App() {
         onClose={() => setIsLeaderboardOpen(false)}
         currentUser={currentUser}
         stats={stats[activeGame]}
+        allStats={stats}
         language={settings.language}
       />
 
