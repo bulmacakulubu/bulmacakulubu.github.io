@@ -4,8 +4,8 @@ import { Track } from '../types';
  * Türkiye Ulusal Canlı Radyoları (100% Güvenli HTTPS Akışları)
  * - Power App Icecast / AAC doğrudan web akışları
  * - Karnaval StreamTheWorld HTTPS canlı CDN akışları
- * - TRT Resmi HLS (.m3u8) Akamai CDN akışları
- * - Doğuş Yayın Grubu (DYG) HLS (.m3u8) akışları
+ * - TRT Radyo Akamai & RadyoTVOnline canlı akışları
+ * - Doğuş Yayın Grubu (DYG) & Turkuvaz & Demirören akışları
  */
 export const TURKISH_RADIO_STATIONS: Track[] = [
   // Odak & Enstrümantal & Klasik
@@ -17,7 +17,7 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
     duration: 'CANLI',
     playlistName: 'Ulusal Radyolar',
     category: 'klasik',
-    audioUrl: 'https://radio-trtradyo3.live.trt.com.tr/master.m3u8',
+    audioUrl: 'https://rd-trtradyo3.medya.trt.com.tr/master_128.m3u8',
     isLive: true,
     city: 'Ulusal / Ankara',
   },
@@ -29,7 +29,7 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
     duration: 'CANLI',
     playlistName: 'Ulusal Radyolar',
     category: 'odak',
-    audioUrl: 'https://dygmaster.radyotvonline.net/voyage/playlist.m3u8',
+    audioUrl: 'https://ssldyg.radyotvonline.com/pozitif/smil:voyage.smil/playlist.m3u8',
     isLive: true,
     city: 'İstanbul',
   },
@@ -115,7 +115,7 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
     duration: 'CANLI',
     playlistName: 'Ulusal Radyolar',
     category: 'pop',
-    audioUrl: 'https://radio-trtfm.live.trt.com.tr/master.m3u8',
+    audioUrl: 'https://trt.radyotvonline.net/trtfm',
     isLive: true,
     city: 'Ulusal / Ankara',
   },
@@ -172,16 +172,28 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
 
   // Kültür, Haber & Klasikler
   {
-    id: 'radio_trt_radyo1',
-    title: 'TRT Radyo 1',
-    artist: 'Kültür, Sanat, Edebiyat & Tiyatro',
-    frequency: '95.6 FM',
+    id: 'radio_ahaber',
+    title: 'A Haber Radyo',
+    artist: 'Haberin ve Gündemin Canlı Nabzı',
+    frequency: '90.2 FM',
     duration: 'CANLI',
     playlistName: 'Ulusal Radyolar',
     category: 'haber',
-    audioUrl: 'https://radio-trtradyo1.live.trt.com.tr/master.m3u8',
+    audioUrl: 'https://trkvz-radyolar.ercdn.net/ahaberradyo/playlist.m3u8',
     isLive: true,
-    city: 'Ulusal / Ankara',
+    city: 'Ulusal / İstanbul',
+  },
+  {
+    id: 'radio_cnnturk',
+    title: 'CNN Türk Radyo',
+    artist: 'İlk Bilen Siz Olun, Haber ve Analiz',
+    frequency: '92.5 FM',
+    duration: 'CANLI',
+    playlistName: 'Ulusal Radyolar',
+    category: 'haber',
+    audioUrl: 'https://moondigitaledge2.radyotvonline.net/cnnturk/playlist.m3u8',
+    isLive: true,
+    city: 'Ulusal / İstanbul',
   },
   {
     id: 'radio_ntv_radyo',
@@ -196,6 +208,18 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
     city: 'Ulusal',
   },
   {
+    id: 'radio_trt_radyo1',
+    title: 'TRT Radyo 1',
+    artist: 'Kültür, Sanat, Edebiyat & Tiyatro',
+    frequency: '95.6 FM',
+    duration: 'CANLI',
+    playlistName: 'Ulusal Radyolar',
+    category: 'haber',
+    audioUrl: 'https://trt.radyotvonline.net/trt1',
+    isLive: true,
+    city: 'Ulusal / Ankara',
+  },
+  {
     id: 'radio_kral_fm',
     title: 'Kral FM',
     artist: 'İlaç Gibi Radyo, Arabesk & Damar Klasikler',
@@ -203,7 +227,7 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
     duration: 'CANLI',
     playlistName: 'Ulusal Radyolar',
     category: 'nostalji',
-    audioUrl: 'https://dygmaster.radyotvonline.net/kralfm/playlist.m3u8',
+    audioUrl: 'https://ssldyg.radyotvonline.com/smil/smil:kralfm.smil/playlist.m3u8',
     isLive: true,
     city: 'Ulusal',
   },
@@ -215,7 +239,7 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
     duration: 'CANLI',
     playlistName: 'Ulusal Radyolar',
     category: 'nostalji',
-    audioUrl: 'https://radio-trtturku.live.trt.com.tr/master.m3u8',
+    audioUrl: 'https://rd-trtturku.medya.trt.com.tr/master_128.m3u8',
     isLive: true,
     city: 'Ulusal',
   },
@@ -227,7 +251,7 @@ export const TURKISH_RADIO_STATIONS: Track[] = [
     duration: 'CANLI',
     playlistName: 'Ulusal Radyolar',
     category: 'nostalji',
-    audioUrl: 'https://radio-trtnagme.live.trt.com.tr/master.m3u8',
+    audioUrl: 'https://rd-trtnagme.medya.trt.com.tr/master_128.m3u8',
     isLive: true,
     city: 'Ulusal',
   },

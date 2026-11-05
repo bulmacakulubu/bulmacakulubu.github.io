@@ -219,17 +219,37 @@ export async function playStreamTrack(
 ): Promise<void> {
   if (onStatus) onStatus('loading');
 
-  // Clean up any existing Hls session
+  // Detach any previous Hls instance cleanly
   if (hlsInstance) {
     try {
+      hlsInstance.stopLoad();
+      hlsInstance.detachMedia();
       hlsInstance.destroy();
     } catch (e) {}
     hlsInstance = null;
   }
 
+  // Clear previous native source
+  audioEl.pause();
+  audioEl.removeAttribute('src');
+
+  // Listeners for native events
+  audioEl.onplaying = () => {
+    if (onStatus) onStatus('playing');
+  };
+  audioEl.onwaiting = () => {
+    if (onStatus) onStatus('loading');
+  };
+  audioEl.onerror = () => {
+    // If not HLS, report error
+    if (!url.includes('.m3u8')) {
+      if (onStatus) onStatus('error');
+    }
+  };
+
   const isHls = url.includes('.m3u8');
 
-  // Safari or native HLS support
+  // Safari or native HLS support check
   if (isHls && audioEl.canPlayType('application/vnd.apple.mpegurl')) {
     audioEl.src = url;
     try {
@@ -249,20 +269,42 @@ export async function playStreamTrack(
           enableWorker: true,
           lowLatencyMode: true,
           backBufferLength: 30,
+          manifestLoadingTimeOut: 10000,
+          manifestLoadingMaxRetry: 3,
+          levelLoadingTimeOut: 10000,
+          levelLoadingMaxRetry: 3,
         });
-        hlsInstance.loadSource(url);
+
         hlsInstance.attachMedia(audioEl);
+        hlsInstance.on(Hls.Events.MEDIA_ATTACHED, () => {
+          hlsInstance.loadSource(url);
+        });
+
         hlsInstance.on(Hls.Events.MANIFEST_PARSED, async () => {
           try {
             await audioEl.play();
             if (onStatus) onStatus('playing');
           } catch (e) {
-            if (onStatus) onStatus('error');
+            console.warn('Playback waiting user click/interaction:', e);
           }
         });
+
         hlsInstance.on(Hls.Events.ERROR, (_: any, data: any) => {
           if (data && data.fatal) {
-            if (onStatus) onStatus('error');
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.warn('HLS Network error, attempting retry...', data.details);
+                hlsInstance.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.warn('HLS Media error, attempting recovery...', data.details);
+                hlsInstance.recoverMediaError();
+                break;
+              default:
+                console.warn('HLS Fatal error:', data.details);
+                if (onStatus) onStatus('error');
+                break;
+            }
           }
         });
         return;
