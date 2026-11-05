@@ -35,3 +35,4 @@ export const GlobalToast: React.FC = () => {
     </div>
   );
 };
+

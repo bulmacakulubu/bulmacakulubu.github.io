@@ -47,3 +47,4 @@ export function subscribeToast(listener: ToastListener): () => void {
 if (typeof window !== 'undefined') {
   (window as any).showToast = showToast;
 }
+

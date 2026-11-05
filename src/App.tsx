@@ -883,6 +883,7 @@ export default function App() {
                 language={settings.language}
                 soundEnabled={settings.soundEnabled}
                 stats={stats}
+                currentUser={currentUser}
                 onPlayGame={(g) => setActiveGame(g)}
               />
             )}

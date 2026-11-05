@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText, Mail, Palette, ChevronDown, Check, Sparkles } from 'lucide-react';
+import { X, Moon, Sun, Volume2, RotateCcw, Globe, VolumeX, FileText, Mail, Palette, ChevronDown, Check, Users, Eye, Activity, TrendingUp } from 'lucide-react';
 import { Settings, AllStats, PaletteId } from '../types';
 import { defaultAllStats } from '../utils/storage';
 import { getAchievements } from '../utils/achievements';
+import { getVisitorStats, VisitorStats } from '../utils/visitorStats';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -152,6 +153,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
+  const [visitorStats] = useState<VisitorStats>(() => getVisitorStats());
   const totalRecordedGames = Object.values(stats || {}).reduce((acc, s) => acc + (s?.played || 0), 0);
 
   return (
@@ -281,6 +283,80 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               />
             </div>
             <div className="text-[11px] text-gray-400">Müzik çalar ve radyo ses düzeyi</div>
+          </div>
+
+          {/* Platform & Ziyaretçi İstatistikleri */}
+          <div className="pt-2 border-t border-[var(--border-color)] space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="font-medium text-sm">
+                  {settings.language === 'tr' ? 'Platform & Ziyaretçi İstatistikleri' : 'Platform & Visitor Analytics'}
+                </div>
+              </div>
+              <div className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded-md flex items-center gap-1.5 shadow-2xs">
+                <Activity size={11} className="text-emerald-400" />
+                <span>{visitorStats.onlinePlayers} {settings.language === 'tr' ? 'çevrimiçi' : 'online'}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              {/* Bugünkü Ziyaretçi */}
+              <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
+                  <span>{settings.language === 'tr' ? 'Bugünkü Ziyaretçi' : "Today's Visitors"}</span>
+                  <Users size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-base font-bold font-mono text-[var(--text-primary)] mt-1">
+                  {visitorStats.todayVisitors.toLocaleString('tr-TR')}
+                </div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">
+                  {settings.language === 'tr' ? 'Tekil ziyaret' : 'Unique visits'}
+                </div>
+              </div>
+
+              {/* Toplam Görüntülenme */}
+              <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
+                  <span>{settings.language === 'tr' ? 'Toplam Görüntülenme' : 'Total Pageviews'}</span>
+                  <Eye size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-base font-bold font-mono text-[var(--text-primary)] mt-1">
+                  {visitorStats.totalPageviews.toLocaleString('tr-TR')}+
+                </div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">
+                  {settings.language === 'tr' ? 'Sayfa gösterimi' : 'All-time pageviews'}
+                </div>
+              </div>
+
+              {/* Çözülen Toplam Bulmaca */}
+              <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
+                  <span>{settings.language === 'tr' ? 'Çözülen Bulmaca' : 'Puzzles Solved'}</span>
+                  <TrendingUp size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-base font-bold font-mono text-[var(--text-primary)] mt-1">
+                  {visitorStats.communitySolvedPuzzles.toLocaleString('tr-TR')}+
+                </div>
+                <div className="text-[10px] text-zinc-500 mt-0.5">
+                  {settings.language === 'tr' ? 'Topluluk çözümleri' : 'Community solved'}
+                </div>
+              </div>
+
+              {/* Bu Cihazdaki Oturum Sayınız */}
+              <div className="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] flex flex-col justify-between">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)]">
+                  <span>{settings.language === 'tr' ? 'Ziyaret Oturumunuz' : 'Your Visits'}</span>
+                  <Activity size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-base font-bold font-mono text-amber-400 mt-1">
+                  {visitorStats.userVisitCount}. {settings.language === 'tr' ? 'ziyaret' : 'visit'}
+                </div>
+                <div className="text-[10px] text-zinc-500 mt-0.5 truncate">
+                  {settings.language === 'tr' ? `İlk: ${visitorStats.userFirstVisit}` : `First: ${visitorStats.userFirstVisit}`}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* İstatistikler */}
