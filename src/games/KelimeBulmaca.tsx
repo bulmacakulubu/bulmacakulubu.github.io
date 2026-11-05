@@ -215,23 +215,12 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   const handleShare = async () => {
     const grid = generateWordleEmojiGrid(guesses, solution);
     const scoreStr = gameStatus === 'won' ? `${guesses.length}/6` : 'X/6';
-    const res = await shareScore({
+    await shareScore({
       title: 'Bulmaca Kulübü - Kelime Bulmaca',
       gameName: isTr ? 'Kelime Bulmaca' : 'Word Puzzle',
       scoreOrAttempts: scoreStr,
       emojiGrid: grid,
     });
-
-    if (res === 'copied') {
-      showToast(isTr ? 'Sonuç panoya kopyalandı! 📋' : 'Result copied to clipboard! 📋');
-    }
-  };
-
-  const handleShareWhatsApp = () => {
-    const grid = generateWordleEmojiGrid(guesses, solution);
-    const scoreStr = gameStatus === 'won' ? `${guesses.length}/6` : 'X/6';
-    const text = `🧩 Bulmaca Kulübü: ${isTr ? 'Kelime Bulmaca' : 'Word Puzzle'}\n🏆 Sonuç: ${scoreStr}\n\n${grid}`;
-    openWhatsAppShare(text);
   };
 
   const handleKey = (key: string) => {
@@ -523,26 +512,18 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
           )}
 
           {/* Share Buttons */}
-          <div className="flex items-center justify-center gap-1.5 mt-1">
+          <div className="flex items-center justify-center gap-2 mt-1">
             <button
               onClick={handleShare}
-              className="px-2.5 py-0.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
+              className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 rounded-lg font-bold text-[11px] transition shadow-sm flex items-center gap-1.5 cursor-pointer"
             >
-              <Share2 size={12} />
-              <span>{isTr ? 'Paylaş' : 'Share'}</span>
-            </button>
-
-            <button
-              onClick={handleShareWhatsApp}
-              className="px-2.5 py-0.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-[11px] transition shadow-sm flex items-center gap-1 cursor-pointer"
-            >
-              <MessageSquare size={12} />
-              <span>WhatsApp</span>
+              <Share2 size={13} className="text-amber-400" />
+              <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
             </button>
 
             <button
               onClick={() => startNewRound()}
-              className="px-3 py-0.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-lg font-bold text-[11px] transition shadow-sm cursor-pointer"
+              className="px-3 py-1 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-lg font-bold text-[11px] transition shadow-sm cursor-pointer"
             >
               {isTr ? 'Sıradaki ➔' : 'Next ➔'}
             </button>

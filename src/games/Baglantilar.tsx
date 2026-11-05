@@ -497,14 +497,6 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
       scoreOrAttempts: isWon ? `${formatTime(seconds)} içinde çözüldü` : 'Tamamlanamadı',
       emojiGrid: grid,
     });
-    showToast(isEn ? 'Result copied to clipboard! 📋' : 'Sonuç panoya kopyalandı! 📋');
-  };
-
-  const handleShareWhatsApp = () => {
-    const grid = generateEmojiGrid();
-    const isWon = solvedGroups.length === 4;
-    const text = `🧩 Bulmaca Kulübü: ${isEn ? 'Connections' : 'Bağlantılar'}\n🏆 Sonuç: ${isWon ? `${formatTime(seconds)}` : 'X'}\n\n${grid}`;
-    openWhatsAppShare(text);
   };
 
   const handleCheckGroup = () => {
@@ -736,23 +728,15 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
           <div className="flex items-center justify-center gap-2 mt-3">
             <button
               onClick={handleShare}
-              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 rounded-xl font-bold text-xs transition flex items-center gap-2 shadow-sm cursor-pointer"
             >
-              <Share2 size={13} />
+              <Share2 size={14} className="text-amber-400" />
               <span>{isEn ? 'Share Grid' : 'Skoru Paylaş'}</span>
             </button>
 
             <button
-              onClick={handleShareWhatsApp}
-              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <MessageSquare size={13} />
-              <span>WhatsApp</span>
-            </button>
-
-            <button
               onClick={handleNextSet}
-              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
             >
               {isEn ? 'Next Puzzle ➔' : 'Sıradaki Set ➔'}
             </button>

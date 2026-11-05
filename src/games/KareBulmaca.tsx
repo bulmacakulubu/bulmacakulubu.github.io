@@ -471,7 +471,6 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
       gameName: 'Çengel / Kare Bulmaca',
       scoreOrAttempts: `${timeStr} sürede tamamlandı!`,
     });
-    showToast(isTr ? 'Sonuç panoya kopyalandı! 📋' : 'Result copied to clipboard! 📋');
   };
 
   const acrossClues = puzzle.clues.filter((c) => c.direction === 'across');

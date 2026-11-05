@@ -18,6 +18,7 @@ import { AdSenseBanner } from './components/AdSenseBanner';
 import { RemoveAdsModal } from './components/RemoveAdsModal';
 import { LegalModal } from './components/LegalModal';
 import { LeaderboardModal } from './components/LeaderboardModal';
+import { ShareModal } from './components/ShareModal';
 
 import { KelimeBulmaca } from './games/KelimeBulmaca';
 import { KareBulmaca } from './games/KareBulmaca';
@@ -986,6 +987,9 @@ export default function App() {
         stats={stats[activeGame]}
         language={settings.language}
       />
+
+      {/* Unified Multi-Platform Social Share Modal */}
+      <ShareModal language={settings.language} />
     </div>
   );
 }

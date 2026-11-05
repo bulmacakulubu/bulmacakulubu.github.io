@@ -135,12 +135,6 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
       gameName: isTr ? 'Kelime Türetme' : 'Word Builder',
       scoreOrAttempts: `${score} Puan (${foundWords.length} Kelime)`,
     });
-    showToast(isTr ? 'Sonuç panoya kopyalandı! 📋' : 'Result copied to clipboard! 📋');
-  };
-
-  const handleShareWhatsApp = () => {
-    const text = `🧩 Bulmaca Kulübü: ${isTr ? 'Kelime Türetme' : 'Word Builder'}\n🏆 Skor: ${score} Puan (${foundWords.length} Kelime Bulundu!)\nSen de oyna: https://bulmacakulubu.github.io`;
-    openWhatsAppShare(text);
   };
 
   const handleSubmit = async () => {
@@ -411,23 +405,16 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
           <div className="flex items-center justify-center gap-2">
             <button
               onClick={handleShare}
-              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 rounded-xl font-bold text-xs transition flex items-center gap-2 shadow-sm cursor-pointer"
             >
-              <Share2 size={13} />
-              <span>Skoru Paylaş</span>
-            </button>
-            <button
-              onClick={handleShareWhatsApp}
-              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <MessageSquare size={13} />
-              <span>WhatsApp</span>
+              <Share2 size={14} className="text-amber-400" />
+              <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
             </button>
             <button
               onClick={resetGame}
-              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
             >
-              Yeni Tur ➔
+              {isTr ? 'Yeni Tur ➔' : 'Next Round ➔'}
             </button>
           </div>
         </div>

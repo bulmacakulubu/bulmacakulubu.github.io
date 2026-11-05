@@ -565,24 +565,14 @@ export const Nonogram: React.FC<NonogramProps> = ({
                   scoreOrAttempts: `"${puzzleDisplayName}" resmini ${formatTime(seconds)} içinde çözdüm!`,
                 });
               }}
-              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 rounded-xl font-bold text-xs transition flex items-center gap-2 shadow-sm cursor-pointer"
             >
-              <Share2 size={13} />
-              <span>Skoru Paylaş</span>
-            </button>
-            <button
-              onClick={() => {
-                const text = `🧩 Bulmaca Kulübü: Nonogram\n🎨 "${puzzleDisplayName}" piksel resmini ${formatTime(seconds)} içinde tamamladım!\nSen de oyna: https://bulmacakulubu.github.io`;
-                openWhatsAppShare(text);
-              }}
-              className="px-3.5 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <MessageSquare size={13} />
-              <span>WhatsApp</span>
+              <Share2 size={14} className="text-amber-400" />
+              <span>{isEn ? 'Share Score' : 'Skoru Paylaş'}</span>
             </button>
             <button
               onClick={() => startNewGame(sizeMode, true)}
-              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
             >
               {isEn ? 'Next Artwork ➔' : 'Sıradaki Resim ➔'}
             </button>

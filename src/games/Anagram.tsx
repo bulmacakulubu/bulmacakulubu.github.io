@@ -245,7 +245,6 @@ export const Anagram: React.FC<AnagramProps> = ({
       gameName: 'Anagram Çözücü',
       scoreOrAttempts: `${score} Puan (${foundWords.length}/${puzzle.targetWords.length} Kelime)`,
     });
-    showToast(isTr ? 'Sonuç panoya kopyalandı! 📋' : 'Result copied to clipboard! 📋');
   };
 
   // Group target words by length

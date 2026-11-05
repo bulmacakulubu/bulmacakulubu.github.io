@@ -247,23 +247,10 @@ export const NoktaAvi: React.FC<NoktaAviProps> = ({
                     scoreOrAttempts: `${score} ${isTr ? 'Puan' : 'Points'}`,
                   });
                 }}
-                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 rounded-xl font-bold text-xs transition flex items-center gap-2 shadow-sm cursor-pointer"
               >
-                <Share2 size={13} />
-                <span>{isTr ? 'Skoru Paylaş' : 'Share'}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  const text = isTr
-                    ? `🎯 Nokta Avı'nda 30 saniyede ${score} puan yaptım! Sen kaç yapabilirsin? https://bulmacakulubu.github.io`
-                    : `🎯 Scored ${score} points in Dot Hunt! Can you beat me? https://bulmacakulubu.github.io`;
-                  openWhatsAppShare(text);
-                }}
-                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
-              >
-                <MessageSquare size={13} />
-                <span>WhatsApp</span>
+                <Share2 size={14} className="text-amber-400" />
+                <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
               </button>
             </div>
 
