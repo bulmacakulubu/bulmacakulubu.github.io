@@ -5,6 +5,7 @@ import { RotateCcw, Lightbulb, Share2, MessageSquare } from 'lucide-react';
 import { generateWordSearch } from '../utils/wordSearchGenerator';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 
 interface SozcukAviProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
@@ -69,11 +70,15 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
   const handleHint = () => {
     if (!isPlaying) return;
     const unfound = words.filter((w) => !foundWords.includes(w));
-    if (unfound.length === 0) return;
+    if (unfound.length === 0) {
+      showToast(isTr ? 'Tüm kelimeler zaten bulundu!' : 'All words already found!');
+      return;
+    }
 
     const targetWord = unfound[0];
     const doHint = () => {
       handleWordListClick(targetWord);
+      showToast(isTr ? `💡 İpucu: "${targetWord}" panoda vurgulandı!` : `💡 Hint: Word "${targetWord}" highlighted!`);
     };
 
     if (isPremium) {

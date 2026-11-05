@@ -285,3 +285,4 @@ export const ShareModal: React.FC<ShareModalProps> = ({ language = 'tr' }) => {
     </div>
   );
 };
+

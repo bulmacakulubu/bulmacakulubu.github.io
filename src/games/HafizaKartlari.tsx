@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 
 interface HafizaKartlariProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
@@ -82,9 +83,10 @@ export const HafizaKartlari: React.FC<HafizaKartlariProps> = ({
     const doPeek = () => {
       setIsPeeking(true);
       if (soundEnabled) playSound('success');
+      showToast(isTr ? '💡 İpucu: Kartlar kısa süreliğine açıldı!' : '💡 Hint: Cards revealed briefly!');
       setTimeout(() => {
         setIsPeeking(false);
-      }, 1200);
+      }, 1400);
     };
 
     if (isPremium) {

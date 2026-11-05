@@ -5,6 +5,7 @@ import { Heart, RotateCcw, Lightbulb, Sparkles } from 'lucide-react';
 import { HANGMAN_PUZZLES_TR, HANGMAN_PUZZLES_EN, HangmanPuzzle } from '../data/wordBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
 import { triggerAdBreak } from '../utils/adSenseService';
+import { showToast } from '../utils/toastService';
 
 interface AdamAsmacaProps {
   onGameEnd: (won: boolean) => void;
@@ -93,16 +94,20 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
 
   const handleRevealHintWithAd = () => {
     if (isHintRevealed) return;
-    if (isPremium) {
+    const doRevealHint = () => {
       setIsHintRevealed(true);
       if (soundEnabled) playSound('click');
+      showToast(isEn ? `💡 Hint: "${puzzle.hint}" revealed!` : `💡 İpucu: "${puzzle.hint}" açıldı!`);
+    };
+
+    if (isPremium) {
+      doRevealHint();
     } else {
       triggerAdBreak({
         type: 'reward',
         name: 'hangman_hint',
         adBreakDone: () => {
-          setIsHintRevealed(true);
-          if (soundEnabled) playSound('click');
+          doRevealHint();
         },
       });
     }
@@ -115,6 +120,7 @@ export const AdamAsmaca: React.FC<AdamAsmacaProps> = ({ onGameEnd, soundEnabled,
     const doReveal = () => {
       const chosen = unrevealed[Math.floor(Math.random() * unrevealed.length)];
       handleGuess(chosen);
+      showToast(isEn ? `💡 Letter "${chosen}" revealed!` : `💡 "${chosen}" harfi açıldı!`);
     };
 
     if (isPremium) {

@@ -4,6 +4,7 @@ import { playSound } from '../utils/audio';
 import { RotateCcw, Paintbrush, X, CheckCircle2, Sparkles, AlertCircle, Lightbulb, Share2, MessageSquare } from 'lucide-react';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 
 interface NonogramProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
@@ -221,13 +222,17 @@ export const Nonogram: React.FC<NonogramProps> = ({
       }
     }
 
-    if (targetR === -1) return;
+    if (targetR === -1) {
+      showToast(isEn ? 'All cells are already correctly filled!' : 'Tüm kareler zaten dolduruldu!');
+      return;
+    }
 
     const doHint = () => {
       const nextState = gridState.map((row) => [...row]);
       nextState[targetR][targetC] = 1;
       setGridState(nextState);
       if (soundEnabled) playSound('tile');
+      showToast(isEn ? `💡 Hint: Cell [${targetR + 1},${targetC + 1}] revealed!` : `💡 İpucu: [${targetR + 1},${targetC + 1}] karesi açıldı!`);
       checkWinCondition(nextState);
     };
 
@@ -314,6 +319,7 @@ export const Nonogram: React.FC<NonogramProps> = ({
         if (!isTargetFilled) {
           if (soundEnabled) playSound('error');
           setErrors((e) => e + 1);
+          showToast(isEn ? `❌ Incorrect tile! (${errors + 1} errors)` : `❌ Hatalı kare! (${errors + 1} hata)`);
         } else {
           if (soundEnabled) playSound('tile');
         }

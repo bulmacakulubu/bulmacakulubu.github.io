@@ -5,6 +5,7 @@ import { RotateCcw, Edit3, Lightbulb, Share2, MessageSquare, Check, Sparkles } f
 import { generateSudoku, SudokuDifficulty } from '../utils/sudokuGenerator';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 
 interface SudokuProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
@@ -97,6 +98,7 @@ export const Sudoku: React.FC<SudokuProps> = ({
     if (!isCorrect && num !== 0) {
       if (soundEnabled) playSound('error');
       setErrors((prev) => prev + 1);
+      showToast(language === 'tr' ? `❌ Hatalı sayı! (${errors + 1} Hata)` : `❌ Wrong number! (${errors + 1} Errors)`);
     } else {
       if (soundEnabled) playSound('tile');
       // Clear notes in this cell
@@ -157,7 +159,10 @@ export const Sudoku: React.FC<SudokuProps> = ({
       }
     }
 
-    if (targetR === -1) return;
+    if (targetR === -1) {
+      showToast(language === 'tr' ? 'Tüm hücreler zaten dolu!' : 'All cells are already filled!');
+      return;
+    }
 
     const doHint = () => {
       const correctNum = solutionBoard[targetR][targetC];
@@ -167,6 +172,7 @@ export const Sudoku: React.FC<SudokuProps> = ({
       setBoard(newBoard);
       setSelectedCell([targetR, targetC]);
       if (soundEnabled) playSound('tile');
+      showToast(language === 'tr' ? `💡 İpucu: [${targetR + 1}, ${targetC + 1}] hücresine ${correctNum} yerleştirildi!` : `💡 Hint: Cell [${targetR + 1}, ${targetC + 1}] filled with ${correctNum}!`);
     };
 
     if (isPremium) {

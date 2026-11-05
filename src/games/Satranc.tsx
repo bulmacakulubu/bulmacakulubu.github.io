@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { MultiplayerSession } from '../types';
 import { MultiplayerMessage } from '../utils/multiplayer';
+import { showToast } from '../utils/toastService';
 import { CHESS_LESSONS, ChessLesson } from '../data/chessLessons';
 import { getLegalMoves, Square } from '../utils/chessRules';
 
@@ -488,7 +489,12 @@ export const Satranc: React.FC<SatrancProps> = ({
 
           {mode === 'academy' && (
             <button
-              onClick={() => setShowHint((h) => !h)}
+              onClick={() => {
+                setShowHint((h) => !h);
+                if (currentLesson) {
+                  showToast(`💡 İpucu: ${currentLesson.hint[isEn ? 'en' : 'tr']}`);
+                }
+              }}
               className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
             >
               <Lightbulb size={12} />

@@ -9,6 +9,7 @@ import {
 import { validateAndGetMeaning } from '../utils/dictionaryService';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 
 interface KelimeTuretmeProps {
   onGameEnd: (won: boolean, score?: number) => void;
@@ -34,12 +35,6 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(120);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2400);
-  };
 
   // Reset when language changes
   useEffect(() => {
@@ -238,14 +233,6 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center justify-start select-none pt-1 sm:pt-2 pb-2 relative max-w-4xl xl:max-w-5xl space-y-2 sm:space-y-3">
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div className="fixed top-16 sm:top-18 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 border border-zinc-700 dark:border-zinc-300 rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 max-w-[92vw] animate-bounce pointer-events-none">
-          <AlertCircle size={15} className="text-amber-500 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
         {/* LEFT: Game Mode & Set */}

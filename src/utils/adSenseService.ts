@@ -18,6 +18,7 @@ declare global {
 
 /**
  * Trigger an H5 Game AdBreak (e.g. between game sessions or for rewards)
+ * Uses safety timeout fallback so hint/rewards NEVER get stuck if adBreak is blocked or pending.
  */
 export function triggerAdBreak(options: {
   type: 'start' | 'pause' | 'next' | 'browse' | 'reward';
@@ -26,13 +27,30 @@ export function triggerAdBreak(options: {
   afterAd?: () => void;
   adBreakDone?: (placementInfo: any) => void;
 }): void {
-  if (typeof window !== 'undefined' && typeof window.adBreak === 'function') {
-    window.adBreak(options);
-  } else {
-    // If adBreak is not defined (AdBlock or not approved yet), run callbacks directly
-    options.beforeAd?.();
+  let done = false;
+  const safeDone = (info: any) => {
+    if (done) return;
+    done = true;
     options.afterAd?.();
-    options.adBreakDone?.({ breakStatus: 'not_ready' });
+    options.adBreakDone?.(info);
+  };
+
+  options.beforeAd?.();
+
+  if (typeof window !== 'undefined' && typeof window.adBreak === 'function') {
+    try {
+      window.adBreak({
+        ...options,
+        adBreakDone: (placementInfo: any) => safeDone(placementInfo || { breakStatus: 'dismissed' }),
+      });
+      // Safety timeout fallback: If adBreak hangs or adblock suppresses callback, release after 1.8s
+      setTimeout(() => safeDone({ breakStatus: 'timeout_fallback' }), 1800);
+    } catch {
+      safeDone({ breakStatus: 'error_fallback' });
+    }
+  } else {
+    // If adBreak is not defined (AdBlock, dev mode, or not loaded), trigger immediately
+    safeDone({ breakStatus: 'not_ready' });
   }
 }
 
@@ -49,4 +67,3 @@ export function pushAdSense(): void {
     // AdSense already loaded or ad blocker active
   }
 }
-

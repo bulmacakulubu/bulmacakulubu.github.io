@@ -16,6 +16,7 @@ import { ANAGRAM_PUZZLES_TR, AnagramPuzzle } from '../data/anagramBank';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 
 interface AnagramProps {
   onGameEnd: (won: boolean, timeOrScore?: number) => void;
@@ -41,14 +42,8 @@ export const Anagram: React.FC<AnagramProps> = ({
   const [score, setScore] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
   const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [shakeInput, setShakeInput] = useState(false);
   const [revealedLetters, setRevealedLetters] = useState<{ [word: string]: number }>({}); // word -> number of revealed starting chars
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
-  };
 
   const shuffleArray = (arr: string[]) => {
     const copy = [...arr];
@@ -260,14 +255,6 @@ export const Anagram: React.FC<AnagramProps> = ({
 
   return (
     <div className="w-full h-full max-h-[calc(100vh-125px)] flex flex-col items-center justify-between select-none py-1 relative max-w-3xl xl:max-w-4xl">
-      {/* Toast */}
-      {toastMessage && (
-        <div className="fixed top-16 sm:top-18 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 border border-zinc-700 dark:border-zinc-300 rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 max-w-[92vw] animate-bounce pointer-events-none">
-          <AlertCircle size={15} className="text-amber-500 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
       {/* Control Bar */}
       <div className="w-full flex items-center justify-between pb-1.5 border-b border-[var(--border-color)]">
         <div className="flex items-center gap-2">

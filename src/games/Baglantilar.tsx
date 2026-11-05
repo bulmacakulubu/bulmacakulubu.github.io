@@ -5,6 +5,7 @@ import { RotateCcw, Shuffle, CheckCircle2, AlertCircle, Share2, Lightbulb, Messa
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 
 interface BaglantilarProps {
   onGameEnd: (won: boolean, timeSec?: number) => void;
@@ -368,7 +369,6 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
   const [mistakesRemaining, setMistakesRemaining] = useState(4);
   const [isPlaying, setIsPlaying] = useState(true);
   const [seconds, setSeconds] = useState(0);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
   const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
   const [guessHistory, setGuessHistory] = useState<number[][]>([]);
@@ -399,7 +399,6 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
     setMistakesRemaining(4);
     setIsPlaying(true);
     setSeconds(0);
-    setToastMessage(null);
     setGuessHistory([]);
 
     const progress = getPoolProgress(poolKey, puzzleSets.length);
@@ -408,11 +407,6 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
     if (result.isCycleReset) {
       showToast(isEn ? 'All sets completed! Resetting 🏆' : 'Tüm setler tamamlandı! Baştan başlıyor 🏆');
     }
-  };
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
   };
 
   const handleWordClick = (word: string) => {
@@ -578,14 +572,6 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center justify-start select-none pt-1 sm:pt-2 pb-2 relative max-w-2xl sm:max-w-3xl space-y-2.5 sm:space-y-3.5">
-      {/* Toast feedback */}
-      {toastMessage && (
-        <div className="fixed top-16 sm:top-18 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 border border-zinc-700 dark:border-zinc-300 rounded-xl text-xs font-bold shadow-2xl flex items-center gap-2 max-w-[92vw] animate-bounce pointer-events-none">
-          <AlertCircle size={15} className="text-amber-500 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
       {/* UNIFORM CONTROL BAR */}
       <div className="w-full flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
         {/* LEFT: Mistakes Remaining */}

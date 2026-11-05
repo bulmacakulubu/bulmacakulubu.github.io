@@ -19,6 +19,7 @@ import { RemoveAdsModal } from './components/RemoveAdsModal';
 import { LegalModal } from './components/LegalModal';
 import { LeaderboardModal } from './components/LeaderboardModal';
 import { ShareModal } from './components/ShareModal';
+import { GlobalToast } from './components/GlobalToast';
 
 import { KelimeBulmaca } from './games/KelimeBulmaca';
 import { KareBulmaca } from './games/KareBulmaca';
@@ -990,6 +991,9 @@ export default function App() {
 
       {/* Unified Multi-Platform Social Share Modal */}
       <ShareModal language={settings.language} />
+
+      {/* Global Unified Toast Notification System */}
+      <GlobalToast />
     </div>
   );
 }

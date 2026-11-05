@@ -5,6 +5,7 @@ import { RotateCcw, Lightbulb, Share2, MessageSquare, Zap } from 'lucide-react';
 import { validateAndGetMeaning } from '../utils/dictionaryService';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
+import { showToast } from '../utils/toastService';
 import { WORDLE_WORDS_TR, WORDLE_WORDS_EN } from '../data/wordBank';
 
 interface KelimeZinciriProps {
@@ -85,8 +86,11 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
       if (candidate) {
         setInputVal(candidate);
         if (soundEnabled) playSound('success');
+        showToast(isTr ? `💡 İpucu: "${candidate}" yazıldı!` : `💡 Hint: Word "${candidate}" filled!`);
       } else {
-        setErrorMsg(isTr ? 'İpucu bulunamadı, aklına gelen ilk kelimeyi dene!' : 'No hint found, try your best guess!');
+        const msg = isTr ? 'İpucu bulunamadı, aklına gelen ilk kelimeyi dene!' : 'No hint found, try your best guess!';
+        setErrorMsg(msg);
+        showToast(msg);
       }
     };
 
@@ -112,27 +116,25 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
       : inputVal.trim().toUpperCase();
 
     if (trimmed.length < 3) {
-      setErrorMsg(isTr ? 'Kelime en az 3 harfli olmalıdır.' : 'Word must be at least 3 letters.');
+      const msg = isTr ? 'Kelime en az 3 harfli olmalıdır.' : 'Word must be at least 3 letters.';
+      setErrorMsg(msg);
+      showToast(msg);
       if (soundEnabled) playSound('error');
       return;
     }
 
     if (trimmed[0] !== requiredLetter) {
-      setErrorMsg(
-        isTr
-          ? `Kelime "${requiredLetter}" harfiyle başlamalıdır!`
-          : `Word must start with letter "${requiredLetter}"!`
-      );
+      const msg = isTr ? `Kelime "${requiredLetter}" harfiyle başlamalıdır!` : `Word must start with letter "${requiredLetter}"!`;
+      setErrorMsg(msg);
+      showToast(msg);
       if (soundEnabled) playSound('error');
       return;
     }
 
     if (chain.includes(trimmed)) {
-      setErrorMsg(
-        isTr
-          ? 'Bu kelime daha önce zincirde kullanıldı.'
-          : 'This word has already been used in the chain.'
-      );
+      const msg = isTr ? 'Bu kelime daha önce zincirde kullanıldı.' : 'This word has already been used in the chain.';
+      setErrorMsg(msg);
+      showToast(msg);
       if (soundEnabled) playSound('error');
       return;
     }
@@ -140,11 +142,9 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
     // Hybrid Dictionary Check
     const validation = await validateAndGetMeaning(trimmed, language);
     if (!validation.isValid) {
-      setErrorMsg(
-        isTr
-          ? `"${trimmed}" sözlükte geçerli bulunamadı!`
-          : `"${trimmed}" not recognized in dictionary!`
-      );
+      const msg = isTr ? `"${trimmed}" sözlükte geçerli bulunamadı!` : `"${trimmed}" not recognized in dictionary!`;
+      setErrorMsg(msg);
+      showToast(msg);
       if (soundEnabled) playSound('error');
       return;
     }
