@@ -92,7 +92,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
                 1. Gizlilik Politikası ve KVKK / GDPR Aydınlatma Metni
               </h3>
               <p>
-                <strong>Bulmaca Kulübü</strong> (bulmacakulubu.github.io) olarak kullanıcılarımızın kişisel verilerinin korunmasına ve gizliliğine en yüksek derecede önem veriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) ve Avrupa Birliği Genel Veri Koruma Tüzüğü (“GDPR”) uyarınca veri sorumlusu sıfatıyla sizi bilgilendiriyoruz.
+                <strong>Bulmaca Kulübü</strong> (unscrambled.tr) olarak kullanıcılarımızın kişisel verilerinin korunmasına ve gizliliğine en yüksek derecede önem veriyoruz. 6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) ve Avrupa Birliği Genel Veri Koruma Tüzüğü (“GDPR”) uyarınca veri sorumlusu sıfatıyla sizi bilgilendiriyoruz.
               </p>
 
               <h4 className="font-bold text-gray-900 dark:text-gray-100 mt-3">İşlenen Veriler:</h4>

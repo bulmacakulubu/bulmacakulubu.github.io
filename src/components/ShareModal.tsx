@@ -51,7 +51,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({ language = 'tr' }) => {
   if (!state.isOpen) return null;
 
   const isTr = language === 'tr';
-  const siteUrl = state.url || 'https://bulmacakulubu.github.io';
+  const siteUrl = state.url || 'https://unscrambled.tr';
   const shareText = formatShareText(state);
 
   const handleCopyText = async () => {

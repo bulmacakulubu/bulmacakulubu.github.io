@@ -77,7 +77,7 @@ export function generateWordleEmojiGrid(
 
 export function formatShareText(options: ShareOptions): string {
   if (options.customText) return options.customText;
-  const siteUrl = options.url || 'https://bulmacakulubu.github.io';
+  const siteUrl = options.url || 'https://unscrambled.tr';
   const gridSection = options.emojiGrid ? `\n\n${options.emojiGrid}\n` : '\n';
   return `🧩 Bulmaca Kulübü: ${options.gameName}\n🏆 Sonuç: ${options.scoreOrAttempts}${gridSection}\nSen de oyna 👉 ${siteUrl}`;
 }
@@ -88,31 +88,31 @@ export async function shareScore(options: ShareOptions): Promise<'shared' | 'cop
   return 'shared';
 }
 
-export function openWhatsAppShare(text: string, url = 'https://bulmacakulubu.github.io'): void {
+export function openWhatsAppShare(text: string, url = 'https://unscrambled.tr'): void {
   const full = `${text}\n👉 ${url}`;
   const encoded = encodeURIComponent(full);
   window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank', 'noopener,noreferrer');
 }
 
-export function openTwitterShare(text: string, url = 'https://bulmacakulubu.github.io'): void {
+export function openTwitterShare(text: string, url = 'https://unscrambled.tr'): void {
   const encodedText = encodeURIComponent(text);
   const encodedUrl = encodeURIComponent(url);
   window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, '_blank', 'noopener,noreferrer');
 }
 
-export function openTelegramShare(text: string, url = 'https://bulmacakulubu.github.io'): void {
+export function openTelegramShare(text: string, url = 'https://unscrambled.tr'): void {
   const encodedText = encodeURIComponent(text);
   const encodedUrl = encodeURIComponent(url);
   window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`, '_blank', 'noopener,noreferrer');
 }
 
-export function openFacebookShare(text: string, url = 'https://bulmacakulubu.github.io'): void {
+export function openFacebookShare(text: string, url = 'https://unscrambled.tr'): void {
   const encodedUrl = encodeURIComponent(url);
   const encodedQuote = encodeURIComponent(text);
   window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedQuote}`, '_blank', 'noopener,noreferrer');
 }
 
-export function openLinkedInShare(text: string, url = 'https://bulmacakulubu.github.io'): void {
+export function openLinkedInShare(text: string, url = 'https://unscrambled.tr'): void {
   const encodedUrl = encodeURIComponent(url);
   window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`, '_blank', 'noopener,noreferrer');
 }
@@ -143,7 +143,7 @@ export async function copyShareText(text: string): Promise<boolean> {
   }
 }
 
-export async function triggerNativeShare(title: string, text: string, url = 'https://bulmacakulubu.github.io'): Promise<boolean> {
+export async function triggerNativeShare(title: string, text: string, url = 'https://unscrambled.tr'): Promise<boolean> {
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
       await navigator.share({

@@ -233,7 +233,7 @@ export const Sudoku: React.FC<SudokuProps> = ({
   };
 
   const handleShareWhatsApp = () => {
-    const text = `🧩 Bulmaca Kulübü: Sudoku (${difficulty.toUpperCase()})\n⏱️ Süre: ${formatTime(seconds)}\n❌ Hata: ${errors}\nSen de oyna: https://bulmacakulubu.github.io`;
+    const text = `🧩 Bulmaca Kulübü: Sudoku (${difficulty.toUpperCase()})\n⏱️ Süre: ${formatTime(seconds)}\n❌ Hata: ${errors}\nSen de oyna: https://unscrambled.tr`;
     openWhatsAppShare(text);
   };
 
