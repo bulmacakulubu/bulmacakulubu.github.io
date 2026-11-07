@@ -22,3 +22,4 @@ Allow: /
 # Sitemaps and AI Context
 Sitemap: https://bulmacakulubu.github.io/sitemap.xml
 # llms.txt standard for AI Agents: https://bulmacakulubu.github.io/llms.txt
+

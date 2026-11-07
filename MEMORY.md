@@ -34,3 +34,4 @@
 - **Code Guard Rule:** Every change must adhere to the 5-step engineering protocol (Root Cause -> Blast Radius -> Surgical Edit -> Backward Compatibility -> Build Verification).
 - **No Friction / No Permission Prompts:** Prioritize Antigravity native file tools (`read_file`, `edit_file`, `write_file`) over terminal shell commands (`run_command`) to avoid triggering manual IDE confirmation dialogs.
 - **Data Integrity:** Sitede varsayılan olarak gerçekte olmayan veya yapay hiçbir veri bulunamaz. Her istatistik ve derece kullanıcının gerçek eylemlerinden beslenmelidir.
+

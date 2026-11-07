@@ -87,18 +87,13 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
             data-ad-format="horizontal"
           />
 
-          {/* Clean Placeholder while Google AdSense review is pending */}
+          {/* Clean Placeholder while Google AdSense is loading */}
           {!adLoaded && (
-            <div className="absolute inset-0 w-full h-full rounded-lg bg-[var(--bg-secondary)]/50 border border-dashed border-[var(--border-color)] flex items-center justify-center px-3 text-[11px] text-[var(--text-primary)]/70 shadow-2xs pointer-events-none">
-              <div className="flex items-center justify-center gap-2 font-medium truncate">
-                <Sparkles size={12} className="text-[var(--text-primary)] shrink-0 opacity-70" />
+            <div className="absolute inset-0 w-full h-full rounded-lg bg-[var(--bg-secondary)]/30 border border-dashed border-[var(--border-color)]/50 flex items-center justify-center px-3 text-[11px] text-[var(--text-secondary)] pointer-events-none">
+              <div className="flex items-center justify-center gap-2 font-medium truncate opacity-60">
+                <Sparkles size={12} className="shrink-0" />
                 <span className="truncate">
-                  {isTr
-                    ? 'Google AdSense Reklam Alanı (ca-pub-1086062430851863)'
-                    : 'Google AdSense Ad Space (ca-pub-1086062430851863)'}
-                </span>
-                <span className="text-[9px] font-bold uppercase tracking-wider bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-primary)]/80 px-1.5 py-0.5 rounded shrink-0">
-                  {isTr ? 'Hazırlanıyor' : 'Ready'}
+                  {isTr ? 'Sponsorlu Reklam Alanı' : 'Sponsored Ad Space'}
                 </span>
               </div>
             </div>
