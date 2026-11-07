@@ -4,7 +4,7 @@
 
 export const ADSENSE_CONFIG = {
   client: import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-1086062430851863',
-  bottomBannerSlot: import.meta.env.VITE_ADSENSE_BANNER_SLOT || '7980516963',
+  bottomBannerSlot: import.meta.env.VITE_ADSENSE_BANNER_SLOT || '1408415933',
   testMode: import.meta.env.DEV,
 };
 
