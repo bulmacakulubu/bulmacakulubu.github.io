@@ -52,12 +52,12 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
   return (
     <aside 
       aria-label={isTr ? "Sponsorlu Reklam Alanı" : "Sponsored Advertisement"}
-      className="w-full shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-card)]/95 backdrop-blur-md shadow-md z-30 transition-all duration-300 py-1 px-3 flex flex-col items-center justify-center text-center select-none"
-      style={{ maxHeight: '68px', minHeight: '52px' }}
+      className="w-full shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-card)]/95 backdrop-blur-md shadow-md z-30 transition-all duration-300 py-1.5 px-3 flex flex-col items-center justify-center text-center select-none"
+      style={{ minHeight: '68px' }}
     >
       <div className="w-full max-w-3xl flex flex-col items-center justify-center mx-auto">
         {/* Sleek inline top line: Sponsorlu & VIP */}
-        <div className="w-full flex items-center justify-between text-[10px] leading-tight text-[var(--text-secondary)] mb-0.5 max-w-xl px-1">
+        <div className="w-full flex items-center justify-between text-[10px] leading-tight text-[var(--text-secondary)] mb-1 max-w-xl px-1">
           <span className="font-medium text-[10px] bg-[var(--bg-secondary)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">
             {isTr ? 'Sponsorlu Reklam' : 'Sponsored Ad'}
           </span>
@@ -70,21 +70,21 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
           </button>
         </div>
 
-        {/* Ad Container: Strictly 46px height, centered, no vertical overflow */}
-        <div className="w-full max-w-xl h-[46px] max-h-[46px] flex items-center justify-center overflow-hidden relative mx-auto">
+        {/* Ad Container: Responsive display banner */}
+        <div className="w-full max-w-xl min-h-[50px] flex items-center justify-center relative mx-auto">
           <ins
             ref={insRef}
             className="adsbygoogle"
             style={{
-              display: 'inline-block',
+              display: 'block',
               width: '100%',
-              height: '46px',
-              maxHeight: '46px',
+              minHeight: '50px',
               textAlign: 'center',
             }}
             data-ad-client={ADSENSE_CONFIG.client}
-            {...(hasSlot ? { 'data-ad-slot': ADSENSE_CONFIG.bottomBannerSlot } : {})}
-            data-ad-format="horizontal"
+            data-ad-slot={ADSENSE_CONFIG.bottomBannerSlot}
+            data-ad-format="auto"
+            data-full-width-responsive="true"
           />
 
           {/* Clean Placeholder while Google AdSense is loading */}
