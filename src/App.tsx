@@ -10,7 +10,7 @@ import { MultiplayerModal } from './components/MultiplayerModal';
 import { FlyingBird } from './components/FlyingBird';
 import { FloatingMusicStation } from './components/FloatingMusicStation';
 import { BUILT_IN_TRACKS, TURKISH_RADIO_STATIONS, startAmbientMusic, stopAmbientMusic, setAmbientVolume, playStreamTrack, stopStreamTrack } from './utils/audio';
-import { Music, Radio, Disc, FolderOpen, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy, Boxes, Grid3X3, Type, LayoutGrid, Shuffle, Search, Grid, Layers, UserX } from 'lucide-react';
+import { Music, Radio, Disc, FolderOpen, Sparkles, Volume2, VolumeX, Play, Pause, SkipBack, SkipForward, ListMusic, Users, ShieldCheck, Crown, Settings as SettingsIcon, FileText, Maximize2, Minimize2, Scan, Eye, EyeOff, Trophy, Boxes, Grid3X3, Type, LayoutGrid, Shuffle, Search, Grid, Layers, UserX, Menu, X } from 'lucide-react';
 import { isUserPremium } from './utils/revenueCat';
 import { checkUrlForVipActivation } from './utils/shopier';
 import confetti from 'canvas-confetti';
@@ -21,20 +21,21 @@ import { LeaderboardModal } from './components/LeaderboardModal';
 import { ShareModal } from './components/ShareModal';
 import { GlobalToast } from './components/GlobalToast';
 
-import { KelimeBulmaca } from './games/KelimeBulmaca';
-import { KareBulmaca } from './games/KareBulmaca';
-import { Anagram } from './games/Anagram';
-import { KelimeTuretme } from './games/KelimeTuretme';
-import { SozcukAvi } from './games/SozcukAvi';
-import { AdamAsmaca } from './games/AdamAsmaca';
-import { Satranc } from './games/Satranc';
-import { Sudoku } from './games/Sudoku';
-import { KelimeZinciri } from './games/KelimeZinciri';
-import { HafizaKartlari } from './games/HafizaKartlari';
-import { NoktaAvi } from './games/NoktaAvi';
-import { Baglantilar } from './games/Baglantilar';
-import { Nonogram } from './games/Nonogram';
-import { DailyPuzzleView } from './components/DailyPuzzleView';
+// Code-split all games via React.lazy for instant sub-second initial paint and minimal bundle size
+const KelimeBulmaca = React.lazy(() => import('./games/KelimeBulmaca').then((m) => ({ default: m.KelimeBulmaca })));
+const KareBulmaca = React.lazy(() => import('./games/KareBulmaca').then((m) => ({ default: m.KareBulmaca })));
+const Anagram = React.lazy(() => import('./games/Anagram').then((m) => ({ default: m.Anagram })));
+const KelimeTuretme = React.lazy(() => import('./games/KelimeTuretme').then((m) => ({ default: m.KelimeTuretme })));
+const SozcukAvi = React.lazy(() => import('./games/SozcukAvi').then((m) => ({ default: m.SozcukAvi })));
+const AdamAsmaca = React.lazy(() => import('./games/AdamAsmaca').then((m) => ({ default: m.AdamAsmaca })));
+const Satranc = React.lazy(() => import('./games/Satranc').then((m) => ({ default: m.Satranc })));
+const Sudoku = React.lazy(() => import('./games/Sudoku').then((m) => ({ default: m.Sudoku })));
+const KelimeZinciri = React.lazy(() => import('./games/KelimeZinciri').then((m) => ({ default: m.KelimeZinciri })));
+const HafizaKartlari = React.lazy(() => import('./games/HafizaKartlari').then((m) => ({ default: m.HafizaKartlari })));
+const NoktaAvi = React.lazy(() => import('./games/NoktaAvi').then((m) => ({ default: m.NoktaAvi })));
+const Baglantilar = React.lazy(() => import('./games/Baglantilar').then((m) => ({ default: m.Baglantilar })));
+const Nonogram = React.lazy(() => import('./games/Nonogram').then((m) => ({ default: m.Nonogram })));
+const DailyPuzzleView = React.lazy(() => import('./components/DailyPuzzleView').then((m) => ({ default: m.DailyPuzzleView })));
 
 const GAME_HEADER_INFO: Record<GameId, { tr: { title: string; desc: string }; en: { title: string; desc: string } }> = {
   'kelime-bulmaca': {
@@ -112,8 +113,53 @@ const GAME_ICONS: Record<GameId, React.ComponentType<{ size?: number; className?
   'nokta-avi': Sparkles,
 };
 
+const VALID_GAME_IDS: GameId[] = [
+  'kelime-bulmaca',
+  'kare-bulmaca',
+  'anagram',
+  'kelime-turetme',
+  'sozcuk-avi',
+  'adam-asmaca',
+  'satranc',
+  'sudoku',
+  'kelime-zinciri',
+  'hafiza-kartlari',
+  'nokta-avi',
+  'baglantilar',
+  'nonogram',
+  'gunun-bulmacasi',
+];
+
+function getInitialGame(): GameId {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    const gameParam = params.get('game') as GameId | null;
+    if (gameParam && VALID_GAME_IDS.includes(gameParam)) {
+      return gameParam;
+    }
+    const hash = window.location.hash.replace('#', '') as GameId;
+    if (hash && VALID_GAME_IDS.includes(hash)) {
+      return hash;
+    }
+  }
+  return 'kelime-bulmaca';
+}
+
+const GameLoadingSkeleton: React.FC<{ language: 'tr' | 'en' }> = ({ language }) => (
+  <div className="w-full h-full flex flex-col items-center justify-center p-8 min-h-[360px] select-none">
+    <div
+      className="w-10 h-10 rounded-2xl border-3 border-t-transparent animate-spin mb-3 shadow-md"
+      style={{ borderColor: 'var(--accent-color)', borderTopColor: 'transparent' }}
+    />
+    <p className="text-xs font-semibold text-[var(--text-secondary)] animate-pulse">
+      {language === 'tr' ? 'Oyun yükleniyor...' : 'Loading game...'}
+    </p>
+  </div>
+);
+
 export default function App() {
-  const [activeGame, setActiveGame] = useState<GameId>('kelime-bulmaca');
+  const [activeGame, setActiveGame] = useState<GameId>(getInitialGame);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [settings, setSettings] = useState<Settings>(loadSettings());
   const [stats, setStats] = useState<AllStats>(loadStats());
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -133,6 +179,45 @@ export default function App() {
   const [multiplayerSession, setMultiplayerSession] = useState<MultiplayerSession | null>(null);
   const [incomingMultiplayerMessage, setIncomingMultiplayerMessage] = useState<MultiplayerMessage | null>(null);
 
+  // Synchronized Game Selection with History & Deep-Linking
+  const handleSelectGame = (gameId: GameId, pushToHistory = true) => {
+    setActiveGame(gameId);
+    setIsMobileMenuOpen(false);
+    if (pushToHistory && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('game', gameId);
+      window.history.pushState({ game: gameId }, '', url.toString());
+    }
+  };
+
+  // Browser Back/Forward navigation listener
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const gameParam = params.get('game') as GameId | null;
+      if (gameParam && VALID_GAME_IDS.includes(gameParam)) {
+        setActiveGame(gameParam);
+      } else {
+        const hash = window.location.hash.replace('#', '') as GameId;
+        if (hash && VALID_GAME_IDS.includes(hash)) {
+          setActiveGame(hash);
+        } else {
+          setActiveGame('kelime-bulmaca');
+        }
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Dynamic Document Title based on Active Game & Language
+  useEffect(() => {
+    const info = GAME_HEADER_INFO[activeGame]?.[settings.language === 'en' ? 'en' : 'tr'];
+    if (info) {
+      document.title = `${info.title} — ${settings.language === 'en' ? 'Puzzle Club' : 'Bulmaca Kulübü'}`;
+    }
+  }, [activeGame, settings.language]);
+
   // Check URL parameters on mount (1v1 invites and Shopier returns)
   useEffect(() => {
     // Check if user returned from Shopier payment
@@ -145,7 +230,7 @@ export default function App() {
     const room = params.get('room');
     const game = params.get('game') as GameId | null;
     if (room) {
-      if (game) setActiveGame(game);
+      if (game && VALID_GAME_IDS.includes(game)) handleSelectGame(game, false);
       setIsMultiplayerOpen(true);
     }
   }, []);
@@ -482,9 +567,9 @@ export default function App() {
         />
       )}
 
-      {/* Sidebar with slide drawer transition in Zen mode */}
+      {/* Desktop Sidebar with slide drawer transition in Zen mode */}
       <div
-        className={`transition-all duration-300 ease-in-out shrink-0 ${
+        className={`hidden md:block transition-all duration-300 ease-in-out shrink-0 ${
           isZenMode
             ? `fixed inset-y-0 left-0 z-50 ${isSidebarPeeking ? 'translate-x-0 shadow-2xl' : '-translate-x-full pointer-events-none'}`
             : 'relative z-20'
@@ -495,7 +580,7 @@ export default function App() {
       >
         <Sidebar
           activeGame={activeGame}
-          onSelectGame={(g) => setActiveGame(g)}
+          onSelectGame={(g) => handleSelectGame(g)}
           language={settings.language}
           onToggleLanguage={toggleLanguage}
           onOpenSettings={() => setIsSettingsOpen(true)}
@@ -517,11 +602,71 @@ export default function App() {
         />
       </div>
 
+      {/* Mobile Drawer (Slide-Over Navigation for Handheld Screens) */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <div className="relative w-72 max-w-[85vw] h-full z-10 shadow-2xl flex flex-col bg-[var(--bg-secondary)] border-r border-[var(--border-color)]">
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="absolute top-2.5 right-2.5 z-20 p-1.5 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition cursor-pointer shadow-2xs"
+              aria-label={settings.language === 'tr' ? 'Menüyü Kapat' : 'Close Menu'}
+            >
+              <X size={15} />
+            </button>
+            <Sidebar
+              activeGame={activeGame}
+              onSelectGame={(g) => {
+                handleSelectGame(g);
+                setIsMobileMenuOpen(false);
+              }}
+              language={settings.language}
+              onToggleLanguage={toggleLanguage}
+              onOpenSettings={() => {
+                setIsSettingsOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
+              volume={settings.volume}
+              soundEnabled={settings.soundEnabled}
+              tracks={[...radioTracks, ...localTracks]}
+              onAddTracks={handleAddLocalTracks}
+              currentTrackId={currentTrackId}
+              onSelectTrack={(id) => {
+                setCurrentTrackId(id);
+                setIsPlayingMusic(true);
+              }}
+              isPlaying={isPlayingMusic}
+              onTogglePlay={handleTogglePlayMusic}
+              onNextTrack={handleNextTrack}
+              onPrevTrack={handlePrevTrack}
+              onOpenFloatingMusic={() => {
+                setIsFloatingMusicOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
+              isPremium={currentUser.isPremium}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         {/* Top Ticker Stats Bar */}
-        <header className={`${isZenMode ? 'hidden' : 'px-3 sm:px-4 py-2 border-b flex items-center justify-between shrink-0 gap-2'} transition-all`} style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
+        <header className={`${isZenMode ? 'hidden' : 'px-2.5 sm:px-4 py-2 border-b flex items-center justify-between shrink-0 gap-2'} transition-all`} style={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
           <div className="flex items-center gap-2 sm:gap-3 truncate">
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition shrink-0 cursor-pointer shadow-2xs"
+              title={settings.language === 'tr' ? 'Oyun Menüsü' : 'Game Menu'}
+              aria-label="Toggle Navigation"
+            >
+              <Menu size={16} />
+            </button>
+
             <div
               className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-xs"
               style={{ backgroundColor: 'var(--accent-color)', color: 'var(--accent-contrast)' }}
@@ -765,6 +910,7 @@ export default function App() {
         {/* Game Container (Responsive, Uniform, Clean Scroll, 100% Yellow-Box Bounds) */}
         <div className={`flex-1 overflow-y-auto lg:overflow-hidden ${isZenMode ? 'p-0 sm:p-1' : 'px-2 sm:px-4 py-1'} flex flex-col items-center justify-start w-full min-h-0`}>
           <div className="w-full h-full flex flex-col items-center justify-start transition-all duration-300 min-h-0">
+            <React.Suspense fallback={<GameLoadingSkeleton language={settings.language} />}>
             {activeGame === 'kelime-bulmaca' && (
               <KelimeBulmaca
                 language={settings.language}
@@ -884,9 +1030,10 @@ export default function App() {
                 soundEnabled={settings.soundEnabled}
                 stats={stats}
                 currentUser={currentUser}
-                onPlayGame={(g) => setActiveGame(g)}
+                onPlayGame={(g) => handleSelectGame(g)}
               />
             )}
+            </React.Suspense>
           </div>
         </div>
 
@@ -928,7 +1075,7 @@ export default function App() {
         currentUser={currentUser}
         onStartMultiplayer={(session) => {
           setMultiplayerSession(session);
-          setActiveGame(session.gameId);
+          handleSelectGame(session.gameId);
         }}
         onDataMessage={(msg) => {
           setIncomingMultiplayerMessage(msg);

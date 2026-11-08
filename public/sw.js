@@ -1,5 +1,5 @@
 // Bulmaca Kulübü PWA Service Worker
-const CACHE_NAME = 'bk-pwa-v2';
+const CACHE_NAME = 'bk-pwa-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

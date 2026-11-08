@@ -102,7 +102,7 @@ export const Satranc: React.FC<SatrancProps> = ({
       if (winnerIsWhite) {
         if (soundEnabled) playSound('win');
         confetti({ particleCount: 120, spread: 80 });
-        showToast(isEn ? 'Checkmate! White wins! 🏆' : 'Şah Mat! Beyaz kazandı! 🏆', 'success');
+        showToast({ message: isEn ? 'Checkmate! White wins! 🏆' : 'Şah Mat! Beyaz kazandı! 🏆', type: 'success' });
         onGameEnd(true);
         setGameOverResult({
           won: true,
@@ -113,7 +113,7 @@ export const Satranc: React.FC<SatrancProps> = ({
         });
       } else {
         if (soundEnabled) playSound('gameover');
-        showToast(isEn ? 'Checkmate! Black wins!' : 'Şah Mat! Siyah kazandı!', 'error');
+        showToast({ message: isEn ? 'Checkmate! Black wins!' : 'Şah Mat! Siyah kazandı!', type: 'error' });
         onGameEnd(false);
         setGameOverResult({
           won: false,
@@ -136,12 +136,12 @@ export const Satranc: React.FC<SatrancProps> = ({
     } else if (state.isCheck) {
       if (soundEnabled) playSound('error');
       const checkedSide = currentTurn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah');
-      showToast(
-        isEn
+      showToast({
+        message: isEn
           ? `⚠️ CHECK! ${checkedSide} King is under attack!`
           : `⚠️ ŞAH! ${checkedSide} Şahı tehdit altında!`,
-        'error'
-      );
+        type: 'error',
+      });
     }
   };
 
