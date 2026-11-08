@@ -20,7 +20,7 @@ function getAudioContext(): AudioContext {
   return audioCtx;
 }
 
-export function playSound(type: 'click' | 'win' | 'error' | 'success' | 'tile', volume = 0.5) {
+export function playSound(type: 'click' | 'win' | 'error' | 'success' | 'tile' | 'gameover', volume = 0.5) {
   try {
     const ctx = getAudioContext();
     const osc = ctx.createOscillator();
@@ -75,6 +75,14 @@ export function playSound(type: 'click' | 'win' | 'error' | 'success' | 'tile', 
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
       osc.start();
       osc.stop(ctx.currentTime + 0.2);
+    } else if (type === 'gameover') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.35);
+      gain.gain.setValueAtTime(vol * 0.25, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
     }
 
     osc.connect(gain);

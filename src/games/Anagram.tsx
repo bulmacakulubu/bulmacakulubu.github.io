@@ -110,7 +110,7 @@ export const Anagram: React.FC<AnagramProps> = ({
   const handleSubmitWord = () => {
     if (!currentWord || isCompleted) return;
 
-    const word = currentWord.toUpperCase();
+    const word = isTr ? currentWord.toLocaleUpperCase('tr-TR') : currentWord.toUpperCase();
 
     if (foundWords.includes(word)) {
       if (soundEnabled) playSound('error');

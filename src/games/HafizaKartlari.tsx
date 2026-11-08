@@ -44,8 +44,10 @@ export const HafizaKartlari: React.FC<HafizaKartlariProps> = ({
   const [isPlaying, setIsPlaying] = useState(true);
   const [combo, setCombo] = useState(1);
   const [isPeeking, setIsPeeking] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   const initGame = () => {
+    setIsLocked(false);
     const deck = [...ALL_ICONS, ...ALL_ICONS]
       .map((_, idx) => ({
         id: idx,
@@ -103,7 +105,7 @@ export const HafizaKartlari: React.FC<HafizaKartlariProps> = ({
   };
 
   const handleCardClick = (id: number) => {
-    if (!isPlaying || isPeeking) return;
+    if (!isPlaying || isPeeking || isLocked) return;
     const clickedCard = cards.find((c) => c.id === id);
     if (!clickedCard || clickedCard.flipped || clickedCard.matched) return;
 
@@ -137,11 +139,13 @@ export const HafizaKartlari: React.FC<HafizaKartlariProps> = ({
       } else {
         if (soundEnabled) playSound('error');
         setCombo(1);
+        setIsLocked(true);
         setTimeout(() => {
           setCards((prev) =>
             prev.map((c) => (c.id === id || c.id === firstSelected ? { ...c, flipped: false } : c))
           );
           setFirstSelected(null);
+          setIsLocked(false);
         }, 750);
       }
     }
