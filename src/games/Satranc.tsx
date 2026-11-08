@@ -20,6 +20,7 @@ import { MultiplayerMessage } from '../utils/multiplayer';
 import { showToast } from '../utils/toastService';
 import { CHESS_LESSONS, ChessLesson } from '../data/chessLessons';
 import { getLegalMoves, Square } from '../utils/chessRules';
+import { getBestAIMove, applyMove, AIDifficulty } from '../utils/chessAI';
 
 interface SatrancProps {
   onGameEnd: (won: boolean) => void;
@@ -72,6 +73,14 @@ export const Satranc: React.FC<SatrancProps> = ({
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [opponentReaction, setOpponentReaction] = useState<string | null>(null);
   const [showSidePanel, setShowSidePanel] = useState(true);
+  const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>(() => {
+    try {
+      return (localStorage.getItem('bk_chess_ai_difficulty') as AIDifficulty) || 'medium';
+    } catch {
+      return 'medium';
+    }
+  });
+  const [isAIThinking, setIsAIThinking] = useState(false);
 
   const isPanelVisible = showSidePanel && !hideStats;
 
@@ -164,6 +173,11 @@ export const Satranc: React.FC<SatrancProps> = ({
 
   // Move handling
   const handleCellClick = (r: number, c: number) => {
+    // In AI mode, prevent human clicks while AI is calculating or during black turn
+    if (mode === 'ai' && (turn === 'black' || isAIThinking)) {
+      return;
+    }
+
     // In online mode, verify it's my turn
     if (isOnline && turn !== myColor) {
       return;
@@ -346,43 +360,41 @@ export const Satranc: React.FC<SatrancProps> = ({
   };
 
   const makeAIMove = (currentBoard: (string | null)[][]) => {
-    const newBoard = currentBoard.map((row) => [...row]);
-    const blackPieces: Square[] = [];
-    newBoard.forEach((row, r) => {
-      row.forEach((p, c) => {
-        if (p && p === p.toLowerCase()) blackPieces.push([r, c]);
-      });
-    });
+    setIsAIThinking(true);
+    const thinkDelay = aiDifficulty === 'hard' ? 420 : aiDifficulty === 'medium' ? 320 : 200;
 
-    if (blackPieces.length === 0) return;
+    setTimeout(() => {
+      const bestMove = getBestAIMove(currentBoard, aiDifficulty);
+      setIsAIThinking(false);
 
-    // Pick a black piece that has legal moves
-    const shuffled = [...blackPieces].sort(() => Math.random() - 0.5);
-    for (const [fr, fc] of shuffled) {
-      const legal = getLegalMoves(newBoard, fr, fc);
-      if (legal.length > 0) {
-        const [tr, tc] = legal[Math.floor(Math.random() * legal.length)];
-        const moving = newBoard[fr][fc];
-        const target = newBoard[tr][tc];
-        newBoard[tr][tc] = moving;
-        newBoard[fr][fc] = null;
-        if (moving === 'p' && tr === 7) {
-          newBoard[tr][tc] = 'q'; // Promotion
-        }
-        if (soundEnabled) playSound('tile');
-        setBoard(newBoard);
-        setTurn('white');
-        const notation = `AI: ${PIECE_SYMBOLS[moving || '']} ${COLS[fc]}${8 - fr} ➔ ${COLS[tc]}${8 - tr}`;
-        setMoveHistory((prev) => [notation, ...prev]);
+      if (!bestMove) return;
 
-        if (target === 'K') {
-          if (soundEnabled) playSound('gameover');
-          showToast(isEn ? 'AI captured your King! Game over.' : 'Yapay zeka şahınızı aldı! Oyun bitti.', 'error');
-          onGameEnd(false);
-        }
-        return;
+      const newBoard = applyMove(currentBoard, bestMove);
+      const [fr, fc] = bestMove.from;
+      const [tr, tc] = bestMove.to;
+      const moving = bestMove.piece;
+      const target = bestMove.captured;
+
+      if (soundEnabled) playSound('tile');
+      setBoard(newBoard);
+      setTurn('white');
+
+      const diffLabel =
+        aiDifficulty === 'hard'
+          ? (isEn ? 'Hard' : 'Zor')
+          : aiDifficulty === 'medium'
+          ? (isEn ? 'Medium' : 'Orta')
+          : (isEn ? 'Easy' : 'Kolay');
+
+      const notation = `AI (${diffLabel}): ${PIECE_SYMBOLS[moving || '']} ${COLS[fc]}${8 - fr} ➔ ${COLS[tc]}${8 - tr}`;
+      setMoveHistory((prev) => [notation, ...prev]);
+
+      if (target === 'K') {
+        if (soundEnabled) playSound('gameover');
+        showToast(isEn ? 'AI captured your King! Game over.' : 'Yapay zeka şahınızı aldı! Oyun bitti.', 'error');
+        onGameEnd(false);
       }
-    }
+    }, thinkDelay);
   };
 
   const resetGame = () => {
@@ -437,6 +449,49 @@ export const Satranc: React.FC<SatrancProps> = ({
               >
                 {isEn ? 'Computer' : 'Bilgisayar'}
               </button>
+              {/* Difficulty selector when in AI mode */}
+              {mode === 'ai' && (
+                <div className="flex items-center ml-1 pl-1 border-l border-[var(--border-color)] gap-0.5">
+                  {(['easy', 'medium', 'hard'] as AIDifficulty[]).map((level) => {
+                    const isSelected = aiDifficulty === level;
+                    const labels = {
+                      easy: { tr: 'Kolay', en: 'Easy' },
+                      medium: { tr: 'Orta', en: 'Medium' },
+                      hard: { tr: 'Zor', en: 'Hard' },
+                    };
+                    return (
+                      <button
+                        key={level}
+                        onClick={() => {
+                          setAiDifficulty(level);
+                          try {
+                            localStorage.setItem('bk_chess_ai_difficulty', level);
+                          } catch {}
+                          if (soundEnabled) playSound('click');
+                        }}
+                        className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold transition cursor-pointer ${
+                          isSelected
+                            ? level === 'hard'
+                              ? 'bg-rose-600 text-white shadow-xs'
+                              : level === 'medium'
+                              ? 'bg-blue-600 text-white shadow-xs'
+                              : 'bg-emerald-600 text-white shadow-xs'
+                            : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                        title={
+                          level === 'hard'
+                            ? (isEn ? 'Hard: 3-ply Minimax + Alpha-Beta' : 'Zor: 3 Hamle İleriyi Düşünen Büyükusta AI')
+                            : level === 'medium'
+                            ? (isEn ? 'Medium: 2-ply Minimax + Positional Evaluation' : 'Orta: 2 Hamle İleriyi Düşünen Usta AI')
+                            : (isEn ? 'Easy: Casual Beginner AI' : 'Kolay: Acemi AI')
+                        }
+                      >
+                        {labels[level][isEn ? 'en' : 'tr']}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
               <button
                 onClick={() => setMode('2p')}
                 className={`px-2.5 py-1 rounded-lg transition font-extrabold text-[11px] cursor-pointer ${
@@ -488,12 +543,21 @@ export const Satranc: React.FC<SatrancProps> = ({
             </>
           ) : (
             <>
-              <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px]">
-                <span className="text-[var(--text-secondary)]">{isEn ? 'Turn' : 'Sıra'}</span>{' '}
-                <span className="font-bold text-[var(--accent-color)] ml-1">
-                  {turn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah')}
-                  {isOnline && (turn === myColor ? (isEn ? ' (Your Turn!)' : ' (Senin Sıran!)') : (isEn ? ' (Opponent...)' : ' (Rakip...)'))}
-                </span>
+              <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px] flex items-center gap-1.5">
+                {isAIThinking ? (
+                  <span className="flex items-center gap-1.5 text-amber-500 font-bold animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                    <span>{isEn ? 'Computer thinking...' : 'Bilgisayar düşünüyor...'}</span>
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-[var(--text-secondary)]">{isEn ? 'Turn' : 'Sıra'}</span>{' '}
+                    <span className="font-bold text-[var(--accent-color)] ml-1">
+                      {turn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah')}
+                      {isOnline && (turn === myColor ? (isEn ? ' (Your Turn!)' : ' (Senin Sıran!)') : (isEn ? ' (Opponent...)' : ' (Rakip...)'))}
+                    </span>
+                  </>
+                )}
               </div>
               <div className="px-2.5 py-1 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px]">
                 <span className="text-[var(--text-secondary)]">{isEn ? 'Moves' : 'Hamle'}</span>{' '}
