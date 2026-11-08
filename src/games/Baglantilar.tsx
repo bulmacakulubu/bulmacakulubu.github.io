@@ -1,30 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { RotateCcw, Shuffle, CheckCircle2, AlertCircle, Share2, Lightbulb, MessageSquare } from 'lucide-react';
+import { RotateCcw, Shuffle, CheckCircle2, AlertCircle, Share2, Lightbulb, MessageSquare, Sparkles } from 'lucide-react';
 import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
 import { showToast } from '../utils/toastService';
+import { Group, PuzzleSet, generateRandomConnectionsPuzzle } from '../utils/connectionsGenerator';
 
 interface BaglantilarProps {
   onGameEnd: (won: boolean, timeSec?: number) => void;
   soundEnabled: boolean;
   language?: 'tr' | 'en';
   isPremium?: boolean;
-}
-
-interface Group {
-  category: string;
-  words: string[];
-  level: 1 | 2 | 3 | 4;
-  colorClass: string;
-}
-
-interface PuzzleSet {
-  id: number;
-  name: string;
-  groups: Group[];
 }
 
 const PUZZLE_SETS_TR: PuzzleSet[] = [
@@ -340,10 +328,11 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
   isPremium = false,
 }) => {
   const isEn = language === 'en';
-  const puzzleSets = isEn ? PUZZLE_SETS_EN : PUZZLE_SETS_TR;
 
   const [currentSetIndex, setCurrentSetIndex] = useState(0);
-  const puzzle = puzzleSets[currentSetIndex] || puzzleSets[0];
+  const [puzzle, setPuzzle] = useState<PuzzleSet>(() =>
+    generateRandomConnectionsPuzzle(language, 1)
+  );
 
   const distributeAcrossDifferentRows = (groups: Group[]): string[] => {
     const g0 = [...groups[0].words];
@@ -370,12 +359,12 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
   const [isPlaying, setIsPlaying] = useState(true);
   const [seconds, setSeconds] = useState(0);
   const [shake, setShake] = useState(false);
-  const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
+  const [poolStats, setPoolStats] = useState({ seenCount: 1, totalCount: 10000 });
   const [guessHistory, setGuessHistory] = useState<number[][]>([]);
 
   useEffect(() => {
     initRound(currentSetIndex);
-  }, [currentSetIndex, language]);
+  }, [language]);
 
   useEffect(() => {
     let timer: any;
@@ -386,12 +375,8 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
   }, [isPlaying]);
 
   const initRound = (setIdx: number) => {
-    const poolKey = `connections_${language}`;
-    const result = pickUnseenWord(poolKey, puzzleSets, (p) => p.name);
-    const chosenIdx = puzzleSets.findIndex((p) => p.name === result.item.name);
-    const effectiveIdx = chosenIdx !== -1 ? chosenIdx : setIdx;
-
-    const p = puzzleSets[effectiveIdx] || puzzleSets[0];
+    const p = generateRandomConnectionsPuzzle(language, setIdx + 1);
+    setPuzzle(p);
     const distributed = distributeAcrossDifferentRows(p.groups);
     setUnsolvedWords(distributed);
     setSelectedWords([]);
@@ -400,13 +385,7 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
     setIsPlaying(true);
     setSeconds(0);
     setGuessHistory([]);
-
-    const progress = getPoolProgress(poolKey, puzzleSets.length);
-    setPoolStats({ seenCount: progress.seenCount, totalCount: progress.totalCount });
-
-    if (result.isCycleReset) {
-      showToast(isEn ? 'All sets completed! Resetting 🏆' : 'Tüm setler tamamlandı! Baştan başlıyor 🏆');
-    }
+    setPoolStats({ seenCount: setIdx + 1, totalCount: 10000 });
   };
 
   const handleWordClick = (word: string) => {
@@ -568,8 +547,10 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
   };
 
   const handleNextSet = () => {
-    const nextIdx = (currentSetIndex + 1) % puzzleSets.length;
+    const nextIdx = currentSetIndex + 1;
     setCurrentSetIndex(nextIdx);
+    initRound(nextIdx);
+    showToast(isEn ? `🏆 Level #${nextIdx + 1} Started!` : `🏆 Bölüm #${nextIdx + 1} Başladı!`);
   };
 
   return (
@@ -591,11 +572,11 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
           </div>
         </div>
 
-        {/* CENTER: Pool Progress & Timer */}
+        {/* CENTER: Infinite Level Badge & Timer */}
         <div className="flex items-center gap-2 text-xs font-semibold">
-          <div className="px-2.5 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px] text-gray-500">
-            {isEn ? 'POOL' : 'HAVUZ'}{' '}
-            <span className="font-bold text-[var(--accent-color)]">{poolStats.seenCount}/{poolStats.totalCount}</span>
+          <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs text-[11px] font-extrabold text-[var(--accent-color)] flex items-center gap-1">
+            <Sparkles size={12} className="text-amber-400" />
+            <span>{isEn ? 'LEVEL' : 'BÖLÜM'} #{currentSetIndex + 1}</span>
           </div>
           <div className="px-3 py-1.5 bg-[var(--bg-card)] rounded-xl border border-[var(--border-color)] shadow-2xs font-mono">
             ⏱ {formatTime(seconds)}

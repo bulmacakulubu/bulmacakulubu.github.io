@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { playSound } from '../utils/audio';
-import { RotateCcw, Paintbrush, X, CheckCircle2, Sparkles, AlertCircle, Lightbulb, Share2, MessageSquare } from 'lucide-react';
+import { RotateCcw, Paintbrush, X, CheckCircle2, Sparkles, AlertCircle, Lightbulb, Share2, MessageSquare, Dices } from 'lucide-react';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore, openWhatsAppShare } from '../utils/shareService';
 import { showToast } from '../utils/toastService';
+import {
+  PixelPuzzle,
+  NONOGRAM_LIBRARY_5X5,
+  NONOGRAM_LIBRARY_10X10,
+  generateProceduralNonogram,
+} from '../utils/nonogramGenerator';
 
 interface NonogramProps {
   onGameEnd: (won: boolean, timeSec: number) => void;
@@ -15,153 +21,6 @@ interface NonogramProps {
 
 type SizeMode = '5x5' | '10x10';
 
-interface PixelPuzzle {
-  nameTr: string;
-  nameEn: string;
-  grid: number[][]; // 1: filled, 0: empty
-}
-
-const PUZZLES_5X5: PixelPuzzle[] = [
-  {
-    nameTr: 'Kalp',
-    nameEn: 'Heart',
-    grid: [
-      [0, 1, 0, 1, 0],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 0],
-      [0, 0, 1, 0, 0],
-    ],
-  },
-  {
-    nameTr: 'Gülen Yüz',
-    nameEn: 'Smiley',
-    grid: [
-      [0, 1, 0, 1, 0],
-      [0, 1, 0, 1, 0],
-      [0, 0, 0, 0, 0],
-      [1, 0, 0, 0, 1],
-      [0, 1, 1, 1, 0],
-    ],
-  },
-  {
-    nameTr: 'Ağaç',
-    nameEn: 'Tree',
-    grid: [
-      [0, 0, 1, 0, 0],
-      [0, 1, 1, 1, 0],
-      [1, 1, 1, 1, 1],
-      [0, 0, 1, 0, 0],
-      [0, 0, 1, 0, 0],
-    ],
-  },
-  {
-    nameTr: 'Yıldız',
-    nameEn: 'Star',
-    grid: [
-      [0, 0, 1, 0, 0],
-      [1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 0],
-      [0, 1, 0, 1, 0],
-      [1, 0, 0, 0, 1],
-    ],
-  },
-  {
-    nameTr: 'Çapa',
-    nameEn: 'Anchor',
-    grid: [
-      [0, 1, 1, 1, 0],
-      [0, 0, 1, 0, 0],
-      [1, 0, 1, 0, 1],
-      [1, 0, 1, 0, 1],
-      [0, 1, 1, 1, 0],
-    ],
-  },
-];
-
-const PUZZLES_10X10: PixelPuzzle[] = [
-  {
-    nameTr: 'Kedi',
-    nameEn: 'Cat',
-    grid: [
-      [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-      [1, 1, 0, 0, 0, 0, 0, 0, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 1, 1, 0, 1, 1, 0, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-      [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-    ],
-  },
-  {
-    nameTr: 'Yelkenli Gemi',
-    nameEn: 'Sailboat',
-    grid: [
-      [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-      [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
-      [0, 0, 1, 1, 1, 0, 1, 0, 0, 0],
-      [0, 1, 1, 1, 1, 0, 1, 1, 0, 0],
-      [1, 1, 1, 1, 1, 0, 1, 1, 1, 0],
-      [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-    ],
-  },
-  {
-    nameTr: 'Sevimli Ev',
-    nameEn: 'Cozy House',
-    grid: [
-      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
-      [0, 1, 1, 0, 1, 1, 0, 1, 1, 0],
-      [0, 1, 1, 0, 1, 1, 0, 1, 1, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    ],
-  },
-  {
-    nameTr: 'Kılıç',
-    nameEn: 'Sword',
-    grid: [
-      [0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-      [0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-      [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-      [0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
-      [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
-      [0, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-      [0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-      [1, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-      [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
-    ],
-  },
-  {
-    nameTr: 'Şampiyonluk Kupası',
-    nameEn: 'Trophy Cup',
-    grid: [
-      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-      [1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
-      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
-      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
-    ],
-  },
-];
-
 export const Nonogram: React.FC<NonogramProps> = ({
   onGameEnd,
   soundEnabled,
@@ -171,8 +30,10 @@ export const Nonogram: React.FC<NonogramProps> = ({
   const isEn = language === 'en';
   const [sizeMode, setSizeMode] = useState<SizeMode>('5x5');
   const [puzzleIndex, setPuzzleIndex] = useState(0);
-  const puzzlePool = sizeMode === '5x5' ? PUZZLES_5X5 : PUZZLES_10X10;
-  const currentPuzzle = puzzlePool[puzzleIndex] || puzzlePool[0];
+  const [customPuzzle, setCustomPuzzle] = useState<PixelPuzzle | null>(null);
+
+  const puzzlePool = sizeMode === '5x5' ? NONOGRAM_LIBRARY_5X5 : NONOGRAM_LIBRARY_10X10;
+  const currentPuzzle = customPuzzle || puzzlePool[puzzleIndex % puzzlePool.length] || puzzlePool[0];
 
   const size = sizeMode === '5x5' ? 5 : 10;
   // 0: empty, 1: filled, 2: cross (marked empty)
@@ -282,12 +143,32 @@ export const Nonogram: React.FC<NonogramProps> = ({
     colClues.push(clues.length > 0 ? clues : [0]);
   }
 
-  const startNewGame = (mode = sizeMode, nextPuzzle = false) => {
+  const startNewGame = (mode = sizeMode, nextPuzzle = false, forceProcedural = false) => {
     setSizeMode(mode);
-    const pool = mode === '5x5' ? PUZZLES_5X5 : PUZZLES_10X10;
-    const nextIdx = nextPuzzle ? (puzzleIndex + 1) % pool.length : Math.floor(Math.random() * pool.length);
-    setPuzzleIndex(nextIdx);
     const s = mode === '5x5' ? 5 : 10;
+    const pool = mode === '5x5' ? NONOGRAM_LIBRARY_5X5 : NONOGRAM_LIBRARY_10X10;
+
+    if (forceProcedural) {
+      const procedural = generateProceduralNonogram(s);
+      setCustomPuzzle(procedural);
+      showToast(isEn ? '🎲 Infinite Procedural Puzzle Generated!' : '🎲 Sonsuz Prosedürel Bulmaca Üretildi!');
+    } else if (nextPuzzle) {
+      const nextIdx = puzzleIndex + 1;
+      if (nextIdx >= pool.length) {
+        // Pool exhausted: launch endless procedural mode!
+        const procedural = generateProceduralNonogram(s);
+        setCustomPuzzle(procedural);
+        setPuzzleIndex(nextIdx);
+        showToast(isEn ? '🏆 All Gallery Completed! Entering Endless Mode ♾️' : '🏆 Tüm Galeri Tamamlandı! Sonsuz Prosedürel Mod Başladı ♾️');
+      } else {
+        setCustomPuzzle(null);
+        setPuzzleIndex(nextIdx);
+      }
+    } else {
+      setCustomPuzzle(null);
+      setPuzzleIndex(Math.floor(Math.random() * pool.length));
+    }
+
     setGridState(Array.from({ length: s }, () => Array(s).fill(0)));
     setIsPlaying(true);
     setSeconds(0);
@@ -425,8 +306,17 @@ export const Nonogram: React.FC<NonogramProps> = ({
           </button>
 
           <button
+            onClick={() => startNewGame(sizeMode, false, true)}
+            className="px-2.5 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/30 rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"
+            title={isEn ? 'Generate Infinite Procedural Puzzle' : 'Sonsuz Prosedürel Bulmaca Üret'}
+          >
+            <Dices size={13} />
+            <span>{isEn ? 'Endless ♾️' : 'Sonsuz ♾️'}</span>
+          </button>
+
+          <button
             onClick={() => startNewGame(sizeMode, true)}
-            className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
           >
             <RotateCcw size={13} />
             <span>{isEn ? 'New' : 'Yeni'}</span>
@@ -434,11 +324,18 @@ export const Nonogram: React.FC<NonogramProps> = ({
         </div>
       </div>
 
-      {/* Paint Mode Toggle (Fill vs Cross) */}
-      <div className="flex items-center gap-2">
+      {/* Paint Mode Toggle & Theme Badge */}
+      <div className="w-full flex items-center justify-between gap-2 max-w-md px-1">
+        <div className="flex items-center gap-1.5">
+          <span className="px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] text-[11px] font-bold text-[var(--accent-color)] shadow-2xs">
+            {currentPuzzle.category || (isEn ? 'Pixel Art' : 'Piksel Sanatı')} · #{puzzleIndex + 1}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
         <button
           onClick={() => setPaintMode('fill')}
-          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-extrabold border transition shadow-2xs ${
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border transition shadow-2xs ${
             paintMode === 'fill'
               ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] border-[var(--accent-color)]'
               : 'bg-[var(--bg-card)] text-gray-600 dark:text-gray-400 border-[var(--border-color)]'
@@ -449,7 +346,7 @@ export const Nonogram: React.FC<NonogramProps> = ({
         </button>
         <button
           onClick={() => setPaintMode('cross')}
-          className={`flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-extrabold border transition shadow-2xs ${
+          className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border transition shadow-2xs ${
             paintMode === 'cross'
               ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] border-[var(--accent-color)]'
               : 'bg-[var(--bg-card)] text-gray-600 dark:text-gray-400 border-[var(--border-color)]'
@@ -458,6 +355,7 @@ export const Nonogram: React.FC<NonogramProps> = ({
           <X size={13} />
           <span>{isEn ? '✖ Cross' : '✖ Çarpı (Boşluk)'}</span>
         </button>
+        </div>
         <span className="text-[11px] text-gray-400 ml-2 hidden sm:inline">
           {isEn ? '(Right-click places cross on desktop)' : '(Masaüstünde sağ tık doğrudan çarpı koyar)'}
         </span>

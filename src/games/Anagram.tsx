@@ -11,9 +11,9 @@ import {
   Check,
   Star,
   Sparkles,
+  Rocket,
 } from 'lucide-react';
-import { ANAGRAM_PUZZLES_TR, AnagramPuzzle } from '../data/anagramBank';
-import { pickUnseenWord, getPoolProgress } from '../utils/wordMemory';
+import { getAnagramPuzzleForLevel, EXTENDED_ANAGRAM_PUZZLES_TR, AnagramPuzzle } from '../utils/anagramGenerator';
 import { triggerAdBreak } from '../utils/adSenseService';
 import { shareScore } from '../utils/shareService';
 import { showToast } from '../utils/toastService';
@@ -33,7 +33,15 @@ export const Anagram: React.FC<AnagramProps> = ({
 }) => {
   const isTr = language === 'tr';
 
-  const [puzzle, setPuzzle] = useState<AnagramPuzzle>(ANAGRAM_PUZZLES_TR[0]);
+  const [currentLevel, setCurrentLevel] = useState<number>(() => {
+    try {
+      return Number(localStorage.getItem('bk_anagram_lvl')) || 1;
+    } catch {
+      return 1;
+    }
+  });
+
+  const [puzzle, setPuzzle] = useState<AnagramPuzzle>(() => getAnagramPuzzleForLevel(currentLevel));
   const [shuffledLetters, setShuffledLetters] = useState<string[]>([]);
   const [currentWord, setCurrentWord] = useState('');
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
@@ -41,7 +49,6 @@ export const Anagram: React.FC<AnagramProps> = ({
   const [bonusCount, setBonusCount] = useState(0);
   const [score, setScore] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [poolStats, setPoolStats] = useState({ seenCount: 0, totalCount: 0 });
   const [shakeInput, setShakeInput] = useState(false);
   const [revealedLetters, setRevealedLetters] = useState<{ [word: string]: number }>({}); // word -> number of revealed starting chars
 
@@ -54,11 +61,14 @@ export const Anagram: React.FC<AnagramProps> = ({
     return copy;
   };
 
-  const startNewPuzzle = () => {
-    const poolKey = 'anagram_tr';
-    const result = pickUnseenWord(poolKey, ANAGRAM_PUZZLES_TR, (p) => p.id);
-    const p = result.item;
+  const startNewPuzzle = (targetLevel?: number) => {
+    const nextLvl = targetLevel !== undefined ? targetLevel : currentLevel;
+    setCurrentLevel(nextLvl);
+    try {
+      localStorage.setItem('bk_anagram_lvl', String(nextLvl));
+    } catch {}
 
+    const p = getAnagramPuzzleForLevel(nextLvl);
     setPuzzle(p);
     setShuffledLetters(shuffleArray(p.letters));
     setCurrentWord('');
@@ -69,16 +79,11 @@ export const Anagram: React.FC<AnagramProps> = ({
     setIsCompleted(false);
     setRevealedLetters({});
 
-    const progress = getPoolProgress(poolKey, ANAGRAM_PUZZLES_TR.length);
-    setPoolStats({ seenCount: progress.seenCount, totalCount: progress.totalCount });
-
-    if (result.isCycleReset) {
-      showToast(isTr ? 'Tebrikler! Tüm anagram seviyelerini tamamladınız. Baştan başlıyor 🏆' : 'All anagram levels completed! Resetting loop 🏆');
-    }
+    showToast(isTr ? `⭐ Seviye ${nextLvl} Başladı!` : `⭐ Level ${nextLvl} Started!`);
   };
 
   useEffect(() => {
-    startNewPuzzle();
+    startNewPuzzle(currentLevel);
   }, [language]);
 
   const handleShuffle = () => {
@@ -273,11 +278,9 @@ export const Anagram: React.FC<AnagramProps> = ({
           <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
             {isTr ? 'PUAN' : 'SCORE'} <span className="font-extrabold text-[var(--accent-color)]">{score}</span>
           </div>
-          <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
-            {isTr ? 'HAVUZ' : 'POOL'}{' '}
-            <span className="font-bold text-[var(--accent-color)]">
-              {poolStats.seenCount}/{poolStats.totalCount}
-            </span>
+          <div className="px-3 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px] font-extrabold text-[var(--accent-color)] flex items-center gap-1">
+            <Sparkles size={11} className="text-amber-400" />
+            <span>{isTr ? 'SEVİYE' : 'LEVEL'} #{currentLevel}</span>
           </div>
         </div>
 
@@ -293,11 +296,12 @@ export const Anagram: React.FC<AnagramProps> = ({
           </button>
 
           <button
-            onClick={startNewPuzzle}
+            onClick={() => startNewPuzzle(currentLevel)}
             className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl text-[11px] font-bold transition flex items-center gap-1 border border-[var(--border-color)] text-gray-800 dark:text-gray-200 shadow-2xs cursor-pointer"
+            title={isTr ? 'Bu Seviyeyi Yeniden Başlat' : 'Restart Current Level'}
           >
             <RotateCcw size={12} />
-            <span>{isTr ? 'Yeni' : 'New'}</span>
+            <span>{isTr ? 'Yenile' : 'Retry'}</span>
           </button>
         </div>
       </div>
@@ -428,10 +432,11 @@ export const Anagram: React.FC<AnagramProps> = ({
               <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
             </button>
             <button
-              onClick={startNewPuzzle}
-              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
+              onClick={() => startNewPuzzle(currentLevel + 1)}
+              className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer flex items-center gap-1.5"
             >
-              {isTr ? 'Sıradaki Anagram ➔' : 'Next Anagram ➔'}
+              <Rocket size={13} />
+              <span>{isTr ? `Seviye ${currentLevel + 1}'e Geç ➔` : `Advance to Level ${currentLevel + 1} ➔`}</span>
             </button>
           </div>
         </div>
