@@ -19,7 +19,7 @@ import { MultiplayerSession } from '../types';
 import { MultiplayerMessage } from '../utils/multiplayer';
 import { showToast } from '../utils/toastService';
 import { CHESS_LESSONS, ChessLesson } from '../data/chessLessons';
-import { getLegalMoves, Square } from '../utils/chessRules';
+import { getLegalMoves, getGameState, Square, ChessGameState } from '../utils/chessRules';
 import { getBestAIMove, applyMove, AIDifficulty } from '../utils/chessAI';
 
 interface SatrancProps {
@@ -81,6 +81,69 @@ export const Satranc: React.FC<SatrancProps> = ({
     }
   });
   const [isAIThinking, setIsAIThinking] = useState(false);
+  const [gameOverResult, setGameOverResult] = useState<{
+    won: boolean | null;
+    title: string;
+    desc: string;
+  } | null>(null);
+  const [currentCheck, setCurrentCheck] = useState<{ isCheck: boolean; kingSquare: Square | null }>({
+    isCheck: false,
+    kingSquare: null,
+  });
+
+  const evaluateAfterMove = (newBoard: (string | null)[][], currentTurn: 'white' | 'black') => {
+    if (mode === 'academy') return;
+
+    const state = getGameState(newBoard, currentTurn);
+    setCurrentCheck({ isCheck: state.isCheck, kingSquare: state.kingSquare });
+
+    if (state.isCheckmate) {
+      const winnerIsWhite = currentTurn === 'black';
+      if (winnerIsWhite) {
+        if (soundEnabled) playSound('win');
+        confetti({ particleCount: 120, spread: 80 });
+        showToast(isEn ? 'Checkmate! White wins! 🏆' : 'Şah Mat! Beyaz kazandı! 🏆', 'success');
+        onGameEnd(true);
+        setGameOverResult({
+          won: true,
+          title: isEn ? 'Checkmate! White Wins! 🏆' : 'Şah Mat! Beyaz Kazandı! 🏆',
+          desc: isEn
+            ? 'Black King has no escape and is under checkmate.'
+            : 'Siyah Şah tehdit altında ve kaçacak hiçbir yasal kare kalmadı.',
+        });
+      } else {
+        if (soundEnabled) playSound('gameover');
+        showToast(isEn ? 'Checkmate! Black wins!' : 'Şah Mat! Siyah kazandı!', 'error');
+        onGameEnd(false);
+        setGameOverResult({
+          won: false,
+          title: isEn ? 'Checkmate! Black Wins!' : 'Şah Mat! Siyah Kazandı!',
+          desc: isEn
+            ? 'Your King has been checkmated by Black.'
+            : 'Şahınız mat oldu ve oyun siyahın galibiyetiyle sonuçlandı.',
+        });
+      }
+    } else if (state.isStalemate) {
+      if (soundEnabled) playSound('click');
+      showToast(isEn ? 'Stalemate! Game is a draw. 🤝' : 'Pat! Oyun berabere bitti. 🤝');
+      setGameOverResult({
+        won: null,
+        title: isEn ? 'Stalemate! Game Drawn 🤝' : 'Pat! Oyun Berabere Bitti 🤝',
+        desc: isEn
+          ? 'No legal moves left, but King is not in check.'
+          : 'Şah tehdit altında değil ancak oynanabilecek hiçbir yasal hamle kalmadı.',
+      });
+    } else if (state.isCheck) {
+      if (soundEnabled) playSound('error');
+      const checkedSide = currentTurn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah');
+      showToast(
+        isEn
+          ? `⚠️ CHECK! ${checkedSide} King is under attack!`
+          : `⚠️ ŞAH! ${checkedSide} Şahı tehdit altında!`,
+        'error'
+      );
+    }
+  };
 
   const isPanelVisible = showSidePanel && !hideStats;
 
@@ -148,6 +211,7 @@ export const Satranc: React.FC<SatrancProps> = ({
       const moveNotation = `${COLS[from[1]]}${8 - from[0]} ➔ ${COLS[to[1]]}${8 - to[0]}`;
       setMoveHistory((prev) => [isEn ? `Opponent: ${moveNotation}` : `Rakip: ${moveNotation}`, ...prev]);
       if (soundEnabled) playSound('tile');
+      evaluateAfterMove(newBoard, nextTurn);
     } else if (incomingMultiplayerMessage.type === 'CHAT') {
       setOpponentReaction(incomingMultiplayerMessage.payload?.text || '👏');
       setTimeout(() => setOpponentReaction(null), 3500);
@@ -173,6 +237,11 @@ export const Satranc: React.FC<SatrancProps> = ({
 
   // Move handling
   const handleCellClick = (r: number, c: number) => {
+    // If game is over, freeze board interaction
+    if (gameOverResult) {
+      return;
+    }
+
     // In AI mode, prevent human clicks while AI is calculating or during black turn
     if (mode === 'ai' && (turn === 'black' || isAIThinking)) {
       return;
@@ -251,18 +320,6 @@ export const Satranc: React.FC<SatrancProps> = ({
       setSelectedCell(null);
       setValidMoves([]);
 
-      // King capture win condition
-      if (targetPiece === 'k') {
-        if (soundEnabled) playSound('win');
-        confetti({ particleCount: 90, spread: 70 });
-        showToast(isEn ? 'Checkmate! White wins! 🏆' : 'Şah alındı! Beyaz kazandı! 🏆', 'success');
-        onGameEnd(true);
-      } else if (targetPiece === 'K') {
-        if (soundEnabled) playSound('gameover');
-        showToast(isEn ? 'Black wins!' : 'Şah alındı! Siyah kazandı!', 'error');
-        onGameEnd(false);
-      }
-
       // ==========================================
       // ACADEMY GOAL CHECKING
       // ==========================================
@@ -323,9 +380,15 @@ export const Satranc: React.FC<SatrancProps> = ({
         });
       }
 
-      // If AI mode and it's AI turn (black)
+      // Check for Check, Checkmate, or Stalemate after move
+      evaluateAfterMove(newBoard, nextTurn);
+
+      // If AI mode and it's AI turn (black), only trigger if game is not over
       if (mode === 'ai' && nextTurn === 'black') {
-        setTimeout(() => makeAIMove(newBoard), 600);
+        const checkState = getGameState(newBoard, 'black');
+        if (!checkState.isCheckmate && !checkState.isStalemate) {
+          setTimeout(() => makeAIMove(newBoard), 400);
+        }
       }
     } else {
       // Cell selection
@@ -390,15 +453,14 @@ export const Satranc: React.FC<SatrancProps> = ({
       const notation = `AI (${diffLabel}): ${PIECE_SYMBOLS[moving || '']} ${COLS[fc]}${8 - fr} ➔ ${COLS[tc]}${8 - tr}`;
       setMoveHistory((prev) => [notation, ...prev]);
 
-      if (target === 'K') {
-        if (soundEnabled) playSound('gameover');
-        showToast(isEn ? 'AI captured your King! Game over.' : 'Yapay zeka şahınızı aldı! Oyun bitti.', 'error');
-        onGameEnd(false);
-      }
+      // Evaluate Check, Checkmate, or Stalemate against White player after AI move
+      evaluateAfterMove(newBoard, 'white');
     }, thinkDelay);
   };
 
   const resetGame = () => {
+    setGameOverResult(null);
+    setCurrentCheck({ isCheck: false, kingSquare: null });
     if (mode === 'academy') {
       loadLesson(activeLessonIndex);
     } else {
@@ -732,13 +794,22 @@ export const Satranc: React.FC<SatrancProps> = ({
                   const isValidTarget = validMoves.some(([vr, vc]) => vr === r && vc === c);
                   const hasStar = remainingStars.some(([sr, sc]) => sr === r && sc === c);
                   const isWhitePiece = piece ? piece === piece.toUpperCase() : false;
+                  const isKingInCheck =
+                    currentCheck.isCheck &&
+                    currentCheck.kingSquare &&
+                    currentCheck.kingSquare[0] === r &&
+                    currentCheck.kingSquare[1] === c;
 
                   return (
                     <div
                       key={`${r}-${c}`}
                       onClick={() => handleCellClick(r, c)}
                       className={`w-7 h-7 sm:w-9 sm:h-9 md:w-11 md:h-11 lg:w-12 lg:h-12 xl:w-14 xl:h-14 2xl:w-15 2xl:h-15 max-h-[calc((100vh-210px)/8)] max-w-[calc((100vh-210px)/8)] aspect-square flex items-center justify-center cursor-pointer transition-all duration-200 relative select-none ${
-                        isSelected ? 'ring-3 ring-emerald-400 z-10 scale-102 shadow-md' : 'hover:opacity-90'
+                        isKingInCheck
+                          ? 'ring-4 ring-rose-500 bg-rose-500/40 z-20 animate-pulse'
+                          : isSelected
+                          ? 'ring-3 ring-emerald-400 z-10 scale-102 shadow-md'
+                          : 'hover:opacity-90'
                       }`}
                       style={{
                         backgroundColor: isDark
@@ -893,6 +964,31 @@ export const Satranc: React.FC<SatrancProps> = ({
                 <ChevronRight size={14} />
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* GAME OVER / CHECKMATE MODAL CARD                         */}
+      {/* ======================================================== */}
+      {gameOverResult && (
+        <div className="w-full max-w-md p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] text-center animate-fadeIn shadow-2xl mt-1">
+          <div className="flex items-center justify-center gap-2 font-black text-base mb-1">
+            <Award size={20} className={gameOverResult.won ? 'text-amber-400' : 'text-rose-500'} />
+            <span className={gameOverResult.won ? 'text-emerald-500' : gameOverResult.won === false ? 'text-rose-500' : 'text-blue-500'}>
+              {gameOverResult.title}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+            {gameOverResult.desc}
+          </p>
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={resetGame}
+              className="px-5 py-2 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-extrabold text-xs transition shadow-sm cursor-pointer"
+            >
+              {isEn ? 'Play Again ➔' : 'Yeni Maç Başlat ➔'}
+            </button>
           </div>
         </div>
       )}
