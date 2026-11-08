@@ -486,9 +486,11 @@ export const Baglantilar: React.FC<BaglantilarProps> = ({
     const grid = generateEmojiGrid();
     const isWon = solvedGroups.length === 4;
     await shareScore({
-      title: 'Bulmaca Kulübü - Bağlantılar',
+      title: isEn ? 'Puzzle Club - Connections' : 'Bulmaca Kulübü - Bağlantılar',
       gameName: isEn ? 'Connections' : 'Bağlantılar',
-      scoreOrAttempts: isWon ? `${formatTime(seconds)} içinde çözüldü` : 'Tamamlanamadı',
+      scoreOrAttempts: isWon
+        ? (isEn ? `Solved in ${formatTime(seconds)}` : `${formatTime(seconds)} içinde çözüldü`)
+        : (isEn ? 'Unfinished' : 'Tamamlanamadı'),
       emojiGrid: grid,
     });
   };

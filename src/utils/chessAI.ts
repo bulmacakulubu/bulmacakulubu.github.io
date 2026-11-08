@@ -376,3 +376,4 @@ export function getBestAIMove(
   // If multiple moves share the best score, pick randomly among best
   return bestCandidateMoves[Math.floor(Math.random() * bestCandidateMoves.length)] || allMoves[0];
 }
+

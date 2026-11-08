@@ -126,9 +126,9 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
 
   const handleShare = async () => {
     await shareScore({
-      title: 'Bulmaca Kulübü - Kelime Türetme',
+      title: isTr ? 'Bulmaca Kulübü - Kelime Türetme' : 'Puzzle Club - Word Builder',
       gameName: isTr ? 'Kelime Türetme' : 'Word Builder',
-      scoreOrAttempts: `${score} Puan (${foundWords.length} Kelime)`,
+      scoreOrAttempts: `${score} ${isTr ? 'Puan' : 'Points'} (${foundWords.length} ${isTr ? 'Kelime' : 'Words'})`,
     });
   };
 
@@ -179,7 +179,7 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
 
     if (validation.meaning) {
       const shortDef = validation.meaning.length > 40 ? validation.meaning.slice(0, 40) + '...' : validation.meaning;
-      showToast(`+${totalPoints} P! "${wordStr}": ${shortDef}`);
+      showToast(isTr ? `+${totalPoints} P! "${wordStr}": ${shortDef}` : `+${totalPoints} Pts! "${wordStr}": ${shortDef}`);
     } else {
       showToast(isTr ? `+${totalPoints} Puan! Harika!` : `+${totalPoints} Points! Great!`);
     }
@@ -387,7 +387,8 @@ export const KelimeTuretme: React.FC<KelimeTuretmeProps> = ({
             ⏱ {isTr ? 'Süre Doldu! Tur Tamamlandı!' : 'Time is up! Round complete!'}
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
-            Toplam Skorunuz: <span className="font-extrabold text-[var(--accent-color)]">{score} Puan</span> ({foundWords.length} kelime).
+            {isTr ? 'Toplam Skorunuz: ' : 'Your Total Score: '}
+            <span className="font-extrabold text-[var(--accent-color)]">{score} {isTr ? 'Puan' : 'Points'}</span> ({foundWords.length} {isTr ? 'kelime' : 'words'}).
           </p>
           <div className="flex items-center justify-center gap-2">
             <button

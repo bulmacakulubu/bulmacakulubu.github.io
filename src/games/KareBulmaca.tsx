@@ -316,7 +316,7 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
           setSolvedWordKeys((prev) => [...prev, key]);
         }
         if (soundEnabled) playSound('win');
-        showToast(`✨ "${activeClue.answer}" Doğru!`);
+        showToast(isTr ? `✨ "${activeClue.answer}" Doğru!` : `✨ "${activeClue.answer}" Correct!`);
 
         // Check if full puzzle is now complete
         const allDone = puzzle.clues.every((c) => checkClueSolved(c, newGrid));
@@ -743,10 +743,12 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
         <div className="w-full max-w-md p-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-center animate-fadeIn shadow-xl mt-2">
           <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-base mb-1">
             <Trophy size={20} />
-            <span>Tebrikler! Bulmacayı Çözdünüz! 🎉</span>
+            <span>{isTr ? 'Tebrikler! Bulmacayı Çözdünüz! 🎉' : 'Congratulations! Crossword Solved! 🎉'}</span>
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
-            Tüm kareler başarıyla dolduruldu. Sıradaki kare bulmacaya geçebilirsiniz!
+            {isTr
+              ? 'Tüm kareler başarıyla dolduruldu. Sıradaki kare bulmacaya geçebilirsiniz!'
+              : 'All squares filled successfully. You can proceed to the next puzzle!'}
           </p>
           <div className="flex items-center justify-center gap-2">
             <button
@@ -754,13 +756,13 @@ export const KareBulmaca: React.FC<KareBulmacaProps> = ({
               className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Share2 size={13} />
-              <span>Skoru Paylaş</span>
+              <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
             </button>
             <button
               onClick={startNewPuzzle}
               className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
             >
-              Sıradaki Bulmaca ➔
+              {isTr ? 'Sıradaki Bulmaca ➔' : 'Next Crossword ➔'}
             </button>
           </div>
         </div>

@@ -566,9 +566,11 @@ export const Nonogram: React.FC<NonogramProps> = ({
             <button
               onClick={async () => {
                 await shareScore({
-                  title: 'Bulmaca Kulübü - Nonogram',
-                  gameName: 'Nonogram (Piksel)',
-                  scoreOrAttempts: `"${puzzleDisplayName}" resmini ${formatTime(seconds)} içinde çözdüm!`,
+                  title: isEn ? 'Puzzle Club - Nonogram' : 'Bulmaca Kulübü - Nonogram',
+                  gameName: isEn ? 'Nonogram (Pixel Puzzle)' : 'Nonogram (Piksel)',
+                  scoreOrAttempts: isEn
+                    ? `Solved "${puzzleDisplayName}" in ${formatTime(seconds)}!`
+                    : `"${puzzleDisplayName}" resmini ${formatTime(seconds)} içinde çözdüm!`,
                 });
               }}
               className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700 rounded-xl font-bold text-xs transition flex items-center gap-2 shadow-sm cursor-pointer"

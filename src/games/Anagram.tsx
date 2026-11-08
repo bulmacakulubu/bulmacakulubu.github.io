@@ -132,7 +132,7 @@ export const Anagram: React.FC<AnagramProps> = ({
       setCurrentWord('');
       setSelectedIndices([]);
 
-      showToast(`+${wordScore} Puan: ${word}! 🎯`);
+      showToast(isTr ? `+${wordScore} Puan: ${word}! 🎯` : `+${wordScore} Points: ${word}! 🎯`);
 
       // Check if all target words are found
       if (nextFound.length === puzzle.targetWords.length) {
@@ -145,7 +145,7 @@ export const Anagram: React.FC<AnagramProps> = ({
       if (soundEnabled) playSound('tile');
       setBonusCount((prev) => prev + 1);
       setScore((prev) => prev + 35);
-      showToast(`⭐ Bonus Kelime: +35 Puan!`);
+      showToast(isTr ? '⭐ Bonus Kelime: +35 Puan!' : '⭐ Bonus Word: +35 Points!');
       setCurrentWord('');
       setSelectedIndices([]);
     } else {
@@ -236,9 +236,9 @@ export const Anagram: React.FC<AnagramProps> = ({
 
   const handleShare = async () => {
     await shareScore({
-      title: 'Bulmaca Kulübü - Anagram Çözücü',
-      gameName: 'Anagram Çözücü',
-      scoreOrAttempts: `${score} Puan (${foundWords.length}/${puzzle.targetWords.length} Kelime)`,
+      title: isTr ? 'Bulmaca Kulübü - Anagram Çözücü' : 'Puzzle Club - Anagram Solver',
+      gameName: isTr ? 'Anagram Çözücü' : 'Anagram Solver',
+      scoreOrAttempts: `${score} ${isTr ? 'Puan' : 'Points'} (${foundWords.length}/${puzzle.targetWords.length} ${isTr ? 'Kelime' : 'Words'})`,
     });
   };
 
@@ -271,7 +271,7 @@ export const Anagram: React.FC<AnagramProps> = ({
 
         <div className="flex items-center gap-1.5 text-xs font-semibold">
           <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[11px]">
-            PUAN <span className="font-extrabold text-[var(--accent-color)]">{score}</span>
+            {isTr ? 'PUAN' : 'SCORE'} <span className="font-extrabold text-[var(--accent-color)]">{score}</span>
           </div>
           <div className="px-2.5 py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-2xs text-[10px] text-gray-500">
             {isTr ? 'HAVUZ' : 'POOL'}{' '}
@@ -413,10 +413,11 @@ export const Anagram: React.FC<AnagramProps> = ({
         <div className="w-full max-w-md p-4 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-center animate-fadeIn shadow-xl mt-2">
           <div className="flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-base mb-1">
             <Trophy size={20} />
-            <span>Mükemmel! Tüm Kelimeleri Buldunuz! 🎉</span>
+            <span>{isTr ? 'Mükemmel! Tüm Kelimeleri Buldunuz! 🎉' : 'Awesome! All Words Found! 🎉'}</span>
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
-            Toplam Skor: <span className="font-extrabold text-[var(--accent-color)]">{score} Puan</span>. Sıradaki anagrama geçebilirsiniz!
+            {isTr ? 'Toplam Skor: ' : 'Total Score: '}
+            <span className="font-extrabold text-[var(--accent-color)]">{score} {isTr ? 'Puan' : 'Points'}</span>. {isTr ? 'Sıradaki anagrama geçebilirsiniz!' : 'Ready for the next anagram!'}
           </p>
           <div className="flex items-center justify-center gap-2">
             <button
@@ -424,13 +425,13 @@ export const Anagram: React.FC<AnagramProps> = ({
               className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Share2 size={13} />
-              <span>Skoru Paylaş</span>
+              <span>{isTr ? 'Skoru Paylaş' : 'Share Score'}</span>
             </button>
             <button
               onClick={startNewPuzzle}
               className="px-4 py-1.5 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
             >
-              Sıradaki Anagram ➔
+              {isTr ? 'Sıradaki Anagram ➔' : 'Next Anagram ➔'}
             </button>
           </div>
         </div>

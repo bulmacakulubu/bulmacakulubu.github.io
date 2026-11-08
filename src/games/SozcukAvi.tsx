@@ -452,7 +452,7 @@ export const SozcukAvi: React.FC<SozcukAviProps> = ({
             <button
               onClick={async () => {
                 await shareScore({
-                  title: 'Sözcük Avı',
+                  title: isTr ? 'Bulmaca Kulübü - Sözcük Avı' : 'Puzzle Club - Word Search',
                   gameName: isTr ? `Sözcük Avı (${activeCategory})` : `Word Search (${activeCategory})`,
                   scoreOrAttempts: `${formatTime(seconds)} ${isTr ? 'sürede tamamlandı' : 'completion time'}`,
                 });

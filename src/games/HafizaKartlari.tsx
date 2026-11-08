@@ -258,7 +258,7 @@ export const HafizaKartlari: React.FC<HafizaKartlariProps> = ({
             <button
               onClick={async () => {
                 await shareScore({
-                  title: 'Hafıza Kartları',
+                  title: isTr ? 'Bulmaca Kulübü - Hafıza Kartları' : 'Puzzle Club - Memory Cards',
                   gameName: isTr ? 'Hafıza Kartları' : 'Memory Cards',
                   scoreOrAttempts: `${moves} ${isTr ? 'hamle' : 'moves'} (${formatTime(seconds)})`,
                 });

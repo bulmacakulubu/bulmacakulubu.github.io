@@ -314,7 +314,7 @@ export const KelimeZinciri: React.FC<KelimeZinciriProps> = ({
                 <button
                   onClick={async () => {
                     await shareScore({
-                      title: 'Kelime Zinciri',
+                      title: isTr ? 'Bulmaca Kulübü - Kelime Zinciri' : 'Puzzle Club - Word Chain',
                       gameName: isTr ? 'Kelime Zinciri' : 'Word Chain',
                       scoreOrAttempts: `${score} ${isTr ? 'Puan' : 'Points'} (${chain.length} ${isTr ? 'Kelime' : 'Words'})`,
                     });

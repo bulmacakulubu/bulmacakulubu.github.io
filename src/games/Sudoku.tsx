@@ -403,7 +403,7 @@ export const Sudoku: React.FC<SudokuProps> = ({
             🎉 {isEn ? 'Sudoku Solved!' : 'Tebrikler! Sudoku Çözüldü!'}
           </div>
           <p className="text-xs text-gray-600 dark:text-gray-300 mb-3">
-            Süre: <b>{formatTime(seconds)}</b> | Hatalar: <b>{errors}</b>
+            {isEn ? 'Time: ' : 'Süre: '}<b>{formatTime(seconds)}</b> | {isEn ? 'Mistakes: ' : 'Hatalar: '}<b>{errors}</b>
           </p>
           <div className="flex items-center justify-center gap-2">
             <button
@@ -417,7 +417,7 @@ export const Sudoku: React.FC<SudokuProps> = ({
               onClick={() => startNewGame(difficulty)}
               className="px-4 py-2 bg-[var(--accent-color)] text-[var(--accent-contrast)] hover:opacity-90 rounded-xl font-bold text-xs transition shadow-sm cursor-pointer"
             >
-              Yeni Oyun ➔
+              {isEn ? 'New Game ➔' : 'Yeni Oyun ➔'}
             </button>
           </div>
         </div>

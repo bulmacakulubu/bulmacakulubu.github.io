@@ -146,13 +146,13 @@ export const Satranc: React.FC<SatrancProps> = ({
       setBoard(newBoard);
       setTurn(nextTurn);
       const moveNotation = `${COLS[from[1]]}${8 - from[0]} ➔ ${COLS[to[1]]}${8 - to[0]}`;
-      setMoveHistory((prev) => [`Rakip: ${moveNotation}`, ...prev]);
+      setMoveHistory((prev) => [isEn ? `Opponent: ${moveNotation}` : `Rakip: ${moveNotation}`, ...prev]);
       if (soundEnabled) playSound('tile');
     } else if (incomingMultiplayerMessage.type === 'CHAT') {
       setOpponentReaction(incomingMultiplayerMessage.payload?.text || '👏');
       setTimeout(() => setOpponentReaction(null), 3500);
     } else if (incomingMultiplayerMessage.type === 'SURRENDER') {
-      alert(`${multiplayerSession?.opponentName || 'Rakip'} oyundan çekildi. Kazandınız! 🏆`);
+      alert(isEn ? `${multiplayerSession?.opponentName || 'Opponent'} resigned. You won! 🏆` : `${multiplayerSession?.opponentName || 'Rakip'} oyundan çekildi. Kazandınız! 🏆`);
       onGameEnd(true);
     }
   }, [incomingMultiplayerMessage, soundEnabled, multiplayerSession, onGameEnd]);
@@ -306,7 +306,8 @@ export const Satranc: React.FC<SatrancProps> = ({
       const nextTurn = turn === 'white' ? 'black' : 'white';
       setTurn(nextTurn);
       const pieceName = PIECE_SYMBOLS[movingPiece || ''] || '';
-      const moveStr = `${turn === 'white' ? 'Beyaz' : 'Siyah'}: ${pieceName} ${COLS[sc]}${8 - sr} ➔ ${COLS[c]}${8 - r}`;
+      const colorLabel = turn === 'white' ? (isEn ? 'White' : 'Beyaz') : (isEn ? 'Black' : 'Siyah');
+      const moveStr = `${colorLabel}: ${pieceName} ${COLS[sc]}${8 - sr} ➔ ${COLS[c]}${8 - r}`;
       setMoveHistory([moveStr, ...moveHistory]);
 
       // If online, broadcast move to opponent
@@ -420,7 +421,7 @@ export const Satranc: React.FC<SatrancProps> = ({
 
   const handleSurrender = () => {
     if (isOnline && onSendMultiplayerAction) {
-      if (confirm('Maçı terk etmek istediğinize emin misiniz?')) {
+      if (confirm(isEn ? 'Are you sure you want to resign?' : 'Maçı terk etmek istediğinize emin misiniz?')) {
         onSendMultiplayerAction({ type: 'SURRENDER' });
         onGameEnd(false);
       }
@@ -588,7 +589,7 @@ export const Satranc: React.FC<SatrancProps> = ({
               onClick={() => {
                 setShowHint((h) => !h);
                 if (currentLesson) {
-                  showToast(`💡 İpucu: ${currentLesson.hint[isEn ? 'en' : 'tr']}`);
+                  showToast(isEn ? `💡 Hint: ${currentLesson.hint.en}` : `💡 İpucu: ${currentLesson.hint.tr}`);
                 }
               }}
               className="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 rounded-xl text-[11px] font-bold transition flex items-center gap-1 shadow-2xs cursor-pointer"

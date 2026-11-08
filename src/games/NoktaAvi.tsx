@@ -242,7 +242,7 @@ export const NoktaAvi: React.FC<NoktaAviProps> = ({
               <button
                 onClick={async () => {
                   await shareScore({
-                    title: 'Nokta Avı',
+                    title: isTr ? 'Bulmaca Kulübü - Nokta Avı' : 'Puzzle Club - Dot Hunt',
                     gameName: isTr ? 'Nokta Avı' : 'Dot Hunt',
                     scoreOrAttempts: `${score} ${isTr ? 'Puan' : 'Points'}`,
                   });
