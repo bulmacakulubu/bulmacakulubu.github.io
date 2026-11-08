@@ -237,3 +237,4 @@ export function getAnagramPuzzleForLevel(level: number): AnagramPuzzle {
     level,
   };
 }
+

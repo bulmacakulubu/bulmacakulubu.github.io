@@ -442,3 +442,4 @@ export function generateProceduralNonogram(size: 5 | 10, seed?: number): PixelPu
     grid,
   };
 }
+
