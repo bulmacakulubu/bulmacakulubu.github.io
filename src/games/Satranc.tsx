@@ -175,31 +175,44 @@ export const Satranc: React.FC<SatrancProps> = ({
     if (selectedCell) {
       const [sr, sc] = selectedCell;
 
-      // Clicked on the same cell -> deselect
+      // 1. Clicked on the same cell -> deselect
       if (sr === r && sc === c) {
         setSelectedCell(null);
         setValidMoves([]);
         return;
       }
 
-      // Check if clicked cell is among valid moves
-      const isValid = validMoves.some(([vr, vc]) => vr === r && vc === c);
+      // 2. Clicked on another piece of the active player's color -> switch selection
+      const isCurrentPlayerPiece = (p: string | null) => {
+        if (!p) return false;
+        if (mode === 'academy') return p === p.toUpperCase();
+        return (turn === 'white' && p === p.toUpperCase()) || (turn === 'black' && p === p.toLowerCase());
+      };
 
-      // In academy mode, only valid moves are allowed
-      if (mode === 'academy' && !isValid) {
-        // If clicked on another of user's own white pieces, switch selection
-        if (piece && piece === piece.toUpperCase()) {
-          setSelectedCell([r, c]);
-          setValidMoves(getLegalMoves(board, r, c));
-          if (soundEnabled) playSound('click');
-        } else {
-          if (soundEnabled) playSound('error');
+      if (piece && isCurrentPlayerPiece(piece)) {
+        if (isOnline) {
+          const isWhitePiece = piece === piece.toUpperCase();
+          if ((myColor === 'white' && !isWhitePiece) || (myColor === 'black' && isWhitePiece)) {
+            return;
+          }
         }
+        setSelectedCell([r, c]);
+        const moves = getLegalMoves(board, r, c, mode === 'academy' ? remainingStars : undefined);
+        setValidMoves(moves);
+        if (soundEnabled) playSound('click');
         return;
       }
 
-      // Execute move
+      // 3. Strictly validate if clicked cell is among legal moves (applies to ALL modes)
+      const isValid = validMoves.some(([vr, vc]) => vr === r && vc === c);
+      if (!isValid) {
+        if (soundEnabled) playSound('error');
+        return;
+      }
+
+      // 4. Move is valid -> Execute move
       const movingPiece = board[sr][sc];
+      const targetPiece = board[r][c];
       const newBoard = board.map((row) => [...row]);
       newBoard[r][c] = movingPiece;
       newBoard[sr][sc] = null;
@@ -223,6 +236,18 @@ export const Satranc: React.FC<SatrancProps> = ({
       setBoard(newBoard);
       setSelectedCell(null);
       setValidMoves([]);
+
+      // King capture win condition
+      if (targetPiece === 'k') {
+        if (soundEnabled) playSound('win');
+        confetti({ particleCount: 90, spread: 70 });
+        showToast(isEn ? 'Checkmate! White wins! 🏆' : 'Şah alındı! Beyaz kazandı! 🏆', 'success');
+        onGameEnd(true);
+      } else if (targetPiece === 'K') {
+        if (soundEnabled) playSound('gameover');
+        showToast(isEn ? 'Black wins!' : 'Şah alındı! Siyah kazandı!', 'error');
+        onGameEnd(false);
+      }
 
       // ==========================================
       // ACADEMY GOAL CHECKING
@@ -297,7 +322,7 @@ export const Satranc: React.FC<SatrancProps> = ({
           if (isWhitePiece) {
             if (soundEnabled) playSound('click');
             setSelectedCell([r, c]);
-            const moves = getLegalMoves(board, r, c);
+            const moves = getLegalMoves(board, r, c, remainingStars);
             setValidMoves(moves);
           }
           return;
@@ -338,6 +363,7 @@ export const Satranc: React.FC<SatrancProps> = ({
       if (legal.length > 0) {
         const [tr, tc] = legal[Math.floor(Math.random() * legal.length)];
         const moving = newBoard[fr][fc];
+        const target = newBoard[tr][tc];
         newBoard[tr][tc] = moving;
         newBoard[fr][fc] = null;
         if (moving === 'p' && tr === 7) {
@@ -348,6 +374,12 @@ export const Satranc: React.FC<SatrancProps> = ({
         setTurn('white');
         const notation = `AI: ${PIECE_SYMBOLS[moving || '']} ${COLS[fc]}${8 - fr} ➔ ${COLS[tc]}${8 - tr}`;
         setMoveHistory((prev) => [notation, ...prev]);
+
+        if (target === 'K') {
+          if (soundEnabled) playSound('gameover');
+          showToast(isEn ? 'AI captured your King! Game over.' : 'Yapay zeka şahınızı aldı! Oyun bitti.', 'error');
+          onGameEnd(false);
+        }
         return;
       }
     }

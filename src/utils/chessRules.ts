@@ -6,7 +6,8 @@ export type Square = [number, number];
 export function getLegalMoves(
   board: (string | null)[][],
   r: number,
-  c: number
+  c: number,
+  stars?: Square[]
 ): Square[] {
   const piece = board[r]?.[c];
   if (!piece) return [];
@@ -106,7 +107,7 @@ export function getLegalMoves(
         moves.push([f1, c]);
         // 2-step forward from starting row
         const f2 = r + 2 * forward;
-        if (r === startRow && !board[f2][c]) {
+        if (r === startRow && isInside(f2, c) && !board[f2][c]) {
           moves.push([f2, c]);
         }
       }
@@ -117,11 +118,14 @@ export function getLegalMoves(
         const tc = c + dc;
         if (isInside(tr, tc)) {
           const target = board[tr][tc];
+          const hasStar = stars?.some(([sr, sc]) => sr === tr && sc === tc);
           if (target) {
             const targetIsWhite = target === target.toUpperCase();
             if (isWhite !== targetIsWhite) {
               moves.push([tr, tc]);
             }
+          } else if (hasStar) {
+            moves.push([tr, tc]);
           }
         }
       }
