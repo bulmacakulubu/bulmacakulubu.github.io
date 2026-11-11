@@ -15,7 +15,8 @@ import {
   Grid3X3,
   LayoutGrid,
   Shuffle,
-  Download,
+  Smartphone,
+  ShieldCheck,
 } from 'lucide-react';
 import { GameId, Track } from '../types';
 
@@ -37,6 +38,7 @@ interface SidebarProps {
   onPrevTrack: () => void;
   onOpenFloatingMusic?: () => void;
   isPremium?: boolean;
+  onOpenLegal?: () => void;
 }
 
 interface GameGuide {
@@ -409,6 +411,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onPrevTrack,
   onOpenFloatingMusic,
   isPremium,
+  onOpenLegal,
 }) => {
   const [hoveredGame, setHoveredGame] = useState<{ id: GameId; top: number } | null>(null);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -536,17 +539,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className={`pt-2 pb-2 px-1 space-y-1.5 ${!isPremium ? 'mb-20' : 'mb-4'}`}>
           <div className="border-t border-[var(--border-color)] mb-2 opacity-60"></div>
 
-          {/* PWA Install Button */}
+          {/* PWA Home Screen Shortcut Button */}
           <button
             onClick={handleInstallApp}
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--accent-light)] text-[var(--text-primary)] text-xs font-semibold transition shadow-2xs group cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-6 h-6 rounded-lg bg-[var(--bg-secondary)] text-[var(--text-primary)] group-hover:scale-105 flex items-center justify-center transition border border-[var(--border-color)]">
-                <Download size={13} />
+                <Smartphone size={13} />
               </div>
               <span className="font-semibold">
-                {language === 'tr' ? 'Uygulamayı İndir' : 'Install App'}
+                {language === 'tr' ? 'Ana Ekrana Ekle' : 'Add to Home Screen'}
               </span>
             </div>
             <span className="text-[10px] text-[var(--text-secondary)] font-medium px-1.5 py-0.5 rounded bg-[var(--bg-secondary)] border border-[var(--border-color)]">
@@ -570,6 +573,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {language === 'tr' ? 'Tema & Ses' : 'Theme & Sound'}
             </span>
           </button>
+
+          {/* Visible Legal & Policy Links Required by Google AdSense Policy */}
+          {onOpenLegal && (
+            <div className="pt-2 px-1 flex items-center justify-center gap-2 text-[10px] text-[var(--text-secondary)]">
+              <button
+                onClick={onOpenLegal}
+                className="hover:underline hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                {language === 'tr' ? 'Gizlilik & KVKK' : 'Privacy Policy'}
+              </button>
+              <span>•</span>
+              <button
+                onClick={onOpenLegal}
+                className="hover:underline hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                {language === 'tr' ? 'Kullanım Şartları' : 'Terms'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

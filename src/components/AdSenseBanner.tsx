@@ -1,16 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Sparkles, Crown } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { ADSENSE_CONFIG, pushAdSense } from '../utils/adSenseService';
 
 interface AdSenseBannerProps {
   isPremium?: boolean;
-  onOpenRemoveAds: () => void;
+  onOpenRemoveAds?: () => void;
   language?: 'tr' | 'en';
 }
 
 export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
   isPremium,
-  onOpenRemoveAds,
   language = 'tr',
 }) => {
   const [adLoaded, setAdLoaded] = useState(false);
@@ -56,18 +55,9 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
       style={{ minHeight: '68px' }}
     >
       <div className="w-full max-w-3xl flex flex-col items-center justify-center mx-auto">
-        {/* Sleek inline top line: Sponsorlu & VIP */}
-        <div className="w-full flex items-center justify-between text-[10px] leading-tight text-[var(--text-secondary)] mb-1 max-w-xl px-1">
-          <span className="font-medium text-[10px] bg-[var(--bg-secondary)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-color)]">
-            {isTr ? 'Sponsorlu Reklam' : 'Sponsored Ad'}
-          </span>
-          <button
-            onClick={onOpenRemoveAds}
-            className="flex items-center gap-1 font-semibold text-[10px] text-[var(--text-primary)] hover:underline cursor-pointer opacity-80 hover:opacity-100 focus-visible:ring-1 focus-visible:ring-[var(--accent-color)] focus-visible:outline-none"
-          >
-            <Crown size={11} className="text-[var(--text-primary)]" />
-            <span>{isTr ? 'Reklamları Kaldır (VIP)' : 'Remove Ads (VIP)'}</span>
-          </button>
+        {/* Google AdSense Compliant Label: Only "Reklamlar" or "Sponsorlu Bağlantılar" allowed */}
+        <div className="w-full flex items-center justify-center text-[10px] tracking-wider uppercase text-[var(--text-secondary)] opacity-70 mb-1 max-w-xl">
+          <span>{isTr ? '— Reklamlar —' : '— Advertisements —'}</span>
         </div>
 
         {/* Ad Container: Responsive display banner */}

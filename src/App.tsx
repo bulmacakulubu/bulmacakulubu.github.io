@@ -599,6 +599,7 @@ export default function App() {
           onPrevTrack={handlePrevTrack}
           onOpenFloatingMusic={() => setIsFloatingMusicOpen((prev) => !prev)}
           isPremium={currentUser.isPremium}
+          onOpenLegal={() => setIsLegalModalOpen(true)}
         />
       </div>
 
@@ -647,6 +648,10 @@ export default function App() {
                 setIsMobileMenuOpen(false);
               }}
               isPremium={currentUser.isPremium}
+              onOpenLegal={() => {
+                setIsLegalModalOpen(true);
+                setIsMobileMenuOpen(false);
+              }}
             />
           </div>
         </div>
