@@ -172,6 +172,12 @@ export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isRemoveAdsOpen, setIsRemoveAdsOpen] = useState(false);
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState<'about' | 'guides' | 'faq' | 'privacy' | 'cookies' | 'terms'>('about');
+
+  const handleOpenLegal = (tab: 'about' | 'guides' | 'faq' | 'privacy' | 'cookies' | 'terms' = 'about') => {
+    setLegalModalTab(tab);
+    setIsLegalModalOpen(true);
+  };
   const [isLeaderboardOpen, setIsLeaderboardOpen] = useState(false);
 
   // Multiplayer state
@@ -599,7 +605,7 @@ export default function App() {
           onPrevTrack={handlePrevTrack}
           onOpenFloatingMusic={() => setIsFloatingMusicOpen((prev) => !prev)}
           isPremium={currentUser.isPremium}
-          onOpenLegal={() => setIsLegalModalOpen(true)}
+          onOpenLegal={(tab) => handleOpenLegal(tab)}
         />
       </div>
 
@@ -648,8 +654,8 @@ export default function App() {
                 setIsMobileMenuOpen(false);
               }}
               isPremium={currentUser.isPremium}
-              onOpenLegal={() => {
-                setIsLegalModalOpen(true);
+              onOpenLegal={(tab) => {
+                handleOpenLegal(tab);
                 setIsMobileMenuOpen(false);
               }}
             />
@@ -1061,7 +1067,7 @@ export default function App() {
           localStorage.removeItem('bulmaca_kulubu_stats_v1');
           setStats(loadStats());
         }}
-        onOpenLegal={() => setIsLegalModalOpen(true)}
+        onOpenLegal={() => handleOpenLegal('privacy')}
       />
 
       {/* Google Auth & User Profile Modal */}
@@ -1126,11 +1132,12 @@ export default function App() {
         language={settings.language}
       />
 
-      {/* KVKK / GDPR & Legal Privacy Modal */}
+      {/* KVKK / GDPR, Guides, FAQ & Legal Privacy Modal */}
       <LegalModal
         isOpen={isLegalModalOpen}
         onClose={() => setIsLegalModalOpen(false)}
         language={settings.language}
+        initialTab={legalModalTab}
       />
 
       {/* Leaderboard & Rankings Modal */}

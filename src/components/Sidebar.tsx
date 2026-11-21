@@ -38,7 +38,7 @@ interface SidebarProps {
   onPrevTrack: () => void;
   onOpenFloatingMusic?: () => void;
   isPremium?: boolean;
-  onOpenLegal?: () => void;
+  onOpenLegal?: (tab?: 'about' | 'guides' | 'faq' | 'privacy' | 'cookies' | 'terms') => void;
 }
 
 interface GameGuide {
@@ -576,16 +576,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           {/* Visible Legal & Policy Links Required by Google AdSense Policy */}
           {onOpenLegal && (
-            <div className="pt-2 px-1 flex items-center justify-center gap-2 text-[10px] text-[var(--text-secondary)]">
+            <div className="pt-2 px-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] text-[var(--text-secondary)]">
               <button
-                onClick={onOpenLegal}
+                onClick={() => onOpenLegal('about')}
                 className="hover:underline hover:text-[var(--text-primary)] cursor-pointer"
               >
-                {language === 'tr' ? 'Gizlilik & KVKK' : 'Privacy Policy'}
+                {language === 'tr' ? 'Hakkımızda & Künye' : 'About'}
               </button>
               <span>•</span>
               <button
-                onClick={onOpenLegal}
+                onClick={() => onOpenLegal('guides')}
+                className="hover:underline hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                {language === 'tr' ? 'Oyun Rehberi' : 'Guides'}
+              </button>
+              <span>•</span>
+              <button
+                onClick={() => onOpenLegal('faq')}
+                className="hover:underline hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                {language === 'tr' ? 'SSS' : 'FAQ'}
+              </button>
+              <span>•</span>
+              <button
+                onClick={() => onOpenLegal('privacy')}
+                className="hover:underline hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                {language === 'tr' ? 'Gizlilik & KVKK' : 'Privacy'}
+              </button>
+              <span>•</span>
+              <button
+                onClick={() => onOpenLegal('terms')}
                 className="hover:underline hover:text-[var(--text-primary)] cursor-pointer"
               >
                 {language === 'tr' ? 'Kullanım Şartları' : 'Terms'}

@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bulmaca Kulübü — Ücretsiz Çevrimiçi Zeka, Kelime ve Mantık Oyunları</title>
-    <meta name="description" content="Türkiye'nin en zengin çevrimiçi bulmaca platformu: Kelime Bulmaca, Çengel Bulmaca, Sudoku, Satranç, Bağlantılar ve 14 farklı zeka oyunu. Ücretsiz, reklamsız seçenekli, anında oyna." />
-    <meta name="keywords" content="bulmaca, kelime bulmaca, çengel bulmaca, kare bulmaca, sudoku, satranç, anagram, kelime türetme, sözcük avı, nonogram, zeka oyunları, ücretsiz bulmaca, tdk bulmaca" />
+    <meta name="description" content="Türkiye'nin en zengin çevrimiçi bulmaca ve zeka oyunları platformu: Kelime Bulmaca, Kare Çengel, Sudoku, Satranç, Bağlantılar, Nonogram ve 14 farklı zihin egzersizi. Ücretsiz, reklamsız seçenekli, anında tarayıcıda oyna." />
+    <meta name="keywords" content="bulmaca, kelime bulmaca, çengel bulmaca, kare bulmaca, sudoku, satranç, anagram, kelime türetme, sözcük avı, nonogram, zeka oyunları, ücretsiz bulmaca, tdk bulmaca, beyin egzersizi, mantık oyunları" />
     <meta name="author" content="Hakan Ulu" />
     <link rel="canonical" href="https://unscrambled.tr/" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -81,6 +81,83 @@
             "@type": "Person",
             "name": "Hakan Ulu"
           }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://unscrambled.tr/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Bulmaca Kulübü ücretli mi? Herhangi bir abonelik gerekir mi?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Hayır, Bulmaca Kulübü tamamen ücretsizdir. 14 oyunun tamamı, Günün Bulmacası ve 1v1 Çevrimiçi Düello herhangi bir kayıt veya ödeme zorunluluğu olmadan herkese açıktır."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "1v1 Çevrimiçi Düello modu nasıl çalışır?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "1v1 Düello sistemi WebRTC Peer-to-Peer altyapısıyla çalışır. Bir oda kodu oluşturup arkadaşınıza göndererek doğrudan gerçek zamanlı yarışabilirsiniz."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Günün Bulmacası ne zaman yenilenir?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Günün Bulmacası her gece Türkiye saatiyle 00:00'da (GMT+3) tüm dünyadaki oyuncular için eş zamanlı olarak yenilenir."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Kelime Bulmaca (5 Harfli) renkleri ne anlama gelir?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yeşil renk harfin doğru yerde olduğunu, sarı renk harfin kelimede bulunduğunu ancak yerinin farklı olduğunu, gri renk ise harfin gizli kelimede olmadığını belirtir."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Zeka oyunları çözmenin beyne ve hafızaya faydaları nelerdir?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Düzenli bulmaca çözmek çalışma belleğini güçlendirir, analitik problem çözme hızını artırır ve bilişsel esnekliği destekler."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Bulmaca Kulübü uygulaması telefon veya bilgisayara nasıl yüklenir?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Bulmaca Kulübü onaylı bir PWA (Progressive Web App) uygulamasıdır. Menüdeki 'Ana Ekrana Ekle' butonuna basarak mağaza indirmesi yapmadan doğrudan cihazınıza yükleyebilirsiniz."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "HowTo",
+          "@id": "https://unscrambled.tr/#howto-wordle",
+          "name": "5 Harfli Kelime Bulmaca Nasıl Oynanır?",
+          "description": "5 harfli gizli kelimeyi 6 denemede mantık ve harf renk ipuçlarını kullanarak bulma adımları.",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "name": "İlk Tahmini Yapın",
+              "text": "Sesli harf çeşitliliği yüksek 5 harfli geçerli bir Türkçe kelime girin."
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Renk Geri Bildirimlerini İnceleyin",
+              "text": "Yeşil (tam yerinde), Sarı (yeri yanlış) ve Gri (kelimede yok) ipuçlarını analiz edin."
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Kelimeleri Daraltarak 6 Hakta Çözün",
+              "text": "Kalan harf olasılıklarını değerlendirerek 6 tahmin hakkınız dolmadan gizli kelimeye ulaşın."
+            }
+          ]
         }
       ]
     }
@@ -102,7 +179,141 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.8/dist/hls.min.js"></script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- App Mount Root & Initial Crawlable Semantic Content -->
+    <div id="root">
+      <!-- Pre-rendered Fallback Structure for Search Engines & AdSense Verification Crawlers -->
+      <header style="padding: 24px 16px; text-align: center; border-bottom: 1px solid #27272a; background: #09090b; color: #f4f4f5; font-family: Inter, sans-serif;">
+        <h1 style="font-size: 24px; font-weight: 800; margin: 0 0 8px 0; letter-spacing: -0.02em;">Bulmaca Kulübü</h1>
+        <p style="font-size: 14px; color: #a1a1aa; margin: 0; max-width: 640px; margin: 0 auto;">
+          Türkiye'nin Ücretsiz Çevrimiçi Zeka, Kelime ve Mantık Oyunları Platformu. 14 Farklı Zihin Egzersizi, Günün Bulmacası ve 1v1 Çevrimiçi Düello.
+        </p>
+      </header>
+
+      <main style="max-width: 960px; margin: 0 auto; padding: 24px 16px; font-family: Inter, sans-serif; color: #d4d4d8; line-height: 1.6;">
+        <!-- Editorial Article: About & Mission -->
+        <article id="platform-hakkinda" style="margin-bottom: 40px; padding: 20px; background: #18181b; border: 1px solid #27272a; border-radius: 16px;">
+          <h2 style="font-size: 20px; color: #fafafa; margin-top: 0;">Platform Hakkında & Bilişsel Gelişim Misyonu</h2>
+          <p>
+            <strong>Bulmaca Kulübü</strong> (<em>unscrambled.tr</em>), her yaştan zihin jimnastiği meraklısını modern, minimalist ve reklamsız seçenekli bir dijital bulmaca atmosferinde buluşturmak amacıyla tasarlanmış bağımsız bir Türkçe bilişsel eğlence merkezidir.
+          </p>
+          <p>
+            Geleneksel gazete bulmacası kültürünün en sevilen formatlarını çağdaş web teknolojileriyle harmanlayan platformumuz; Kelime Bulmaca (Wordle uyarlaması), Kare ve Çengel Bulmaca, FIDE standartlarında Satranç AI motoru, Sudoku, Bağlantılar (Connections), Nonogram (Japon Piksel Karalama), Anagram, Kelime Türetme ve Sözcük Avı gibi 14 bağımsız oyunu tek bir çatı altında sunmaktadır.
+          </p>
+          <p>
+            Nöroloji ve bilişsel psikoloji alanındaki araştırmalar, her gün 15-20 dakika ayrılan zeka ve kelime egzersizlerinin çalışma belleğini (working memory) aktif tuttuğunu, kelime dağarcığını zenginleştirdiğini ve analitik düşünme hızını geliştirdiğini kanıtlamaktadır. Bulmaca Kulübü olarak hedefimiz, ziyaretçilerimize hem keyifli vakit geçirebilecekleri hem de zihinsel zindeliklerini koruyabilecekleri yüksek kaliteli bir dijital alan sunmaktır.
+          </p>
+        </article>
+
+        <!-- Comprehensive 14 Game Guides -->
+        <article id="oyun-rehberleri" style="margin-bottom: 40px;">
+          <h2 style="font-size: 20px; color: #fafafa; border-bottom: 1px solid #27272a; padding-bottom: 8px;">14 Zeka ve Kelime Oyununun Ayrıntılı Kuralları ve Çözüm Taktikleri</h2>
+
+          <section style="margin-top: 20px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">1. Günün Bulmacası (Daily Puzzle Challenge)</h3>
+            <p>
+              Her gece Türkiye saatiyle 00:00'da tüm dünya genelindeki oyuncular için eş zamanlı yenilenen ortak mücadeledir. Günün belirlenen bulmacasını tek oturumda çözerek resmi sürenizi kaydedebilir, aktif galibiyet serinizi (streak) koruyabilir ve küresel sıralama tablosunda yerinizi alabilirsiniz.
+            </p>
+          </section>
+
+          <section style="margin-top: 16px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">2. Kelime Bulmaca (5 Harfli Gizli Sözcük)</h3>
+            <p>
+              Dünyaca ünlü 5 harfli kelime tahmin oyunu Wordle formatının zengin Türkçe sözlük ve sınırsız oyun motoruyla uyarlanmış sürümüdür. Oyuncular 6 tahmin hakkına sahiptir. Yeşil renk harfin doğru yerde olduğunu, sarı renk harfin kelimede var olup yerinin farklı olduğunu, gri renk ise harfin gizli kelimede yer almadığını gösterir.
+            </p>
+          </section>
+
+          <section style="margin-top: 16px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">3. Kare ve Çengel Bulmaca</h3>
+            <p>
+              Geleneksel gazete bulmacası keyfi. Yatay ve dikey soru tanımlarını okuyarak ızgaradaki boş kutucukları doğru harflerle doldurun. Takıldığınız soru ve kelimelerde platformumuzun sunduğu "Harf Aç" veya "Kelime Aç" ipucu butonlarından destek alabilirsiniz.
+            </p>
+          </section>
+
+          <section style="margin-top: 16px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">4. Satranç (FIDE Kurallı AI Motoru)</h3>
+            <p>
+              Uluslararası Satranç Federasyonu (FIDE) resmi kurallarıyla çalışan yapay zeka satranç motoru. Rok hamleleri, geçerken alma (en passant), piyon terfisi, şah-mat ve pat durumları eksiksiz uygulanır. Başlangıç, orta ve usta yapay zeka zorluk dereceleri mevcuttur.
+            </p>
+          </section>
+
+          <section style="margin-top: 16px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">5. Sudoku (9x9 Mantık Izgarası)</h3>
+            <p>
+              Rakamların mantıksal sıralanışına dayanan, matematiksel işlem gerektirmeyen küresel zeka oyunu. 9x9 boyutundaki ızgarada her satırda, her sütunda ve 3x3 kalın çerçeveli her bölgede 1'den 9'a kadar olan tüm rakamlar tekrarsız olarak yer almalıdır.
+            </p>
+          </section>
+
+          <section style="margin-top: 16px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">6. Bağlantılar (Word Connections)</h3>
+            <p>
+              16 kelimeden oluşan rastgele bir ızgarada ortak bir kavram, deyim veya temayı paylaşan dörderli dört gizli grubu çözme oyunudur. Sarı (Kolay), Yeşil (Orta), Mavi (İleri) ve Mor (Ters köşe / kelime oyunu) olmak üzere 4 zorluk seviyesi içerir.
+            </p>
+          </section>
+
+          <section style="margin-top: 16px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">7. Nonogram (Japon Piksel Bulmaca)</h3>
+            <p>
+              Satır ve sütun başındaki sayı dizilerine bakarak doğru kareleri karalayıp gizli piksel sanatını ortaya çıkarma oyunudur. Sayılar o satır veya sütunda peş peşe gelen bitişik dolu kare gruplarını temsil eder.
+            </p>
+          </section>
+
+          <section style="margin-top: 16px; padding: 16px; background: #18181b; border: 1px solid #27272a; border-radius: 12px;">
+            <h3 style="font-size: 16px; color: #60a5fa; margin-top: 0;">8 - 14. Diğer Zeka & Kelime Oyunları</h3>
+            <p>
+              Platformumuzda ayrıca hızlı kelime üretimi için <strong>Anagram Çözücü</strong>, kök harflerden en uzun kelimeleri kurduğunuz <strong>Kelime Türetme</strong>, çok yönlü arama yapay <strong>Sözcük Avı</strong>, klasik tahmin oyunu <strong>Adam Asmaca</strong>, ardışık son harfle ilerleyen <strong>Kelime Zinciri</strong>, görsel eşleme yeteneğini ölçen <strong>Hafıza Kartları</strong> ve stratejik alan kaplama oyunu <strong>Nokta Avı (Dots & Boxes)</strong> yer almaktadır.
+            </p>
+          </section>
+        </article>
+
+        <!-- FAQ Section -->
+        <article id="sss" style="margin-bottom: 40px; padding: 20px; background: #18181b; border: 1px solid #27272a; border-radius: 16px;">
+          <h2 style="font-size: 20px; color: #fafafa; margin-top: 0;">Sıkça Sorulan Sorular (SSS)</h2>
+          <div style="margin-top: 16px;">
+            <h4 style="font-size: 14px; color: #e4e4e7; margin-bottom: 4px;">Bulmaca Kulübü ücretsiz mi?</h4>
+            <p style="margin-top: 0; font-size: 13px; color: #a1a1aa;">
+              Evet. Bulmaca Kulübü'nde yer alan tüm 14 oyun, sınırsız günlük oyun motorları ve 1v1 Çevrimiçi Düello modu tamamen ücretsiz olarak sunulmaktadır.
+            </p>
+
+            <h4 style="font-size: 14px; color: #e4e4e7; margin-bottom: 4px;">1v1 Çok Oyunculu Düello nasıl çalışır?</h4>
+            <p style="margin-top: 0; font-size: 13px; color: #a1a1aa;">
+              WebRTC Peer-to-Peer teknolojisiyle çalışır. Oluşturulan oda kodunu arkadaşınızla paylaşarak merkezi bir sunucuya ihtiyaç duymadan doğrudan şifreli ve gerçek zamanlı yarışabilirsiniz.
+            </p>
+
+            <h4 style="font-size: 14px; color: #e4e4e7; margin-bottom: 4px;">Skorlarım ve serilerim nerede saklanır?</h4>
+            <p style="margin-top: 0; font-size: 13px; color: #a1a1aa;">
+              Tüm oyun skorlarınız ve istatistikleriniz cihazınızın yerel tarayıcı hafızasında (LocalStorage) güvenle saklanır.
+            </p>
+          </div>
+        </article>
+
+        <!-- Institutional Footer & Imprint -->
+        <footer style="padding-top: 24px; border-top: 1px solid #27272a; text-align: center; font-size: 12px; color: #71717a;">
+          <p style="margin: 0 0 8px 0;">
+            <strong>Bulmaca Kulübü</strong> (unscrambled.tr) • Bağımsız Zeka ve Kelime Oyunları Platformu
+          </p>
+          <p style="margin: 0 0 8px 0;">
+            Geliştirici & Editör: <strong>Hakan Ulu</strong> • İletişim: <a href="mailto:hknlaauu1@gmail.com" style="color: #60a5fa; text-decoration: none;">hknlaauu1@gmail.com</a>
+          </p>
+          <p style="margin: 0;">
+            Tüm hakları saklıdır © 2026 • KVKK ve GDPR uyumlu, kullanıcı dostu zeka egzersizi deneyimi.
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <!-- No-Script Fallback for Crawlers with Disabled JavaScript -->
+    <noscript>
+      <div style="max-width: 800px; margin: 40px auto; padding: 24px; background: #18181b; color: #f4f4f5; font-family: sans-serif; border-radius: 16px; border: 1px solid #3f3f46;">
+        <h2>Bulmaca Kulübü — Ücretsiz Zeka ve Kelime Oyunları</h2>
+        <p>
+          Tarayıcınızda JavaScript devre dışı bırakılmış. Oyunları interaktif olarak oynamak için lütfen tarayıcınızın ayarlarından JavaScript'i etkinleştirin.
+        </p>
+        <p>
+          İletişim: <a href="mailto:hknlaauu1@gmail.com" style="color: #60a5fa;">hknlaauu1@gmail.com</a> • Geliştirici: Hakan Ulu
+        </p>
+      </div>
+    </noscript>
+
     <script>
       if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
         window.addEventListener('load', () => {
@@ -113,4 +324,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
