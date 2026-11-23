@@ -51,37 +51,38 @@ export const AdSenseBanner: React.FC<AdSenseBannerProps> = ({
   return (
     <aside 
       aria-label={isTr ? "Sponsorlu Reklam Alanı" : "Sponsored Advertisement"}
-      className="w-full shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-card)]/95 backdrop-blur-md shadow-md z-30 transition-all duration-300 py-1.5 px-3 flex flex-col items-center justify-center text-center select-none"
-      style={{ minHeight: '68px' }}
+      className="w-full shrink-0 border-t border-[var(--border-color)] bg-[var(--bg-card)]/95 backdrop-blur-md shadow-md z-30 transition-all duration-300 py-1 px-3 flex flex-col items-center justify-center text-center select-none"
+      style={{ minHeight: '52px', maxHeight: '105px' }}
     >
       <div className="w-full max-w-3xl flex flex-col items-center justify-center mx-auto">
         {/* Google AdSense Compliant Label: Only "Reklamlar" or "Sponsorlu Bağlantılar" allowed */}
-        <div className="w-full flex items-center justify-center text-[10px] tracking-wider uppercase text-[var(--text-secondary)] opacity-70 mb-1 max-w-xl">
+        <div className="w-full flex items-center justify-center text-[9px] tracking-wider uppercase text-[var(--text-secondary)] opacity-70 mb-0.5 max-w-xl">
           <span>{isTr ? '— Reklamlar —' : '— Advertisements —'}</span>
         </div>
 
-        {/* Ad Container: Responsive display banner */}
-        <div className="w-full max-w-xl min-h-[50px] flex items-center justify-center relative mx-auto">
+        {/* Ad Container: Compact horizontal display banner */}
+        <div className="w-full max-w-xl min-h-[45px] max-h-[90px] flex items-center justify-center relative mx-auto overflow-hidden">
           <ins
             ref={insRef}
             className="adsbygoogle"
             style={{
               display: 'block',
               width: '100%',
-              minHeight: '50px',
+              minHeight: '45px',
+              maxHeight: '90px',
               textAlign: 'center',
             }}
             data-ad-client={ADSENSE_CONFIG.client}
             data-ad-slot={ADSENSE_CONFIG.bottomBannerSlot}
-            data-ad-format="auto"
+            data-ad-format="horizontal"
             data-full-width-responsive="true"
           />
 
           {/* Clean Placeholder while Google AdSense is loading */}
           {!adLoaded && (
-            <div className="absolute inset-0 w-full h-full rounded-lg bg-[var(--bg-secondary)]/30 border border-dashed border-[var(--border-color)]/50 flex items-center justify-center px-3 text-[11px] text-[var(--text-secondary)] pointer-events-none">
+            <div className="absolute inset-0 w-full h-full rounded-lg bg-[var(--bg-secondary)]/30 border border-dashed border-[var(--border-color)]/50 flex items-center justify-center px-3 text-[10px] text-[var(--text-secondary)] pointer-events-none">
               <div className="flex items-center justify-center gap-2 font-medium truncate opacity-60">
-                <Sparkles size={12} className="shrink-0" />
+                <Sparkles size={11} className="shrink-0" />
                 <span className="truncate">
                   {isTr ? 'Sponsorlu Reklam Alanı' : 'Sponsored Ad Space'}
                 </span>
