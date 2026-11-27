@@ -1,4 +1,4 @@
-import { AllStats, GameId, GameStats, Settings } from '../types';
+import { AllStats, GameId, GameStats, Settings, PaletteId } from '../types';
 
 const STATS_KEY = 'bulmaca_kulubu_stats_v1';
 const SETTINGS_KEY = 'bulmaca_kulubu_settings_v1';
@@ -53,8 +53,8 @@ export function getDailyPuzzleInfo(): { gameId: GameId; dateKey: string; nextRes
 }
 
 export const defaultSettings: Settings = {
-  theme: 'dark',
-  palette: 'monochrome',
+  theme: 'light',
+  palette: 'warm-paper',
   language: 'tr',
   soundEnabled: true,
   volume: 30,
@@ -117,9 +117,13 @@ export function loadSettings(): Settings {
     if (!data) return defaultSettings;
     const parsed = JSON.parse(data);
 
-    // Bauhaus Mono Zinc permanent unified dark mode
-    const palette = 'monochrome';
-    const theme = 'dark';
+    // Dinlendirici renk paletleri: Varsayılan Sıcak Kağıt (Warm Paper)
+    const validPalettes: PaletteId[] = ['warm-paper', 'sage', 'latte', 'nordic-slate'];
+    let palette: PaletteId = parsed.palette;
+    if (!palette || !validPalettes.includes(palette)) {
+      palette = 'warm-paper';
+    }
+    const theme: 'light' | 'dark' = palette === 'nordic-slate' ? 'dark' : 'light';
 
     const merged = { ...defaultSettings, ...parsed, palette, theme };
     saveSettings(merged);

@@ -26,72 +26,126 @@
 
 @layer base {
   /* ======================================================== */
-  /* BAUHAUS MONO ZINC (SABİT TEK RENK KOYU GÖRÜNÜM MODU)      */
-  /* Göz yormayan mat kömür & çinko monokrom mimari          */
+  /* TEMA 1: "Sıcak Kağıt & Parşömen" (Warm Paper) - VARSAYILAN */
+  /* Dinlendirici fildişi, mat krem ve sıcak mürekkep kömürü   */
   /* ======================================================== */
   :root,
-  :root[data-theme="dark"],
-  :root[data-theme="light"],
-  :root[data-palette],
-  body {
-    --bg-main: #09090b;
-    --bg-primary: #09090b;
-    --bg-secondary: #111114;
-    --bg-card: #16161a;
-    --panel-bg: #16161a;
-    --border-color: #27272a;
+  :root[data-palette="warm-paper"],
+  .theme-warm-paper,
+  body.theme-warm-paper {
+    --bg-main: #f5f2eb;
+    --bg-primary: #f5f2eb;
+    --bg-secondary: #ece7de;
+    --bg-card: #ffffff;
+    --panel-bg: #ffffff;
+    --border-color: #ded6c8;
 
-    --text-primary: #f4f4f5;
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
-    --text-color: #f4f4f5;
+    --text-primary: #24211e;
+    --text-secondary: #635b52;
+    --text-muted: #8f857a;
+    --text-color: #24211e;
 
-    --accent-color: #ffffff;
-    --accent-contrast: #09090b;
-    --accent-light: #202024;
-    --accent-gold: #ffffff;
+    --accent-color: #8b5e3c;
+    --accent-contrast: #ffffff;
+    --accent-light: #ece3d6;
+    --accent-gold: #b07a4b;
 
-    --board-dark: #27272a;
-    --board-light: #8e95a5;
+    --board-dark: #b89370;
+    --board-light: #f4ede3;
 
-    --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.7);
+    --card-shadow: 0 4px 20px -2px rgba(60, 45, 30, 0.07);
   }
-}
 
-/* Tüm body varyantlarını tek bir standart monokrom temaya kilitler */
-body,
-body[class*="theme-"] {
-  --bg-main: #09090b !important;
-  --panel-bg: #16161a !important;
-  --text-color: #f4f4f5 !important;
-  --accent-gold: #ffffff !important;
-  --board-dark: #27272a !important;
-  --board-light: #8e95a5 !important;
-  --border-color: #27272a !important;
-  --bg-primary: #09090b !important;
-  --bg-secondary: #111114 !important;
-  --bg-card: #16161a !important;
-  --text-primary: #f4f4f5 !important;
-  --accent-color: #ffffff !important;
-  --accent-contrast: #09090b !important;
-  --accent-light: #202024 !important;
-  color: var(--text-primary);
-}
+  /* ======================================================== */
+  /* TEMA 2: "Huzurlu Adaçayı & Nane" (Sage & Zen Earth)       */
+  /* Doğa yeşili, buğulu adaçayı ve ferahlatıcı zen tonları    */
+  /* ======================================================== */
+  :root[data-palette="sage"],
+  .theme-sage,
+  body.theme-sage {
+    --bg-main: #eff4ef;
+    --bg-primary: #eff4ef;
+    --bg-secondary: #e2ece3;
+    --bg-card: #ffffff;
+    --panel-bg: #ffffff;
+    --border-color: #cbd8ce;
 
-body [class*="text-gray-"],
-body [class*="text-slate-"],
-body [class*="text-zinc-"] {
-  color: var(--text-secondary);
-}
+    --text-primary: #1b2e24;
+    --text-secondary: #4b6656;
+    --text-muted: #799182;
+    --text-color: #1b2e24;
 
-body .text-white {
-  color: var(--text-primary) !important;
-}
+    --accent-color: #386b4f;
+    --accent-contrast: #ffffff;
+    --accent-light: #e0ece3;
+    --accent-gold: #4e8264;
 
-body [class*="border-gray-"],
-body [class*="border-slate-"],
-body [class*="border-zinc-"] {
-  border-color: var(--border-color);
+    --board-dark: #6e947d;
+    --board-light: #edf4ef;
+
+    --card-shadow: 0 4px 20px -2px rgba(30, 55, 40, 0.07);
+  }
+
+  /* ======================================================== */
+  /* TEMA 3: "Sütlü Kahve & Ahşap" (Warm Latte / Nordic Wood)  */
+  /* Sıcak latte, karamel, kavrulmuş kakao ve ahşap dokusu     */
+  /* ======================================================== */
+  :root[data-palette="latte"],
+  .theme-latte,
+  body.theme-latte {
+    --bg-main: #f6f0e7;
+    --bg-primary: #f6f0e7;
+    --bg-secondary: #ecdfd0;
+    --bg-card: #ffffff;
+    --panel-bg: #ffffff;
+    --border-color: #d8c9b6;
+
+    --text-primary: #2b2017;
+    --text-secondary: #665544;
+    --text-muted: #94816f;
+    --text-color: #2b2017;
+
+    --accent-color: #af6b31;
+    --accent-contrast: #ffffff;
+    --accent-light: #ece0cf;
+    --accent-gold: #be7c42;
+
+    --board-dark: #aa7a4f;
+    --board-light: #f6ede0;
+
+    --card-shadow: 0 4px 20px -2px rgba(55, 35, 18, 0.07);
+  }
+
+  /* ======================================================== */
+  /* TEMA 4: "İskandinav Arduvazı" (Nordic Slate / Gece Modu)  */
+  /* Göz kamaştırmayan yumuşak dağ taşı, grafit ve kehribar    */
+  /* ======================================================== */
+  :root[data-palette="nordic-slate"],
+  :root[data-theme="dark"],
+  .theme-nordic-slate,
+  body.theme-nordic-slate {
+    --bg-main: #181b20;
+    --bg-primary: #181b20;
+    --bg-secondary: #21252d;
+    --bg-card: #272d37;
+    --panel-bg: #272d37;
+    --border-color: #383f4d;
+
+    --text-primary: #edf1f7;
+    --text-secondary: #9da8b8;
+    --text-muted: #6b778a;
+    --text-color: #edf1f7;
+
+    --accent-color: #ebcb8b;
+    --accent-contrast: #181b20;
+    --accent-light: #323946;
+    --accent-gold: #ebcb8b;
+
+    --board-dark: #3f4756;
+    --board-light: #8e99b0;
+
+    --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.45);
+  }
 }
 
 body {
@@ -102,8 +156,13 @@ body {
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
   user-select: none;
+}
+
+/* Renkli rozetlerde ve oyun taşlarında beyaz yazı netliğini korur */
+.text-white {
+  color: #ffffff !important;
 }
 
 /* 2 punto (~2px) artırılmış mikro etiketler */

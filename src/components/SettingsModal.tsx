@@ -175,32 +175,114 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Content */}
         <div className="p-6 space-y-6 max-h-[75vh] overflow-y-auto">
-          {/* Bauhaus Mono Zinc: Sabit Koyu Görünüm Kartı */}
-          <div className="p-4 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-sm space-y-2">
+          {/* Dinlendirici Renk Temaları Seçici */}
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] flex items-center justify-center text-[var(--text-primary)] shadow-xs shrink-0">
-                  <Moon size={16} />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-2">
-                    <span>Bauhaus Mono Zinc</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--text-primary)] font-semibold border border-[var(--border-color)]">
-                      {settings.language === 'tr' ? 'Sabit Koyu Mod' : 'Fixed Dark Mode'}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-[var(--text-secondary)] mt-0.5">
-                    {settings.language === 'tr'
-                      ? 'Göz yormayan mat kömür & gümüş çinko tonları ile optimize edilmiştir.'
-                      : 'Ergonomic matte zinc & soft silver palette optimized for eye comfort.'}
-                  </div>
-                </div>
+              <div className="flex items-center gap-2">
+                <Palette size={16} className="text-[var(--accent-color)]" />
+                <span className="font-bold text-sm text-[var(--text-primary)]">
+                  {settings.language === 'tr' ? 'Dinlendirici Renk Teması' : 'Relaxing Color Theme'}
+                </span>
               </div>
-              <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-color)] shrink-0">
-                <span className="w-3.5 h-3.5 rounded-full bg-[#09090b] border border-white/20 shadow-xs" title="Zemin #09090b" />
-                <span className="w-3.5 h-3.5 rounded-full bg-[#18181c] border border-white/20 shadow-xs" title="Panel #18181c" />
-                <span className="w-3.5 h-3.5 rounded-full bg-[#f4f4f5] border border-white/20 shadow-xs" title="Yazı #f4f4f5" />
-              </div>
+              <span className="text-[10px] text-[var(--text-secondary)] font-medium">
+                {settings.language === 'tr' ? 'Göz Ergonomisi' : 'Eye Comfort'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {[
+                {
+                  id: 'warm-paper' as PaletteId,
+                  nameTr: 'Sıcak Kağıt & Parşömen',
+                  nameEn: 'Warm Paper & Sepia',
+                  badgeTr: 'Varsayılan',
+                  badgeEn: 'Default',
+                  descTr: 'Fildişi zemin, kitap kağıdı ve yumuşak mürekkep kömürü.',
+                  descEn: 'Relaxing ivory parchment and soft charcoal ink.',
+                  colors: ['#F5F2EB', '#FFFFFF', '#8B5E3C', '#24211E'],
+                },
+                {
+                  id: 'sage' as PaletteId,
+                  nameTr: 'Huzurlu Adaçayı & Nane',
+                  nameEn: 'Sage & Zen Earth',
+                  badgeTr: 'Doğal',
+                  badgeEn: 'Zen',
+                  descTr: 'Ferah adaçayı yeşili, okaliptüs ve buğulu orman tonları.',
+                  descEn: 'Soothing misty sage green and calming botanical hues.',
+                  colors: ['#EFF4EF', '#FFFFFF', '#386B4F', '#1B2E24'],
+                },
+                {
+                  id: 'latte' as PaletteId,
+                  nameTr: 'Sütlü Kahve & Ahşap',
+                  nameEn: 'Warm Latte & Wood',
+                  badgeTr: 'Nostaljik',
+                  badgeEn: 'Cozy',
+                  descTr: 'Sıcak badem, karamel ve ahşap dokulu nostaljik kafe havası.',
+                  descEn: 'Warm almond milk, roasted caramel, and wooden board comfort.',
+                  colors: ['#F6F0E7', '#FFFFFF', '#AF6B31', '#2B2017'],
+                },
+                {
+                  id: 'nordic-slate' as PaletteId,
+                  nameTr: 'İskandinav Arduvazı',
+                  nameEn: 'Nordic Slate',
+                  badgeTr: 'Koyu Mod',
+                  badgeEn: 'Dark',
+                  descTr: 'Zifiri siyah yerine göz kamaştırmayan yumuşak dağ taşı ve kehribar.',
+                  descEn: 'Eye-friendly soft slate gray and warm golden amber.',
+                  colors: ['#181B20', '#272D37', '#EBCB8B', '#EDF1F7'],
+                },
+              ].map((themeItem) => {
+                const isSelected = (settings.palette || 'warm-paper') === themeItem.id;
+
+                return (
+                  <button
+                    key={themeItem.id}
+                    onClick={() =>
+                      onUpdateSettings({
+                        ...settings,
+                        palette: themeItem.id,
+                        theme: themeItem.id === 'nordic-slate' ? 'dark' : 'light',
+                      })
+                    }
+                    className={`p-3 rounded-2xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between gap-2.5 relative group ${
+                      isSelected
+                        ? 'border-[var(--accent-color)] bg-[var(--accent-light)] shadow-sm ring-1 ring-[var(--accent-color)]/50'
+                        : 'border-[var(--border-color)] bg-[var(--bg-secondary)] hover:border-[var(--accent-color)]/50 hover:bg-[var(--bg-card)]'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-1 mb-1">
+                        <span className="font-bold text-xs text-[var(--text-primary)]">
+                          {settings.language === 'tr' ? themeItem.nameTr : themeItem.nameEn}
+                        </span>
+                        {isSelected ? (
+                          <div className="w-4 h-4 rounded-full bg-[var(--accent-color)] text-[var(--accent-contrast)] flex items-center justify-center shrink-0">
+                            <Check size={11} strokeWidth={3} />
+                          </div>
+                        ) : (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-[var(--bg-card)] border border-[var(--border-color)] text-[var(--text-secondary)] font-medium">
+                            {settings.language === 'tr' ? themeItem.badgeTr : themeItem.badgeEn}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] leading-snug text-[var(--text-secondary)]">
+                        {settings.language === 'tr' ? themeItem.descTr : themeItem.descEn}
+                      </p>
+                    </div>
+
+                    {/* Canlı Renk Noktaları */}
+                    <div className="flex items-center gap-1.5 pt-1 border-t border-[var(--border-color)]/40">
+                      {themeItem.colors.map((c, i) => (
+                        <span
+                          key={i}
+                          className="w-3.5 h-3.5 rounded-full border border-black/15 dark:border-white/20 shadow-2xs"
+                          style={{ backgroundColor: c }}
+                        />
+                      ))}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

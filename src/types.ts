@@ -26,6 +26,10 @@ export interface GameStats {
 export type AllStats = Record<GameId, GameStats>;
 
 export type PaletteId =
+  | 'warm-paper'
+  | 'sage'
+  | 'latte'
+  | 'nordic-slate'
   | 'rose-bronze'
   | 'champagne-carbon'
   | 'royal-amber'
@@ -37,7 +41,6 @@ export type PaletteId =
   | 'cyber'
   | 'aurora'
   | 'monochrome'
-  | 'sage'
   | 'classic'
   | 'pastel'
   | 'oled';

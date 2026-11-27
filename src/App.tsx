@@ -306,15 +306,25 @@ export default function App() {
 
   useEffect(() => {
     saveSettings(settings);
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.documentElement.setAttribute('data-palette', 'monochrome');
+    const activePalette = settings.palette || 'warm-paper';
+    const isDark = activePalette === 'nordic-slate';
 
-    // Bauhaus Mono Zinc: Unified single dark mode enforcement
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-palette', activePalette);
+
+    // Apply active theme class
     document.body.className = document.body.className
       .replace(/theme-[\w-]+/g, '')
       .trim();
-    document.body.classList.add('theme-monochrome');
-    document.documentElement.classList.add('dark');
+    document.body.classList.add(`theme-${activePalette}`);
+
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    }
 
     const effectiveVolume = settings.soundEnabled ? settings.volume / 100 : 0;
     setAmbientVolume(effectiveVolume);

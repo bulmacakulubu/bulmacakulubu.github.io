@@ -313,9 +313,9 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
   }, [currentGuess, guesses, gameStatus, wordLength, solution, language]);
 
   const getLetterStatus = (letter: string, i: number) => {
-    if (solution[i] === letter) return 'bg-emerald-700 text-white border-2 border-emerald-400 shadow-md shadow-emerald-950/40';
-    if (solution.includes(letter)) return 'bg-amber-600 text-white border-2 border-amber-300 shadow-md shadow-amber-950/40';
-    return 'bg-zinc-800/90 text-zinc-400 border-2 border-zinc-700/50';
+    if (solution[i] === letter) return 'bg-emerald-600 text-white border-2 border-emerald-500 shadow-sm';
+    if (solution.includes(letter)) return 'bg-amber-500 text-white border-2 border-amber-400 shadow-sm';
+    return 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border-2 border-[var(--border-color)] opacity-75';
   };
 
   const getKeyStatus = (char: string): string => {
@@ -324,12 +324,12 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
       for (let i = 0; i < g.length; i++) {
         if (g[i] === char) {
           if (solution[i] === char) {
-            return 'bg-emerald-700 text-white border-emerald-400 shadow-xs';
+            return 'bg-emerald-600 text-white border-emerald-500 shadow-xs';
           }
           if (solution.includes(char)) {
-            status = 'bg-amber-600 text-white border-amber-400 shadow-xs';
+            status = 'bg-amber-500 text-white border-amber-400 shadow-xs';
           } else if (!status) {
-            status = 'bg-zinc-800/70 text-zinc-500 border-zinc-700/50 opacity-60';
+            status = 'bg-[var(--border-color)] text-[var(--text-muted)] border-transparent opacity-45';
           }
         }
       }
@@ -453,14 +453,14 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                 {Array.from({ length: wordLength }).map((_, colIndex) => {
                   const letter = guess[colIndex] || '';
                   const isHintLetter = isCurrent && !letter && revealedIndices.includes(colIndex);
-                  let style = 'bg-zinc-900/90 border border-zinc-700/60 text-white shadow-inner';
+                  let style = 'bg-[var(--bg-card)] border-2 border-[var(--border-color)] text-[var(--text-primary)] shadow-2xs';
 
                   if (isCompleted) {
                     style = getLetterStatus(letter, colIndex);
                   } else if (letter) {
-                    style = 'bg-zinc-800/95 border border-amber-400 text-amber-200 scale-105 shadow-md shadow-amber-500/20';
+                    style = 'bg-[var(--bg-card)] border-2 border-[var(--accent-color)] text-[var(--accent-color)] font-black scale-105 shadow-sm';
                   } else if (isHintLetter) {
-                    style = 'bg-amber-500/10 border border-amber-400 text-amber-400 font-normal border-dashed';
+                    style = 'bg-[var(--accent-light)] border-2 border-[var(--accent-color)] text-[var(--accent-color)] font-normal border-dashed';
                   }
 
                   return (
@@ -518,8 +518,8 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
         </div>
       )}
 
-      {/* LÜKS KLAVYE TEPSİSİ (Tactile Keyboard - Zero Hang, Perfect Fit) */}
-      <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl p-1 sm:p-1.5 rounded-2xl border border-amber-500/30 bg-zinc-950/80 shadow-xl backdrop-blur-xs space-y-1 shrink-0">
+      {/* LÜKS KLAVYE TEPSİSİ (Tactile Keyboard - Dynamic Theme) */}
+      <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl p-1 sm:p-1.5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-lg backdrop-blur-xs space-y-1 shrink-0">
         {keyboardRows.map((row, rIdx) => (
           <div key={rIdx} className="flex justify-center gap-0.5 sm:gap-1 w-full">
             {row.map((key) => {
@@ -532,10 +532,10 @@ export const KelimeBulmaca: React.FC<KelimeBulmacaProps> = ({
                   className={`h-7 sm:h-8 md:h-8.5 rounded-lg sm:rounded-xl font-black text-xs sm:text-sm border transition active:scale-95 shadow-xs cursor-pointer flex items-center justify-center ${
                     customStatus
                       ? customStatus
-                      : 'bg-zinc-900/90 border-zinc-700/70 text-zinc-100 hover:border-amber-400 hover:text-amber-200'
+                      : 'bg-[var(--bg-card)] border-[var(--border-color)] text-[var(--text-primary)] hover:border-[var(--accent-color)] hover:text-[var(--accent-color)]'
                   } ${
                     isSpecial
-                      ? 'flex-[1.4] max-w-[62px] px-1 sm:px-2 bg-amber-500/20 text-amber-300 border-amber-500/40 font-extrabold text-[10px] sm:text-xs'
+                      ? 'flex-[1.4] max-w-[62px] px-1 sm:px-2 bg-[var(--accent-light)] text-[var(--accent-color)] border-[var(--accent-color)]/30 font-extrabold text-[10px] sm:text-xs'
                       : 'flex-1 max-w-[42px]'
                   }`}
                 >

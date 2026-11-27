@@ -294,8 +294,8 @@ export const Sudoku: React.FC<SudokuProps> = ({
       </div>
 
       {/* SUDOKU BOARD (NYT Style Smart Lighting) */}
-      <div className="p-2 sm:p-3 rounded-2xl border-2 border-gray-400 dark:border-gray-600 bg-[var(--bg-card)] shadow-md">
-        <div className="grid grid-cols-9 border-2 border-gray-800 dark:border-gray-200">
+      <div className="p-2 sm:p-3 rounded-2xl border-2 border-[var(--border-color)] bg-[var(--bg-card)] shadow-md">
+        <div className="grid grid-cols-9 border-2 border-[var(--text-primary)]">
           {board.map((row, r) =>
             row.map((val, c) => {
               const isInitial = initialBoard[r][c] !== 0;
@@ -310,8 +310,8 @@ export const Sudoku: React.FC<SudokuProps> = ({
               const isWrong = val !== 0 && val !== solutionBoard[r][c];
 
               // Block border styling
-              const borderR = c % 3 === 2 && c !== 8 ? 'border-r-2 border-r-gray-800 dark:border-r-gray-200' : 'border-r border-r-gray-200 dark:border-r-gray-700';
-              const borderB = r % 3 === 2 && r !== 8 ? 'border-b-2 border-b-gray-800 dark:border-b-gray-200' : 'border-b border-b-gray-200 dark:border-b-gray-700';
+              const borderR = c % 3 === 2 && c !== 8 ? 'border-r-2 border-r-[var(--text-primary)]' : 'border-r border-r-[var(--border-color)]';
+              const borderB = r % 3 === 2 && r !== 8 ? 'border-b-2 border-b-[var(--text-primary)]' : 'border-b border-b-[var(--border-color)]';
 
               const cellNotes = notes[r]?.[c] || [];
 
@@ -321,13 +321,13 @@ export const Sudoku: React.FC<SudokuProps> = ({
                   onClick={() => setSelectedCell([r, c])}
                   className={`w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:w-11 lg:h-11 max-h-[calc((100vh-230px)/9)] max-w-[calc((100vh-230px)/9)] aspect-square flex items-center justify-center font-bold text-xs sm:text-base relative transition-all cursor-pointer ${borderR} ${borderB} ${
                     isSelected
-                      ? 'bg-blue-600 text-white z-10 scale-105 shadow-sm'
+                      ? 'bg-[var(--accent-color)] text-[var(--accent-contrast)] z-10 scale-105 shadow-sm'
                       : isSameNumber
-                      ? 'bg-blue-200/80 dark:bg-blue-900/60 font-black'
+                      ? 'bg-[var(--accent-light)] text-[var(--accent-color)] font-black'
                       : isSameRegion
-                      ? 'bg-blue-50/70 dark:bg-gray-800/60'
+                      ? 'bg-[var(--bg-secondary)]/50'
                       : 'bg-transparent'
-                  } ${isWrong ? 'text-rose-600 dark:text-rose-400 font-black' : isInitial ? 'text-gray-900 dark:text-white font-extrabold' : 'text-blue-600 dark:text-blue-400'}`}
+                  } ${isWrong ? 'text-rose-600 font-black' : isInitial ? 'text-[var(--text-primary)] font-extrabold' : 'text-[var(--accent-color)] font-bold'}`}
                 >
                   {val !== 0 ? (
                     val
